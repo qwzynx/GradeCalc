@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grade Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="formContainer">
+      <div class="targetss">
+        <p class="titles">Target</p>
+        <input type="number" placeholder="100" id="targetInput" class="elementInput">
+      </div>
+      <div class="formTable" id="formTable">
+        <p class="titles">Title</p>
+        <p class="titles">Percentage</p>
+        <p class="titles">Weight</p>
+        <input type="text" placeholder="Assignment" class="elementInput" autocomplete="off">
+        <input type="number" placeholder="100" class="elementInput percentage" autocomplete="off">
+        <input type="number" placeholder="0" class="elementInput weight" autocomplete="off">
+      </div>
+      <button id="new">New</button>
+    </div>
+
+    <div class="information">
+      <p class="info-text">Current Average: <span id="average">0.00%</span></p>
+      <p class="info-text">How much left: <span id="hml">100%</span></p>
+      <p class="info-text">YorkU GPA: <span id="yorkuGPA">9</span></p>
+      <p class="info-text">YorkU Letter: <span id="yorkuletter">A+</span></p>
+      <p class="info-text">(60%) To not fail: <span id="getsixty">60.00%</span></p>
+      <p class="info-text">To achieve target: <span id="targety">100%</span></p>
+    </div>
+
+    <div class="pTopContainer" id="pTopContainer">
+      <p class="titles">Points</p>
+      <p class="titles">From</p>
+      <p class="titles">Percentage</p>
+      <input type="number" id="points" placeholder="0" class="elementInput" autocomplete="off">
+      <input type="number" id="from" placeholder="10" class="elementInput" autocomplete="off">
+      <p class="titles" id="newPercentage">0.00%</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
