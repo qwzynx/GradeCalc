@@ -4,7 +4,7 @@ const form = document.getElementById('formTable');
 const newBtn = document.getElementById('new');
 const average = document.getElementById('average');
 const hml = document.getElementById('hml');
-const getsixty = document.getElementById('getsixty');
+const getFifty = document.getElementById('getFifty');
 const yorkuGPA = document.getElementById('yorkuGPA');
 const yorkuletter = document.getElementById('yorkuletter');
 const targety = document.getElementById('targety');
@@ -71,7 +71,7 @@ function calculating() {
     // Update Display
     average.textContent = finalAverage.toFixed(2) + '%';
     hml.textContent = 100-totalWeight.toFixed(2) + '%';
-    getsixty.textContent = ((6000-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2) + '%';
+    getFifty.textContent = ((5000-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2) + '%';
     targety.textContent = ((targetValue*100-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2) + '%';
 
     if (finalAverage < 50) {
