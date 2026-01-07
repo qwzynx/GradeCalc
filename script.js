@@ -9,11 +9,8 @@ const yorkuGPA = document.getElementById('yorkuGPA');
 const yorkuletter = document.getElementById('yorkuletter');
 const targety = document.getElementById('targety');
 const targetInput = document.getElementById('targetInput');
-
-
-
-
-
+const higher = document.getElementById('higher');
+const lower = document.getElementById('lower');
 
 
 form.addEventListener('input', calculating);
@@ -69,46 +66,64 @@ function calculating() {
 
     let targetValue = targetInput.value;
     // Update Display
-    average.textContent = finalAverage.toFixed(2) + '%';
-    hml.textContent = 100-totalWeight.toFixed(2) + '%';
-    getFifty.textContent = ((5000-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2) + '%';
-    targety.textContent = ((targetValue*100-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2) + '%';
+    average.textContent = finalAverage.toFixed(2);
+    hml.textContent = 100-totalWeight.toFixed(2);
+    getFifty.textContent = ((5000-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2);
+    targety.textContent = ((targetValue*100-finalAverage*totalWeight)/(100-totalWeight)).toFixed(2);
 
     if (finalAverage < 50) {
         yorkuGPA.textContent = 0;
         yorkuletter.textContent = "F";
+        higher.textContent = ((5000 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = 0;
     }
     else if (finalAverage >= 50 && finalAverage < 55) {
         yorkuGPA.textContent = (2+((finalAverage-50)/5)).toFixed(2);
         yorkuletter.textContent = "D";
+        higher.textContent = ((5500 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((4900 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 55 && finalAverage < 60) {
         yorkuGPA.textContent = (3+((finalAverage-55)/5)).toFixed(2);
         yorkuletter.textContent = "D+";
+        higher.textContent = ((6000 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((5400 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 60 && finalAverage < 65) {
         yorkuGPA.textContent = (4+((finalAverage-60)/5)).toFixed(2);
         yorkuletter.textContent = "C";
+        higher.textContent = ((6500 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((5900 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 65 && finalAverage < 70) {
         yorkuGPA.textContent = (5+((finalAverage-65)/5)).toFixed(2);
         yorkuletter.textContent = "C+";
+        higher.textContent = ((7000 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((6400 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 70 && finalAverage < 75) {
         yorkuGPA.textContent = (6+((finalAverage-70)/5)).toFixed(2);
         yorkuletter.textContent = "B";
+        lower.textContent = ((6900 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        higher.textContent = ((7600 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 75 && finalAverage < 80) {
         yorkuGPA.textContent = (7+((finalAverage-75)/5)).toFixed(2);
         yorkuletter.textContent = "B+";
+        higher.textContent = ((8000 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((7400 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 80 && finalAverage < 90) {
         yorkuGPA.textContent = (8+((finalAverage-80)/10)).toFixed(2);
         yorkuletter.textContent = "A";
+        higher.textContent = ((9000 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
+        lower.textContent = ((7900 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
     else if (finalAverage >= 90) {
         yorkuGPA.textContent = 9; //(9+((finalAverage-90)/10)).toFixed(2) if can go above 9
         yorkuletter.textContent = "A+";
+        higher.textContent = (100).toFixed(2);
+        lower.textContent = ((8900 - (finalAverage*totalWeight))/(100-totalWeight)).toFixed(2);
     }
 }
 
@@ -121,6 +136,6 @@ pTop.addEventListener('input', () => {
     const points = document.getElementById('points').value;
     const from = document.getElementById('from').value;
     if (!isNaN(points) && !isNaN(from) && from > 0) {
-        newPercentage.textContent = ((points/from)*100).toFixed(2) + '%';
+        newPercentage.textContent = ((points/from)*100).toFixed(2);
     }
 });
