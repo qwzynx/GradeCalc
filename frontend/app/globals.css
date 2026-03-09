@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: rgb(25, 21, 29);
+  --prHighlight: rgb(48, 39, 56);
+  --secondary: rgb(224, 211, 211);
+  --alt-color: rgb(90, 76, 105);
+  
+  --background: var(--primary);
+  --foreground: var(--secondary);
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-prHighlight: var(--prHighlight);
+  --color-secondary: var(--secondary);
+  --color-alt: var(--alt-color);
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  
+  --font-orbitron: var(--font-orbitron);
+  --font-montserrat: var(--font-montserrat);
+  --font-sans: var(--font-orbitron);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.1em;
+}
+
+/* Hide number input arrows/spinners across all browsers */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Global button hover effects */
+button, 
+[role="button"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover:not(:disabled),
+[role="button"]:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02) !important;
+  filter: brightness(1.2) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  cursor: pointer;
+  transform: translateY(1px) scale(0.98) !important;
+  box-shadow: none !important;
 }
