@@ -2,30 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import NeonButton from "./components/NeonButton";
-import GlassCard from "./components/GlassCard";
-
-interface Assignment {
-  id?: string;
-  course_id: string;
-  name: string;
-  mark?: number;
-  weight?: number;
-}
-
-interface Course {
-  id?: string;
-  user_id?: string;
-  name: string;
-  prof_name?: string;
-  credits?: number;
-  mark?: number;
-  in_progress?: boolean;
-  year: number;
-  semester: string;
-  category?: string;
-}
+import DashboardMetrics from "./components/DashboardMetrics";
+import AddCourseForm from "./components/AddCourseForm";
+import CourseCard from "./components/CourseCard";
+import CourseFilters from "./components/CourseFilters";
+import { Course, Assignment } from "./types";
 
 export default function Home() {
   const router = useRouter();
@@ -33,6 +15,12 @@ export default function Home() {
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  
+  // Search & Filter States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterSemester, setFilterSemester] = useState("All");
+  const [filterYear, setFilterYear] = useState("All");
+  const [filterCategory, setFilterCategory] = useState("All");
   
   const TEST_USER_ID = "00b2d4c5-c95a-46ed-8c39-a7d154a8cb66";
 
@@ -131,19 +119,24 @@ export default function Home() {
     return { letter: 'F', gpa: 0.0 };
   };
 
-  const PIE_COLORS: Record<string, string> = {
-    'A+': '#34d399',
-    'A': '#10b981',
-    'B+': '#60a5fa',
-    'B': '#3b82f6',
-    'C+': '#fbbf24',
-    'C': '#f59e0b',
-    'D+': '#fb923c',
-    'D': '#f97316',
-    'F': '#ef4444'
-  };
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = !searchTerm || 
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (course.prof_name && course.prof_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (course.category && course.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesSemester = filterSemester === "All" || course.semester === filterSemester;
+    const matchesYear = filterYear === "All" || course.year.toString() === filterYear;
+    const matchesCategory = filterCategory === "All" || course.category === filterCategory;
 
-  const calculateDashboardData = () => {
+    return matchesSearch && matchesSemester && matchesYear && matchesCategory;
+  });
+
+  const availableSemesters = Array.from(new Set(courses.map(c => c.semester))).sort();
+  const availableYears = Array.from(new Set(courses.map(c => c.year))).sort((a, b) => b - a);
+  const availableCategories = Array.from(new Set(courses.map(c => c.category || "Uncategorized"))).filter(c => c !== "Uncategorized").sort();
+
+  const calculateDashboardData = (dataToCalculate: Course[]) => {
     let totalCredits = 0;
     let earnedPoints = 0;
     const letterCounts: Record<string, number> = {
@@ -160,7 +153,7 @@ export default function Home() {
 
     const timelineDataMap: Record<string, { totalMark: number, count: number, order: number }> = {};
 
-    courses.forEach(course => {
+    dataToCalculate.forEach(course => {
       let finalPercentage = null;
       if (course.mark !== undefined && course.mark !== null) {
         finalPercentage = course.mark;
@@ -209,7 +202,7 @@ export default function Home() {
     return { averageGpa, pieData, lineData };
   };
 
-  const { averageGpa, pieData, lineData } = calculateDashboardData();
+  const { averageGpa, pieData, lineData } = calculateDashboardData(filteredCourses);
 
   return (
     <div className="min-h-screen p-8 sm:p-20">
@@ -220,131 +213,36 @@ export default function Home() {
           </h1>
           <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
         </div>
-        <NeonButton onClick={() => setShowAddForm(!showAddForm)}>
-          {showAddForm ? "Cancel Entry" : "Initialize New Course"}
+        <NeonButton onClick={() => setShowAddForm(true)}>
+          Initialize New Course
         </NeonButton>
       </header>
 
       <main>
         {!loading && courses.length > 0 && (
-          <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <GlassCard className="flex flex-col items-center justify-center p-8 lg:col-span-1">
-              <h2 className="text-sm uppercase tracking-widest text-alt-color mb-2 text-center">Cumulative GPA</h2>
-              <div className="text-6xl font-orbitron font-bold text-secondary drop-shadow-[0_0_15px_rgba(224,211,211,0.6)]">
-                {averageGpa}
-              </div>
-              <div className="text-xs mt-2 uppercase tracking-wider text-prHighlight">Out of 9.0 Scale</div>
-            </GlassCard>
-            <GlassCard className="p-6 lg:col-span-1 flex flex-col items-center justify-center min-h-[250px]">
-               <h2 className="text-sm uppercase tracking-widest text-alt-color mb-4 w-full text-center">Grade Distribution</h2>
-               {pieData.length > 0 ? (
-                 <div className="w-60 h-48">
-                   <ResponsiveContainer width="100%" height="100%">
-                     <PieChart>
-                       <Pie
-                         data={pieData}
-                         cx="50%"
-                         cy="50%"
-                         innerRadius={60}
-                         outerRadius={80}
-                         paddingAngle={5}
-                         dataKey="value"
-                         stroke="none"
-                       >
-                         {pieData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={PIE_COLORS[entry.name] || '#ccc'} />
-                         ))}
-                       </Pie>
-                       <RechartsTooltip 
-                          contentStyle={{ backgroundColor: 'rgba(10, 10, 10, 0.9)', borderColor: '#e0d3d3', borderRadius: '8px', color: '#e0d3d3' }}
-                          itemStyle={{ color: '#e0d3d3' }}
-                       />
-                       <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '12px' }}/>
-                     </PieChart>
-                   </ResponsiveContainer>
-                 </div>
-               ) : (
-                 <div className="text-alt-color italic text-sm">No grade data available</div>
-               )}
-            </GlassCard>
-            <GlassCard className="p-6 lg:col-span-2 flex flex-col items-center justify-center min-h-[250px]">
-               <h2 className="text-sm uppercase tracking-widest text-alt-color mb-4 w-full text-center">Performance Timeline</h2>
-               {lineData.length > 0 ? (
-                 <div className="w-full h-48">
-                   <ResponsiveContainer width="100%" height="100%">
-                     <LineChart data={lineData}>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#303642" vertical={false} />
-                       <XAxis dataKey="name" stroke="#8a9ab3" fontSize={10} tickLine={false} axisLine={false} />
-                       <YAxis stroke="#8a9ab3" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
-                       <RechartsTooltip 
-                          contentStyle={{ backgroundColor: 'rgba(10, 10, 10, 0.9)', borderColor: '#e0d3d3', borderRadius: '8px', color: '#e0d3d3' }}
-                          formatter={(value: any) => [`${value}%`, 'Average Mark']}
-                          labelStyle={{ color: '#e0d3d3', marginBottom: '8px', fontFamily: 'Orbitron, sans-serif' }}
-                       />
-                       <Line type="monotone" dataKey="mark" stroke="#f2a65a" strokeWidth={3} dot={{ fill: '#f2a65a', strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                     </LineChart>
-                   </ResponsiveContainer>
-                 </div>
-               ) : (
-                 <div className="text-alt-color italic text-sm">No timeline data available</div>
-               )}
-            </GlassCard>
-          </div>
+          <>
+            <DashboardMetrics averageGpa={averageGpa} pieData={pieData} lineData={lineData} />
+            <CourseFilters 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterSemester={filterSemester}
+              setFilterSemester={setFilterSemester}
+              filterYear={filterYear}
+              setFilterYear={setFilterYear}
+              filterCategory={filterCategory}
+              setFilterCategory={setFilterCategory}
+              availableSemesters={availableSemesters}
+              availableYears={availableYears}
+              availableCategories={availableCategories}
+            />
+          </>
         )}
 
         {showAddForm && (
-          <GlassCard className="mb-12 max-w-2xl mx-auto transform transition-all animate-in fade-in slide-in-from-top-4 relative z-10 w-full">
-            <h2 className="text-2xl mb-6 font-orbitron text-secondary border-b border-prHighlight pb-2">Initialize New Course Parameters</h2>
-            <form onSubmit={handleAddCourse} className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Course Designation *</label>
-                  <input required name="name" type="text" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. CS 101" />
-                </div>
-                
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Professor</label>
-                  <input name="prof_name" type="text" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. Dr. Smith" />
-                </div>
-
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Category</label>
-                  <input name="category" type="text" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. Computer Science Science" />
-                </div>
-
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Year *</label>
-                  <input required name="year" type="number" defaultValue={new Date().getFullYear()} className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" />
-                </div>
-                
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Semester *</label>
-                  <select required name="semester" defaultValue="Fall" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none cursor-pointer">
-                    <option value="Fall" className="bg-primary text-secondary">Fall</option>
-                    <option value="Winter" className="bg-primary text-secondary">Winter</option>
-                    <option value="Full Summer" className="bg-primary text-secondary">Full Summer</option>
-                    <option value="Summer 1" className="bg-primary text-secondary">Summer 1</option>
-                    <option value="Summer 2" className="bg-primary text-secondary">Summer 2</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Credits</label>
-                  <input name="credits" type="number" step="0.5" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. 3" />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Status</label>
-                  <label htmlFor="in_progress" className="flex-1 flex items-center gap-3 bg-primary/50 border border-prHighlight rounded-md p-3 transition-all hover:border-secondary cursor-pointer group">
-                    <input name="in_progress" id="in_progress" type="checkbox" defaultChecked className="w-5 h-5 accent-secondary bg-primary border-prHighlight rounded focus:ring-secondary focus:ring-offset-primary cursor-pointer" />
-                    <span className="text-sm uppercase tracking-wider text-secondary group-hover:text-white transition-colors select-none">In Progress</span>
-                  </label>
-                </div>
-              </div>
-              
-              <NeonButton type="submit" className="mt-4 w-full py-4 text-lg">Execute Insertion</NeonButton>
-            </form>
-          </GlassCard>
+          <AddCourseForm 
+            onSubmit={handleAddCourse} 
+            onCancel={() => setShowAddForm(false)} 
+          />
         )}
 
         {loading ? (
@@ -363,10 +261,28 @@ export default function Home() {
             <p className="text-xl font-orbitron tracking-widest text-secondary">No databanks found.</p>
             <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Initialize a new course to begin tracking.</p>
           </div>
+        ) : filteredCourses.length === 0 ? (
+          <div className="text-center py-20 flex flex-col items-center">
+             <div className="w-16 h-16 mb-4 rounded-full border border-prHighlight/30 flex items-center justify-center bg-primary/20">
+               <span className="text-xl opacity-50 text-alt-color font-orbitron">!</span>
+            </div>
+            <p className="text-lg font-orbitron tracking-widest text-alt-color">No results found for current filters.</p>
+            <button 
+              onClick={() => {
+                setSearchTerm("");
+                setFilterSemester("All");
+                setFilterYear("All");
+                setFilterCategory("All");
+              }}
+              className="mt-4 text-secondary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest"
+            >
+              Reset All Filters
+            </button>
+          </div>
         ) : (
           <div className="flex flex-col gap-12">
             {(() => {
-              const groupedCourses = courses.reduce((acc, course) => {
+              const groupedCourses = filteredCourses.reduce((acc, course) => {
                 const category = course.category && course.category.trim() !== "" ? course.category : "Uncategorized";
                 if (!acc[category]) acc[category] = [];
                 acc[category].push(course);
@@ -379,65 +295,26 @@ export default function Home() {
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {groupedCourses[category].map((course, idx) => {
                       const uniqueId = course.id || idx.toString();
+                      let finalPercentage: number | null = null;
+                      if (course.mark !== undefined && course.mark !== null) {
+                        finalPercentage = course.mark;
+                      } else if (course.id) {
+                        const calculated = calculateGrade(course.id);
+                        if (calculated !== null) {
+                          finalPercentage = parseFloat(calculated);
+                        }
+                      }
+                      const letterGrade = finalPercentage !== null ? getYorkUGrade(finalPercentage).letter : "N/A";
+                      
                       return (
-              <GlassCard 
-                key={uniqueId} 
-                className="group flex flex-col h-full hover:ring-2 hover:ring-secondary hover:scale-[1.02] cursor-pointer"
-                onClick={() => router.push(`/course/${uniqueId}`)}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-orbitron font-bold text-secondary group-hover:text-white transition-colors">{course.name}</h3>
-                  <span className="text-xs uppercase tracking-wider bg-prHighlight/50 border border-prHighlight px-2 py-1 rounded text-secondary">{course.semester} {course.year}</span>
-                </div>
-                <div className="flex-1 space-y-3 text-sm text-alt-color mt-2">
-                  <div className="flex justify-between items-center border-b border-prHighlight/30 pb-2">
-                    <span className="uppercase text-[10px] tracking-widest">Instructor</span>
-                    <span className="text-secondary">{course.prof_name || "Unassigned"}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-prHighlight/30 pb-2">
-                    <span className="uppercase text-[10px] tracking-widest">Status</span>
-                    <span className={course.in_progress ? "text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)]" : "text-alt-color"}>
-                      {course.in_progress ? "Active" : "Archived"}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-6 pt-4 border-t border-prHighlight/50 flex justify-between items-end">
-                   <div className="uppercase text-[10px] tracking-widest text-alt-color">
-                     {(course.mark !== undefined && course.mark !== null) ? (
-                        <span className="text-red-400 flex items-center gap-1 drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                          Forced Grade Active
-                        </span>
-                     ) : "Calculated Grade"}
-                   </div>
-                   <div className="text-2xl font-orbitron">
-                     {(() => {
-                        let finalPercentage = null;
-                        if (course.mark !== undefined && course.mark !== null) {
-                          finalPercentage = course.mark;
-                        } else if (course.id) {
-                          const calculated = calculateGrade(course.id);
-                          if (calculated !== null) {
-                            finalPercentage = parseFloat(calculated);
-                          }
-                        }
-
-                        if (finalPercentage !== null) {
-                           const { letter } = getYorkUGrade(finalPercentage);
-                           const colorClass = finalPercentage >= 80 ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" 
-                                            : finalPercentage >= 70 ? "text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"
-                                            : finalPercentage >= 60 ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"
-                                            : finalPercentage >= 50 ? "text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]"
-                                            : "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]";
-                           return <span className={`${colorClass} font-bold`}>{letter}</span>;
-                        } else {
-                           return <span className="text-alt-color italic text-lg">N/A</span>;
-                        }
-                     })()}
-                   </div>
-                </div>
-              </GlassCard>
-            )})}
+                        <CourseCard
+                          key={uniqueId}
+                          course={course}
+                          finalPercentage={finalPercentage}
+                          letterGrade={letterGrade}
+                          onClick={() => router.push(`/course/${uniqueId}`)}
+                        />
+                      );})}
                   </div>
                 </div>
               ));
