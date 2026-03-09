@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { LogOut } from "lucide-react";
 import NeonButton from "../../components/NeonButton";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
 import EditCourseForm from "../../components/EditCourseForm";
@@ -24,12 +26,12 @@ export default function CourseDetail() {
   const [addingAssignment, setAddingAssignment] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [targetGrade, setTargetGrade] = useState<number>(80);
+  const { user, loading: authLoading } = useAuth();
+  const userId = user?.id;
   
   // Assignment input modes
   const [inputModes, setInputModes] = useState<("percentage" | "points")[]>(["percentage"]);
   const [splitQuantity, setSplitQuantity] = useState<number>(1);
-  
-  const TEST_USER_ID = "00b2d4c5-c95a-46ed-8c39-a7d154a8cb66";
 
   const fetchMetrics = async (target: number, currentAssignments: Assignment[]) => {
     const assignsForCalc = currentAssignments.map((a: Assignment) => ({ percentage: a.mark, weight: a.weight }));
@@ -56,8 +58,8 @@ export default function CourseDetail() {
 
   const fetchCourseData = async () => {
     try {
-      if (!courseId) return;
-      const res = await fetch(`http://localhost:8000/api/courses/${courseId}`);
+      if (!courseId || !userId) return;
+      const res = await fetch(`http://localhost:8000/api/courses/${courseId}?user_id=${userId}`);
       const data = await res.json();
       if (data && data.length > 0) {
         setCourse(data[0]);
@@ -82,8 +84,10 @@ export default function CourseDetail() {
   };
 
   useEffect(() => {
-    fetchCourseData();
-  }, [courseId]);
+    if (userId) {
+      fetchCourseData();
+    }
+  }, [courseId, userId]);
 
   const handleUpdateCourse = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,7 +111,7 @@ export default function CourseDetail() {
     if (credits) updatedCourse.credits = parseFloat(credits);
 
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${TEST_USER_ID}`, {
+      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCourse),
@@ -124,7 +128,7 @@ export default function CourseDetail() {
     if (!window.confirm("Are you sure you want to permanently delete this course?")) return;
     
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${TEST_USER_ID}`, {
+      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
         method: "DELETE"
       });
       router.push('/');
@@ -141,7 +145,7 @@ export default function CourseDetail() {
     const markValue = parseFloat(formData.get("force_mark") as string);
 
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${TEST_USER_ID}`, {
+      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mark: markValue }),
@@ -156,7 +160,7 @@ export default function CourseDetail() {
   const handleRemoveForceGrade = async () => {
     if (!course?.id) return;
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${TEST_USER_ID}`, {
+      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mark: null }),
@@ -313,16 +317,7 @@ export default function CourseDetail() {
     }
   };
 
-  if (loading || !course) {
-    return (
-      <div className="min-h-screen p-8 sm:p-20 flex justify-center items-center">
-        <div className="relative">
-          <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
-          <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-transparent border-b-secondary animate-spin opacity-50" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-        </div>
-      </div>
-    );
-  }
+  const { signOut } = useAuth();
 
   // Calculate Graph Data safely
   const completedWeight = backendMetrics ? 100 - backendMetrics.remaining_weight : 0;
@@ -337,6 +332,14 @@ export default function CourseDetail() {
     { name: 'Remaining Weight', value: parseFloat(remainingWeight.toFixed(2)), color: '#f2a65a' }
   ].filter(d => d.value > 0);
 
+  if (authLoading || loading || !course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-primary">
+         <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-8 sm:p-16 flex flex-col">
       <header className="mb-8 border-b border-prHighlight pb-6">
@@ -344,10 +347,24 @@ export default function CourseDetail() {
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           System Uplink
         </button>
-        <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
-          {course.name}
-        </h1>
-        <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+              {course.name}
+            </h1>
+            <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+          </div>
+          <button 
+            onClick={signOut}
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
+          >
+            <div className="flex flex-col items-start text-right">
+               <span className="text-[10px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors">Session</span>
+               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors">Sign Out</span>
+            </div>
+            <LogOut className="w-4 h-4 text-alt-color group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
+          </button>
+        </div>
       </header>
 
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1 max-w-screen-2xl mx-auto w-full">

@@ -57,6 +57,7 @@ button,
 
 button:hover:not(:disabled),
 [role="button"]:hover:not(:disabled) {
+  cursor: pointer;
   transform: translateY(-2px) scale(1.02) !important;
   filter: brightness(1.2) !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;

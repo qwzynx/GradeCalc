@@ -8,9 +8,12 @@ import AddCourseForm from "./components/AddCourseForm";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment } from "./types";
+import { useAuth } from "@/components/AuthProvider";
+import { LogOut, User as UserIcon } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [loading, setLoading] = useState(true);
@@ -22,11 +25,12 @@ export default function Home() {
   const [filterYear, setFilterYear] = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   
-  const TEST_USER_ID = "00b2d4c5-c95a-46ed-8c39-a7d154a8cb66";
+  const userId = user?.id;
 
   const fetchCourses = async () => {
+    if (!userId) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/courses?user_id=${TEST_USER_ID}`);
+      const res = await fetch(`http://localhost:8000/api/courses?user_id=${userId}`);
       const data = await res.json();
       setCourses(data || []);
 
@@ -53,15 +57,17 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
+    if (userId) {
+      fetchCourses();
+    }
+  }, [userId]);
 
   const handleAddCourse = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
     const newCourse: Partial<Course> = {
-      user_id: TEST_USER_ID,
+      user_id: userId,
       name: formData.get("name") as string,
       year: parseInt(formData.get("year") as string) || new Date().getFullYear(),
       semester: formData.get("semester") as string || "Fall",
@@ -203,15 +209,36 @@ export default function Home() {
   };
 
   const { averageGpa, pieData, lineData } = calculateDashboardData(filteredCourses);
+  const { signOut } = useAuth();
+
+  if (authLoading || (loading && !userId)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-primary">
+         <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen p-8 sm:p-20">
+    <div className="min-h-screen p-8 sm:pt-10">
       <header className="mb-12 flex flex-col sm:flex-row items-center justify-between border-b border-prHighlight pb-6 gap-4">
-        <div>
-          <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
-            GradeMatrix
-          </h1>
-          <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
+        <div className="flex items-center gap-6">
+          <div>
+            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+              GradeMatrix
+            </h1>
+            <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
+          </div>
+          <button 
+            onClick={signOut}
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
+          >
+            <div className="flex flex-col items-start">
+               <span className="text-[10px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors">Session</span>
+               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors">Sign Out</span>
+            </div>
+            <LogOut className="w-4 h-4 text-alt-color group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
+          </button>
         </div>
         <NeonButton onClick={() => setShowAddForm(true)}>
           Initialize New Course

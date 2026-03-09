@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Search, X } from "lucide-react";
 
 interface CourseFiltersProps {
   searchTerm: string;
@@ -36,11 +37,11 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         <div className="flex-1 relative group">
           <div className="absolute inset-0 bg-secondary/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
           <div className="relative flex items-center">
-            <span className="absolute left-3 text-alt-color/60 font-orbitron text-xs">SEARCH</span>
+            <Search className="absolute left-3 w-4 h-4 text-alt-color/60" />
             <input
               type="text"
               placeholder="Course name, code, or professor..."
-              className="w-full bg-primary/60 border border-prHighlight/40 rounded-lg py-4 pl-20 pr-4 text-secondary placeholder:text-alt-color/40 focus:outline-none focus:border-secondary transition-all font-orbitron tracking-wider text-sm"
+              className="w-full bg-primary/60 border border-prHighlight/40 rounded-lg py-4 pl-10 pr-4 text-secondary placeholder:text-alt-color/40 focus:outline-none focus:border-secondary transition-all font-orbitron tracking-wider text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -53,7 +54,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex flex-col gap-1 min-w-[140px]">
             <label className="text-[10px] font-orbitron text-alt-color uppercase tracking-[0.2em] ml-2">Semester</label>
             <select
-              className="bg-primary/60 border border-prHighlight/40 rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-orbitron text-sm cursor-pointer appearance-none"
+              className="bg-primary border border-prHighlight rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-montserrat text-sm cursor-pointer appearance-none"
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
             >
@@ -68,7 +69,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex flex-col gap-1 min-w-[100px]">
             <label className="text-[10px] font-orbitron text-alt-color uppercase tracking-[0.2em] ml-2">Year</label>
             <select
-              className="bg-primary/60 border border-prHighlight/40 rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-orbitron text-sm cursor-pointer appearance-none"
+              className="bg-primary border border-prHighlight rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-montserrat text-sm cursor-pointer appearance-none"
               value={filterYear}
               onChange={(e) => setFilterYear(e.target.value)}
             >
@@ -81,13 +82,13 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
           {/* Category Filter */}
           <div className="flex flex-col gap-1 min-w-[160px]">
-            <label className="text-[10px] font-orbitron text-alt-color uppercase tracking-[0.2em] ml-2">Hub</label>
+            <label className="text-[10px] font-orbitron text-alt-color uppercase tracking-[0.2em] ml-2">STREAM</label>
             <select
-              className="bg-primary/60 border border-prHighlight/40 rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-orbitron text-sm cursor-pointer appearance-none"
+              className="bg-primary border border-prHighlight/40 rounded-lg py-2 px-3 text-secondary focus:outline-none focus:border-secondary transition-all font-montserrat text-sm cursor-pointer appearance-none"
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
             >
-              <option value="All">ALL HUBS</option>
+              <option value="All">ALL STREAMS</option>
               {availableCategories.map((c) => (
                 <option key={c} value={c}>{c.toUpperCase()}</option>
               ))}
@@ -127,9 +128,7 @@ const FilterBadge = ({ label, onClear }: { label: string; onClear: () => void })
   <div className="flex items-center gap-2 bg-secondary/10 border border-secondary/30 rounded-full px-3 py-1">
     <span className="text-[10px] font-orbitron text-secondary uppercase tracking-wider">{label}</span>
     <button onClick={onClear} className="text-secondary hover:text-white transition-colors">
-      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <X className="w-3 h-3" />
     </button>
   </div>
 );

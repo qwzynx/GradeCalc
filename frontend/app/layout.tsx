@@ -12,10 +12,13 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
   title: "Futuristic Grade Calculator",
   description: "Calculate your grades in style",
 };
+
+import { AuthProvider } from "@/components/AuthProvider";
 
 export default function RootLayout({
   children,
@@ -28,7 +31,9 @@ export default function RootLayout({
         className={`${orbitron.variable} ${montserrat.variable} antialiased bg-primary text-secondary selection:bg-prHighlight overflow-x-hidden`}
         suppressHydrationWarning
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
