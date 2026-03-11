@@ -58,31 +58,25 @@ export default function CourseDetail() {
       if (!courseId || !userId) return;
       const { data, error } = await supabase
         .from('courses')
-        .select('*')
+        .select('*, assignments(*)')
         .eq('id', courseId)
         .eq('user_id', userId);
         
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setCourse(data[0]);
+        const fullCourse = data[0];
+        setCourse(fullCourse);
+        
+        const loadedAssignments = fullCourse.assignments || [];
+        setAssignments(loadedAssignments);
+
+        // Perform calculations locally
+        await fetchMetrics(targetGrade, loadedAssignments);
       } else {
         router.push('/');
         return;
       }
-
-      const { data: aData, error: aError } = await supabase
-        .from('assignments')
-        .select('*')
-        .eq('course_id', courseId);
-        
-      if (aError) throw aError;
-      
-      const loadedAssignments = aData || [];
-      setAssignments(loadedAssignments);
-
-      // Perform calculations locally
-      await fetchMetrics(targetGrade, loadedAssignments);
 
     } catch (error) {
       console.error("Error fetching course data", error);

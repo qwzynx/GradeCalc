@@ -32,30 +32,20 @@ export default function Home() {
     try {
       const { data, error } = await supabase
         .from('courses')
-        .select('*')
+        .select('*, assignments(*)')
         .eq('user_id', userId);
 
       if (error) throw error;
-      setCourses(data || []);
+      
+      const loadedCourses = data || [];
+      setCourses(loadedCourses);
 
       const assignData: Record<string, Assignment[]> = {};
-      if (data && data.length > 0) {
-        await Promise.all(data.map(async (course: Course) => {
-          if (course.id) {
-            try {
-              const { data: aData, error: aError } = await supabase
-                .from('assignments')
-                .select('*')
-                .eq('course_id', course.id);
-                
-              if (aError) throw aError;
-              assignData[course.id] = aData || [];
-            } catch (err) {
-              console.error(`Failed fetching assignments for course ${course.id}`, err);
-            }
-          }
-        }));
-      }
+      loadedCourses.forEach((course: any) => {
+        if (course.id) {
+          assignData[course.id] = course.assignments || [];
+        }
+      });
       setAssignments(assignData);
     } catch (error) {
       console.error("Error fetching courses", error);
