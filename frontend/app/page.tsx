@@ -10,7 +10,7 @@ import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment } from "./types";
 import { useAuth } from "@/components/AuthProvider";
 import { LogOut, User as UserIcon } from "lucide-react";
-
+import { supabase } from "@/lib/supabase";
 export default function Home() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -30,8 +30,12 @@ export default function Home() {
   const fetchCourses = async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/courses?user_id=${userId}`);
-      const data = await res.json();
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) throw error;
       setCourses(data || []);
 
       const assignData: Record<string, Assignment[]> = {};
@@ -39,8 +43,12 @@ export default function Home() {
         await Promise.all(data.map(async (course: Course) => {
           if (course.id) {
             try {
-              const aRes = await fetch(`http://localhost:8000/api/courses/${course.id}/assignments`);
-              const aData = await aRes.json();
+              const { data: aData, error: aError } = await supabase
+                .from('assignments')
+                .select('*')
+                .eq('course_id', course.id);
+                
+              if (aError) throw aError;
               assignData[course.id] = aData || [];
             } catch (err) {
               console.error(`Failed fetching assignments for course ${course.id}`, err);
@@ -84,11 +92,12 @@ export default function Home() {
     if (credits) newCourse.credits = parseFloat(credits);
 
     try {
-      await fetch("http://localhost:8000/api/courses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newCourse),
-      });
+      const { error } = await supabase
+        .from('courses')
+        .insert([newCourse]);
+        
+      if (error) throw error;
+      
       setShowAddForm(false);
       fetchCourses();
     } catch (error) {

@@ -48,7 +48,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
       
       if (_event === 'SIGNED_IN') {
-        router.push('/');
+        if (window.location.pathname === '/login') {
+          router.push('/');
+        }
       } else if (_event === 'SIGNED_OUT') {
         router.push('/login');
       }

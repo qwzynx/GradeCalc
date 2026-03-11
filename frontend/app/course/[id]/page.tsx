@@ -10,6 +10,8 @@ import EditCourseForm from "../../components/EditCourseForm";
 import AssignmentForm from "../../components/AssignmentForm";
 import GlassCard from "../../components/GlassCard";
 import { Course, Assignment, BackendMetrics } from "../../types";
+import { supabase } from "@/lib/supabase";
+import { calculateGrades } from "@/lib/calculations";
 
 export default function CourseDetail() {
   const { id } = useParams();
@@ -36,13 +38,8 @@ export default function CourseDetail() {
   const fetchMetrics = async (target: number, currentAssignments: Assignment[]) => {
     const assignsForCalc = currentAssignments.map((a: Assignment) => ({ percentage: a.mark, weight: a.weight }));
     try {
-      const cRes = await fetch("http://localhost:8000/api/calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assignments: assignsForCalc, target_grade: target })
-      });
-      const cData = await cRes.json();
-      setBackendMetrics(cData);
+      const metrics = calculateGrades(assignsForCalc, target) as BackendMetrics;
+      setBackendMetrics(metrics);
     } catch (e) {
       console.error("Error fetching metrics", e);
     }
@@ -59,8 +56,14 @@ export default function CourseDetail() {
   const fetchCourseData = async () => {
     try {
       if (!courseId || !userId) return;
-      const res = await fetch(`http://localhost:8000/api/courses/${courseId}?user_id=${userId}`);
-      const data = await res.json();
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+      
       if (data && data.length > 0) {
         setCourse(data[0]);
       } else {
@@ -68,12 +71,17 @@ export default function CourseDetail() {
         return;
       }
 
-      const aRes = await fetch(`http://localhost:8000/api/courses/${courseId}/assignments`);
-      const aData = await aRes.json();
+      const { data: aData, error: aError } = await supabase
+        .from('assignments')
+        .select('*')
+        .eq('course_id', courseId);
+        
+      if (aError) throw aError;
+      
       const loadedAssignments = aData || [];
       setAssignments(loadedAssignments);
 
-      // Fetch Calculations from Python Backend
+      // Perform calculations locally
       await fetchMetrics(targetGrade, loadedAssignments);
 
     } catch (error) {
@@ -111,11 +119,14 @@ export default function CourseDetail() {
     if (credits) updatedCourse.credits = parseFloat(credits);
 
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedCourse),
-      });
+      const { error } = await supabase
+        .from('courses')
+        .update(updatedCourse)
+        .eq('id', course.id)
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+      
       setEditingCourse(false);
       fetchCourseData();
     } catch (error) {
@@ -128,9 +139,14 @@ export default function CourseDetail() {
     if (!window.confirm("Are you sure you want to permanently delete this course?")) return;
     
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
-        method: "DELETE"
-      });
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', course.id)
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+      
       router.push('/');
     } catch (error) {
       console.error("Error deleting course", error);
@@ -145,11 +161,14 @@ export default function CourseDetail() {
     const markValue = parseFloat(formData.get("force_mark") as string);
 
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mark: markValue }),
-      });
+      const { error } = await supabase
+        .from('courses')
+        .update({ mark: markValue })
+        .eq('id', course.id)
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+        
       setForceGradeOpen(false);
       fetchCourseData();
     } catch (error) {
@@ -160,11 +179,14 @@ export default function CourseDetail() {
   const handleRemoveForceGrade = async () => {
     if (!course?.id) return;
     try {
-      await fetch(`http://localhost:8000/api/courses/${course.id}?user_id=${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mark: null }),
-      });
+      const { error } = await supabase
+        .from('courses')
+        .update({ mark: null })
+        .eq('id', course.id)
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+        
       setForceGradeOpen(false);
       fetchCourseData();
     } catch (error) {
@@ -241,11 +263,7 @@ export default function CourseDetail() {
       };
       
       promises.push(
-        fetch("http://localhost:8000/api/assignments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newAssignment),
-        })
+        supabase.from('assignments').insert([newAssignment])
       );
       
       await Promise.all(promises);
@@ -290,11 +308,13 @@ export default function CourseDetail() {
     updatedAssignment.weight = weight ? parseFloat(weight) : undefined;
 
     try {
-      await fetch(`http://localhost:8000/api/assignments/${editingAssignment.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedAssignment),
-      });
+      const { error } = await supabase
+        .from('assignments')
+        .update(updatedAssignment)
+        .eq('id', editingAssignment.id);
+        
+      if (error) throw error;
+        
       setEditingAssignment(null);
       fetchCourseData();
     } catch (error) {
@@ -307,9 +327,13 @@ export default function CourseDetail() {
     if (!window.confirm("Are you sure you want to delete this assignment?")) return;
     
     try {
-      await fetch(`http://localhost:8000/api/assignments/${assignment.id}`, {
-        method: "DELETE"
-      });
+      const { error } = await supabase
+        .from('assignments')
+        .delete()
+        .eq('id', assignment.id);
+        
+      if (error) throw error;
+        
       setEditingAssignment(null);
       fetchCourseData();
     } catch (error) {
