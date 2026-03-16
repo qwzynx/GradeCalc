@@ -26,6 +26,41 @@ export default function Home() {
   const [filterAcademicYear, setFilterAcademicYear] = useState<number[]>([]);
   const [filterCategory, setFilterCategory] = useState<string[]>([]);
   const [filterInProgress, setFilterInProgress] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load filters from localStorage on mount
+  useEffect(() => {
+    const savedFilters = localStorage.getItem("gradeMatrixFilters");
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        if (parsed.searchTerm) setSearchTerm(parsed.searchTerm);
+        if (parsed.filterSemester) setFilterSemester(parsed.filterSemester);
+        if (parsed.filterYear) setFilterYear(parsed.filterYear);
+        if (parsed.filterAcademicYear) setFilterAcademicYear(parsed.filterAcademicYear);
+        if (parsed.filterCategory) setFilterCategory(parsed.filterCategory);
+        if (typeof parsed.filterInProgress === 'boolean') setFilterInProgress(parsed.filterInProgress);
+      } catch (e) {
+        console.error("Failed to parse saved filters", e);
+      }
+    }
+    setIsInitialized(true);
+  }, []);
+
+  // Save filters to localStorage when they change
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const filtersToSave = {
+      searchTerm,
+      filterSemester,
+      filterYear,
+      filterAcademicYear,
+      filterCategory,
+      filterInProgress
+    };
+    localStorage.setItem("gradeMatrixFilters", JSON.stringify(filtersToSave));
+  }, [searchTerm, filterSemester, filterYear, filterAcademicYear, filterCategory, filterInProgress, isInitialized]);
   
   const userId = user?.id;
 

@@ -8,6 +8,7 @@ import NeonButton from "../../components/NeonButton";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
 import EditCourseForm from "../../components/EditCourseForm";
 import AssignmentForm from "../../components/AssignmentForm";
+import AnimatedOverlay from "../../components/AnimatedOverlay";
 import GlassCard from "../../components/GlassCard";
 import { Course, Assignment, BackendMetrics } from "../../types";
 import { supabase } from "@/lib/supabase";
@@ -337,6 +338,9 @@ export default function CourseDetail() {
 
   const { signOut } = useAuth();
 
+  // Total weight across all assignments
+  const totalAssignmentWeight = assignments.reduce((sum, a) => sum + (a.weight ?? 0), 0);
+
   // Calculate Graph Data safely
   const completedWeight = backendMetrics ? 100 - backendMetrics.remaining_weight : 0;
   const earnedWeight = backendMetrics && completedWeight > 0 ? (backendMetrics.final_average * completedWeight) / 100 : 0;
@@ -359,7 +363,7 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen p-8 sm:p-16 flex flex-col">
+    <div className="min-h-screen p-8 sm:p-10 flex flex-col">
       <header className="mb-8 border-b border-prHighlight pb-6">
         <button onClick={() => router.push('/')} className="mb-4 text-alt-color hover:text-white transition-colors flex items-center gap-2 text-sm uppercase tracking-wider">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -385,93 +389,103 @@ export default function CourseDetail() {
         </div>
       </header>
 
+      {/* Overlay: Edit Course Form */}
+      <AnimatedOverlay open={editingCourse} onClose={() => setEditingCourse(false)}>
+        <EditCourseForm
+          course={course}
+          onSubmit={handleUpdateCourse}
+          onCancel={() => setEditingCourse(false)}
+          onDelete={handleDeleteCourse}
+        />
+      </AnimatedOverlay>
+
+      {/* Overlay: Add / Edit Assignment Form */}
+      <AnimatedOverlay open={addingAssignment || !!editingAssignment} onClose={() => { setAddingAssignment(false); setEditingAssignment(null); }}>
+        <AssignmentForm
+          editingAssignment={editingAssignment}
+          onSubmit={(e) => editingAssignment ? handleUpdateAssignment(e) : handleSubmitAssignment(e)}
+          onDelete={handleDeleteAssignment}
+          splitQuantity={splitQuantity}
+          setSplitQuantity={setSplitQuantity}
+          inputModes={inputModes}
+          setInputModes={setInputModes}
+          currentTotalWeight={totalAssignmentWeight}
+        />
+      </AnimatedOverlay>
+
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1 max-w-screen-2xl mx-auto w-full">
         
-        {/* LEFT COLUMN: Course Parameter Information & Assignments */}
-        <div className="lg:col-span-4 flex flex-col gap-8">
-          
-          {editingCourse ? (
-             <EditCourseForm
-               course={course}
-               onSubmit={handleUpdateCourse}
-               onCancel={() => setEditingCourse(false)}
-               onDelete={handleDeleteCourse}
-             />
-          ) : (
-             <GlassCard className="flex flex-col gap-4 p-6 relative">
-               <button onClick={() => setEditingCourse(true)} className="absolute top-4 right-4 text-alt-color hover:text-white transition-colors bg-prHighlight/20 p-2 rounded">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-               </button>
-               <h3 className="text-xl font-orbitron text-secondary border-b border-prHighlight/50 pb-2 mb-2">Metrics Box</h3>
-               <div className="flex justify-between items-center pb-2 border-b border-prHighlight/20">
-                 <span className="text-xs uppercase tracking-widest text-alt-color/70">Instructor</span>
-                 <span className="text-secondary text-sm">{course.prof_name || "Unassigned"}</span>
-               </div>
-               <div className="flex justify-between items-center pb-2 border-b border-prHighlight/20">
-                 <span className="text-xs uppercase tracking-widest text-alt-color/70">Category</span>
-                 <span className="text-secondary text-sm">{course.category || "Uncategorized"}</span>
-               </div>
-               <div className="flex justify-between items-center pb-2 border-b border-prHighlight/20">
-                 <span className="text-xs uppercase tracking-widest text-alt-color/70">Credits</span>
-                 <span className="text-secondary text-sm">{course.credits || "N/A"}</span>
-               </div>
-               <div className="flex justify-between items-center pb-2 border-b border-prHighlight/20">
-                 <span className="text-xs uppercase tracking-widest text-alt-color/70">Status</span>
-                 <span className={`text-sm ${course.in_progress ? "text-emerald-400" : "text-alt-color"}`}>
-                   {course.in_progress ? "Active" : "Archived"}
-                 </span>
-               </div>
-             </GlassCard>
-          )}
+        {/* LEFT COLUMN */}
+        <div className="lg:col-span-4 flex flex-col gap-4">
 
-          <div className="flex flex-col gap-4">
-             <div className="flex justify-between items-end border-b border-prHighlight pb-2">
-               <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
-               <button 
-                 onClick={() => { setAddingAssignment(!addingAssignment); setEditingAssignment(null); setSplitQuantity(1); }}
-                 className={`text-xs uppercase tracking-wider transition-all flex items-center gap-1 ${addingAssignment ? 'text-secondary' : 'text-alt-color hover:text-white'}`}
-               >
-                 <span>{addingAssignment ? 'Cancel' : '+ Add'}</span>
-               </button>
-             </div>
+          {/* Compact Metrics Box */}
+          <GlassCard className="p-4 relative">
+            <button
+              onClick={() => setEditingCourse(true)}
+              className="absolute top-3 right-3 text-alt-color hover:text-white transition-colors bg-prHighlight/20 hover:bg-prHighlight/40 p-1.5 rounded"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <h3 className="text-xs font-montserrat text-secondary uppercase tracking-[0.2em] border-b border-prHighlight/50 pb-2 mb-3">Course Parameters</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Instructor</span>
+                <span className="text-secondary text-xs font-montserrat">{course.prof_name || "Unassigned"}</span>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Category</span>
+                <span className="text-secondary text-xs font-montserrat">{course.category || "—"}</span>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Credits</span>
+                <span className="text-secondary text-xs font-montserrat">{course.credits || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Status</span>
+                <span className={`text-xs font-montserrat ${course.in_progress ? "text-emerald-400" : "text-alt-color"}`}>
+                  {course.in_progress ? "● Active" : "○ Archived"}
+                </span>
+              </div>
+            </div>
+          </GlassCard>
 
-             {(addingAssignment || editingAssignment) && (
-               <AssignmentForm
-                 editingAssignment={editingAssignment}
-                 onSubmit={(e) => editingAssignment ? handleUpdateAssignment(e) : handleSubmitAssignment(e)}
-                 onDelete={handleDeleteAssignment}
-                 splitQuantity={splitQuantity}
-                 setSplitQuantity={setSplitQuantity}
-                 inputModes={inputModes}
-                 setInputModes={setInputModes}
-               />
-             )}
+          {/* Assignments Section — fills remaining height, scrollable */}
+          <div className="flex flex-col gap-3 min-h-0">
+            <div className="flex justify-between items-center border-b border-prHighlight pb-2">
+              <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
+              <button 
+                onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
+                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 text-alt-color hover:text-white"
+              >
+                <span>+ Add</span>
+              </button>
+            </div>
 
-             {assignments.length > 0 ? (
-               <div className="flex flex-col gap-2">
-                 {assignments.map(a => (
-                   <div key={a.id} className="flex justify-between items-center p-3 bg-primary/30 border border-prHighlight/50 rounded-lg hover:border-secondary transition-colors group/item relative">
-                     <div className="flex flex-col">
-                       <span className="text-secondary text-base font-bold">{a.name}</span>
-                       <span className="text-[10px] text-alt-color uppercase tracking-wider">
-                         M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight}%</span>
-                       </span>
-                     </div>
-                     <button 
-                       onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
-                       className="p-2 text-alt-color hover:text-white bg-prHighlight/20 rounded transition-colors"
-                     >
-                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                     </button>
-                   </div>
-                 ))}
-               </div>
-             ) : (
-               <div className="text-center py-8 text-alt-color bg-primary/20 rounded border border-prHighlight/30 outline-dashed outline-1 outline-prHighlight/50 outline-offset-[-5px]">
-                 <span className="text-2xl mb-2 opacity-50 block">📂</span>
-                 <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">Archive Empty</p>
-               </div>
-             )}
+            <div className="overflow-y-auto flex flex-col gap-2 max-h-[350px] pr-1 rounded-2xl">
+              {assignments.length > 0 ? (
+                assignments.map(a => (
+                  <div key={a.id} className="flex justify-between items-center p-3 bg-primary/30 border border-prHighlight/50 rounded-lg hover:border-secondary transition-colors group/item relative shrink-0">
+                    <div className="flex flex-col">
+                      <span className="text-secondary text-base font-bold">{a.name}</span>
+                      <span className="text-[10px] text-alt-color uppercase tracking-wider">
+                        M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight}%</span>
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
+                      className="p-2 text-alt-color hover:text-white bg-prHighlight/20 rounded transition-colors shrink-0"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-alt-color bg-primary/20 rounded border border-prHighlight/30 outline-dashed outline-1 outline-prHighlight/50 outline-offset-[-5px]">
+                  <span className="text-2xl mb-2 opacity-50 block">📂</span>
+                  <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">Archive Empty</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -501,3 +515,4 @@ export default function CourseDetail() {
     </div>
   );
 }
+

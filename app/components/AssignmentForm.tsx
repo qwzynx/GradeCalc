@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
 import NumberInput from "./NumberInput";
@@ -13,6 +14,7 @@ export interface AssignmentFormProps {
   setSplitQuantity: (qty: number) => void;
   inputModes: ("percentage" | "points")[];
   setInputModes: (action: ("percentage" | "points")[] | ((prev: ("percentage" | "points")[]) => ("percentage" | "points")[])) => void;
+  currentTotalWeight: number;
 }
 
 export default function AssignmentForm({
@@ -22,8 +24,23 @@ export default function AssignmentForm({
   splitQuantity,
   setSplitQuantity,
   inputModes,
-  setInputModes
+  setInputModes,
+  currentTotalWeight
 }: AssignmentFormProps) {
+  const [weightInputValue, setWeightInputValue] = useState<number>(editingAssignment?.weight ?? 0);
+
+  useEffect(() => {
+    setWeightInputValue(editingAssignment?.weight ?? 0);
+  }, [editingAssignment]);
+
+  // Weight from OTHER assignments (excluding the one being edited)
+  const otherWeight = editingAssignment?.weight
+    ? currentTotalWeight - (editingAssignment.weight ?? 0)
+    : currentTotalWeight;
+  const projectedTotal = otherWeight + weightInputValue;
+  const isOverLimit = projectedTotal > 100;
+  const overAmount = parseFloat((projectedTotal - 100).toFixed(2));
+
   return (
     <GlassCard className="p-4 border-secondary/50 shadow-[0_0_15px_rgba(242,166,90,0.1)]">
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
@@ -107,8 +124,34 @@ export default function AssignmentForm({
                 <span>{splitQuantity > 1 ? 'Total Group Weight %' : 'Weight %'}</span>
                 {splitQuantity > 1 && <span className="text-secondary/50 ml-1">(Averaging items over full weight)</span>}
               </label>
-              <NumberInput required name="weight" step="0.01" defaultValue={editingAssignment?.weight ?? ""} placeholder="Total Wgt" className="w-full bg-primary/50 border border-prHighlight focus:border-secondary transition-colors rounded p-2 text-sm text-secondary" />
+              <NumberInput
+                required
+                name="weight"
+                step="0.01"
+                defaultValue={editingAssignment?.weight ?? ""}
+                placeholder="Total Wgt"
+                className={`w-full bg-primary/50 border rounded p-2 text-sm text-secondary transition-colors ${
+                  isOverLimit ? 'border-amber-500/70 focus:border-amber-400' : 'border-prHighlight focus:border-secondary'
+                }`}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeightInputValue(parseFloat(e.target.value) || 0)}
+              />
             </div>
+
+            {/* Bonus Weight Warning */}
+            {isOverLimit && (
+              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 animate-in fade-in duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0 mt-0.5">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <path d="M12 9v4"/><path d="M12 17h.01"/>
+                </svg>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-orbitron text-amber-400 uppercase tracking-widest">Bonus Weight Detected</span>
+                  <span className="text-[11px] text-amber-300/80 leading-relaxed">
+                    Total weight will be <span className="font-bold text-amber-300">{projectedTotal.toFixed(1)}%</span> — exceeding 100% by <span className="font-bold text-amber-300">{overAmount}%</span>. The extra weight will be counted as <span className="font-bold text-amber-300">bonus marks</span>.
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex gap-2 mt-2">
               <NeonButton type="submit" className="flex-1 py-2 text-xs">Execute {editingAssignment ? 'Update' : 'Add'}</NeonButton>

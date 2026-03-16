@@ -1,9 +1,22 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
+
+const LETTER_GRADES = [
+  { letter: "A+", min: 90, max: 100 },
+  { letter: "A",  min: 80, max: 89  },
+  { letter: "B+", min: 75, max: 79  },
+  { letter: "B",  min: 70, max: 74  },
+  { letter: "C+", min: 65, max: 69  },
+  { letter: "C",  min: 60, max: 64  },
+  { letter: "D+", min: 55, max: 59  },
+  { letter: "D",  min: 50, max: 54  },
+  { letter: "F",  min: 0,  max: 49  },
+] as const;
 
 interface DiagnosticMatrixProps {
   course: Course;
@@ -38,32 +51,73 @@ export default function DiagnosticMatrix({
   maxMark,
   graphData
 }: DiagnosticMatrixProps) {
+  const forceInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+
+  const handleLetterSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const letter = e.target.value;
+    if (!letter) { setSelectedLetter(null); return; }
+    const grade = LETTER_GRADES.find(g => g.letter === letter);
+    if (grade && forceInputRef.current) {
+      const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+      nativeSet?.call(forceInputRef.current, String(grade.max));
+      forceInputRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      setSelectedLetter(letter);
+    }
+  };
+
   return (
     <GlassCard className="p-8 pb-12 overflow-hidden relative border-secondary/40 shadow-[0_0_40px_rgba(242,166,90,0.1)]">
-      <div className="flex justify-between items-start mb-6 border-b border-prHighlight/50 pb-4">
+      <div className="flex justify-between items-start mb-3 border-b border-prHighlight/50">
         <div>
            <h2 className="text-2xl font-orbitron text-secondary">Diagnostic Matrix</h2>
-           <div className="mt-1 flex items-center gap-2">
-             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-             <span className="text-[10px] uppercase tracking-widest text-alt-color">Calculating algorithms via python</span>
-           </div>
         </div>
-        <button onClick={() => setForceGradeOpen(!forceGradeOpen)} className={`px-4 py-2 border transition-all rounded text-xs uppercase tracking-wider flex items-center gap-2 ${forceGradeOpen || (course.mark !== null && course.mark !== undefined) ? 'border-red-500 text-red-500 bg-red-900/20 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'border-prHighlight hover:border-red-500 text-alt-color hover:text-red-400 bg-primary/50'}`}>
+        <button onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} className={`px-4 py-2 border transition-all rounded text-xs uppercase tracking-wider flex items-center gap-2 ${forceGradeOpen || (course.mark !== null && course.mark !== undefined) ? 'border-red-500 text-red-500 bg-red-900/20 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'border-prHighlight hover:border-red-500 text-alt-color hover:text-red-400 bg-primary/50'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
           {course.mark !== undefined && course.mark !== null ? 'Override Active' : 'Force Grade'}
         </button>
       </div>
 
       {forceGradeOpen && (
-        <form onSubmit={handleForceGradeSubmit} className="mb-8 p-4 border border-red-500/50 bg-red-900/10 rounded-md animate-in fade-in slide-in-from-top-2 w-full flex items-center gap-4">
-           <div className="flex-1">
-             <label className="text-xs uppercase tracking-wider text-red-400 block mb-1">Manual Override Phase</label>
-              <NumberInput required name="force_mark" step="0.01" defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""} placeholder="Forced Grade %" className="w-full bg-primary border border-red-500/50 rounded p-2 text-secondary focus:outline-none focus:border-red-400" />
+        <form onSubmit={handleForceGradeSubmit} className="mb-4 p-2 border border-red-500/50 bg-red-900/10 rounded-md animate-in fade-in slide-in-from-top-2 w-full flex items-end gap-3">
+           {/* Letter Grade Dropdown */}
+           <div className="flex-1 min-w-0">
+             <label className="text-[9px] uppercase tracking-widest text-red-400/70 block mb-1">Letter Grade</label>
+             <select
+               value={selectedLetter || ""}
+               onChange={handleLetterSelect}
+               className="w-full bg-primary border border-red-500/50 rounded px-2 py-1.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-red-400 cursor-pointer appearance-none"
+               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center' }}
+             >
+               <option value="" className="bg-primary text-alt-color font-montserrat">— Letter —</option>
+               {LETTER_GRADES.map((g) => (
+                 <option key={g.letter} value={g.letter} className="bg-primary text-secondary font-montserrat">
+                   {g.letter}  ({g.min}% – {g.max}%)
+                 </option>
+               ))}
+             </select>
            </div>
-           <div className="flex flex-col gap-2 mt-4 ml-auto w-1/3">
-             <button type="submit" className="w-full bg-red-900/60 hover:bg-red-500 text-red-500 hover:text-white border border-red-500 rounded p-2 text-xs uppercase tracking-wider font-bold transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]">Execute</button>
+
+           {/* Manual % Input */}
+           <div className="flex-1 min-w-0">
+             <label className="text-[9px] uppercase tracking-widest text-red-400/70 block mb-1">Override %</label>
+             <NumberInput
+               ref={forceInputRef}
+               required
+               name="force_mark"
+               step="0.01"
+               defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""}
+               placeholder="Grade %"
+               className="w-full bg-primary border border-red-500/50 rounded px-2 py-1.5 text-sm text-secondary focus:outline-none focus:border-red-400"
+               onChange={() => setSelectedLetter(null)}
+             />
+           </div>
+
+           {/* Actions */}
+           <div className="flex gap-2 shrink-0">
+             <button type="submit" className="bg-red-900/60 hover:bg-red-500 text-red-500 hover:text-white border border-red-500 rounded px-3 py-1.5 text-sm uppercase tracking-wider font-bold transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]">Execute</button>
              {course.mark !== null && course.mark !== undefined && (
-               <button type="button" onClick={handleRemoveForceGrade} className="w-full bg-transparent border border-alt-color/30 hover:bg-alt-color/20 text-alt-color text-[10px] uppercase tracking-wider p-2 rounded transition-all">Remove</button>
+               <button type="button" onClick={handleRemoveForceGrade} className="bg-transparent border border-alt-color/30 hover:bg-alt-color/20 text-alt-color text-sm uppercase tracking-wider px-3 py-1.5 rounded transition-all">Remove</button>
              )}
            </div>
         </form>

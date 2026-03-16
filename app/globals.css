@@ -69,3 +69,22 @@ button:active:not(:disabled),
   transform: translateY(1px) scale(0.98) !important;
   box-shadow: none !important;
 }
+
+/* Custom scrollbar styling */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgb(25, 21, 29);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgb(48, 39, 56);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(90, 76, 105);
+}
