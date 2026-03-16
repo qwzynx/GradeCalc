@@ -2,6 +2,7 @@
 
 import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
+import NumberInput from "./NumberInput";
 import { Assignment } from "../types";
 
 export interface AssignmentFormProps {
@@ -36,9 +37,8 @@ export default function AssignmentForm({
             {/* Auto-split Quantity Input (Only show when adding new) */}
             {!editingAssignment && (
               <div className="w-16 relative group">
-                <input 
+                <NumberInput 
                   name="quantity" 
-                  type="number" 
                   min="1" 
                   max="10" 
                   value={splitQuantity}
@@ -83,18 +83,18 @@ export default function AssignmentForm({
                   {(!inputModes[i] || inputModes[i] === "percentage") ? (
                     <div className="flex-1">
                       <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Mark %</label>
-                      <input name={splitQuantity > 1 ? `mark_${i}` : "mark"} type="number" step="0.01" defaultValue={editingAssignment?.mark ?? ""} placeholder="Grade" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                      <NumberInput name={splitQuantity > 1 ? `mark_${i}` : "mark"} step="0.01" defaultValue={editingAssignment?.mark ?? ""} placeholder="Grade" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
                     </div>
                   ) : (
                     <div className="flex-1 flex gap-2 items-center">
                       <div className="flex-1">
                         <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Earned</label>
-                        <input name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} type="number" step="0.01" placeholder="Pts" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                         <NumberInput name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} step="0.01" placeholder="Pts" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
                       </div>
                       <span className="text-alt-color font-bold mt-4 shrink-0">/</span>
                       <div className="flex-1">
                         <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Total</label>
-                        <input name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} type="number" step="0.01" placeholder="Max" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                         <NumberInput name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} step="0.01" placeholder="Max" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
                       </div>
                     </div>
                   )}
@@ -107,7 +107,7 @@ export default function AssignmentForm({
                 <span>{splitQuantity > 1 ? 'Total Group Weight %' : 'Weight %'}</span>
                 {splitQuantity > 1 && <span className="text-secondary/50 ml-1">(Averaging items over full weight)</span>}
               </label>
-              <input required name="weight" type="number" step="0.01" defaultValue={editingAssignment?.weight ?? ""} placeholder="Total Wgt" className="w-full bg-primary/50 border border-prHighlight focus:border-secondary transition-colors rounded p-2 text-sm text-secondary" />
+              <NumberInput required name="weight" step="0.01" defaultValue={editingAssignment?.weight ?? ""} placeholder="Total Wgt" className="w-full bg-primary/50 border border-prHighlight focus:border-secondary transition-colors rounded p-2 text-sm text-secondary" />
             </div>
           </div>
           <div className="flex gap-2 mt-2">

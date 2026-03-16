@@ -21,9 +21,11 @@ export default function Home() {
   
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSemester, setFilterSemester] = useState("All");
-  const [filterYear, setFilterYear] = useState("All");
-  const [filterCategory, setFilterCategory] = useState("All");
+  const [filterSemester, setFilterSemester] = useState<string[]>([]);
+  const [filterYear, setFilterYear] = useState<string[]>([]);
+  const [filterAcademicYear, setFilterAcademicYear] = useState<number[]>([]);
+  const [filterCategory, setFilterCategory] = useState<string[]>([]);
+  const [filterInProgress, setFilterInProgress] = useState(false);
   
   const userId = user?.id;
 
@@ -130,15 +132,22 @@ export default function Home() {
       (course.prof_name && course.prof_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (course.category && course.category.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesSemester = filterSemester === "All" || course.semester === filterSemester;
-    const matchesYear = filterYear === "All" || course.year.toString() === filterYear;
-    const matchesCategory = filterCategory === "All" || course.category === filterCategory;
+    const matchesSemester = filterSemester.length === 0 || filterSemester.includes(course.semester);
+    const matchesYear = filterYear.length === 0 || filterYear.includes(course.year.toString());
+    const matchesAcademicYear = filterAcademicYear.length === 0 || filterAcademicYear.includes(
+      course.semester === "Fall" ? course.year : course.year - 1
+    );
+    const matchesCategory = filterCategory.length === 0 || (course.category && filterCategory.includes(course.category));
+    const matchesInProgress = !filterInProgress || course.in_progress;
 
-    return matchesSearch && matchesSemester && matchesYear && matchesCategory;
+    return matchesSearch && matchesSemester && matchesYear && matchesAcademicYear && matchesCategory && matchesInProgress;
   });
 
   const availableSemesters = Array.from(new Set(courses.map(c => c.semester))).sort();
   const availableYears = Array.from(new Set(courses.map(c => c.year))).sort((a, b) => b - a);
+  const availableAcademicYears = Array.from(new Set(courses.map(c => 
+    c.semester === "Fall" ? c.year : c.year - 1
+  ))).sort((a, b) => b - a);
   const availableCategories = Array.from(new Set(courses.map(c => c.category || "Uncategorized"))).filter(c => c !== "Uncategorized").sort();
 
   const calculateDashboardData = (dataToCalculate: Course[]) => {
@@ -221,27 +230,29 @@ export default function Home() {
   return (
     <div className="min-h-screen p-8 sm:pt-10">
       <header className="mb-12 flex flex-col sm:flex-row items-center justify-between border-b border-prHighlight pb-6 gap-4">
-        <div className="flex items-center gap-6">
-          <div>
-            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
-              GradeMatrix
-            </h1>
-            <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
-          </div>
+        <div>
+          <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+            GradeMatrix
+          </h1>
+          <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <NeonButton onClick={() => setShowAddForm(true)}>
+            Initialize New Course
+          </NeonButton>
+          
           <button 
             onClick={signOut}
-            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
+            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
           >
-            <div className="flex flex-col items-start">
-               <span className="text-[10px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors">Session</span>
-               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors">Sign Out</span>
+            <div className="flex flex-col items-start translate-y-px">
+               <span className="text-[9px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors leading-none mb-1">Session</span>
+               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors leading-none">Sign Out</span>
             </div>
             <LogOut className="w-4 h-4 text-alt-color group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
           </button>
         </div>
-        <NeonButton onClick={() => setShowAddForm(true)}>
-          Initialize New Course
-        </NeonButton>
       </header>
 
       <main>
@@ -255,10 +266,15 @@ export default function Home() {
               setFilterSemester={setFilterSemester}
               filterYear={filterYear}
               setFilterYear={setFilterYear}
+              filterAcademicYear={filterAcademicYear}
+              setFilterAcademicYear={setFilterAcademicYear}
               filterCategory={filterCategory}
               setFilterCategory={setFilterCategory}
+              filterInProgress={filterInProgress}
+              setFilterInProgress={setFilterInProgress}
               availableSemesters={availableSemesters}
               availableYears={availableYears}
+              availableAcademicYears={availableAcademicYears}
               availableCategories={availableCategories}
             />
           </>
@@ -296,9 +312,11 @@ export default function Home() {
             <button 
               onClick={() => {
                 setSearchTerm("");
-                setFilterSemester("All");
-                setFilterYear("All");
-                setFilterCategory("All");
+                setFilterSemester([]);
+                setFilterYear([]);
+                setFilterAcademicYear([]);
+                setFilterCategory([]);
+                setFilterInProgress(false);
               }}
               className="mt-4 text-secondary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest"
             >

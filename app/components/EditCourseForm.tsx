@@ -2,6 +2,7 @@
 
 import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
+import NumberInput from "./NumberInput";
 import { Course } from "../types";
 
 interface EditCourseFormProps {
@@ -45,7 +46,7 @@ export default function EditCourseForm({ course, onSubmit, onCancel, onDelete }:
          <div className="flex gap-4">
            <div className="flex-1">
              <label className="block text-[10px] uppercase tracking-wider text-alt-color mb-1">Year</label>
-             <input required name="year" type="number" defaultValue={course.year} className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+              <NumberInput required name="year" defaultValue={course.year} className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
            </div>
            <div className="flex-1">
              <label className="block text-[10px] uppercase tracking-wider text-alt-color mb-1">Semester</label>
@@ -60,7 +61,7 @@ export default function EditCourseForm({ course, onSubmit, onCancel, onDelete }:
          </div>
          <div>
            <label className="block text-[10px] uppercase tracking-wider text-alt-color mb-1">Credits</label>
-           <input name="credits" type="number" step="0.5" defaultValue={course.credits || ""} className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+            <NumberInput name="credits" step="0.5" defaultValue={course.credits || ""} className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
          </div>
          <div className="flex flex-col">
            <label className="block text-[10px] uppercase tracking-wider text-alt-color mb-1">Status</label>

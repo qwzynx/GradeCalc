@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import GlassCard from "./GlassCard";
+import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
 
 interface DiagnosticMatrixProps {
@@ -57,7 +58,7 @@ export default function DiagnosticMatrix({
         <form onSubmit={handleForceGradeSubmit} className="mb-8 p-4 border border-red-500/50 bg-red-900/10 rounded-md animate-in fade-in slide-in-from-top-2 w-full flex items-center gap-4">
            <div className="flex-1">
              <label className="text-xs uppercase tracking-wider text-red-400 block mb-1">Manual Override Phase</label>
-             <input required name="force_mark" type="number" step="0.01" defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""} placeholder="Forced Grade %" className="w-full bg-primary border border-red-500/50 rounded p-2 text-secondary focus:outline-none focus:border-red-400" />
+              <NumberInput required name="force_mark" step="0.01" defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""} placeholder="Forced Grade %" className="w-full bg-primary border border-red-500/50 rounded p-2 text-secondary focus:outline-none focus:border-red-400" />
            </div>
            <div className="flex flex-col gap-2 mt-4 ml-auto w-1/3">
              <button type="submit" className="w-full bg-red-900/60 hover:bg-red-500 text-red-500 hover:text-white border border-red-500 rounded p-2 text-xs uppercase tracking-wider font-bold transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]">Execute</button>
@@ -157,13 +158,12 @@ export default function DiagnosticMatrix({
              <div className="bg-primary/40 border border-prHighlight/50 rounded-lg p-3 flex flex-col justify-between hover:border-secondary/50 transition-colors">
                <div className="flex justify-between items-center mb-2 gap-2">
                  <span className="text-[10px] uppercase tracking-widest text-alt-color">Target %</span>
-                 <input 
-                   type="number" 
-                   value={targetGrade || ""} 
-                   onChange={handleTargetChange} 
-                   placeholder="80"
-                   className="w-15 bg-primary border border-prHighlight focus:border-secondary rounded px-1 py-1 text-sm text-secondary text-right outline-none font-orbitron" 
-                 />
+                  <NumberInput 
+                    value={targetGrade || ""} 
+                    onChange={handleTargetChange} 
+                    placeholder="80"
+                    className="w-15 bg-primary border border-prHighlight focus:border-secondary rounded px-1 py-1 text-sm text-secondary text-right outline-none font-orbitron" 
+                  />
                </div>
                <div className="flex flex-col">
                  <span className="text-[9px] uppercase tracking-widest text-alt-color mb-1">Score Needed</span>

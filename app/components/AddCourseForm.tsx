@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
+import NumberInput from "./NumberInput";
 
 interface AddCourseFormProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -64,7 +65,7 @@ export default function AddCourseForm({ onSubmit, onCancel }: AddCourseFormProps
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Year *</label>
-            <input required name="year" type="number" defaultValue={new Date().getFullYear()} className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" />
+            <NumberInput required name="year" defaultValue={new Date().getFullYear()} className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" />
           </div>
           
           <div>
@@ -80,7 +81,7 @@ export default function AddCourseForm({ onSubmit, onCancel }: AddCourseFormProps
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-alt-color mb-2">Credits</label>
-            <input name="credits" type="number" step="0.5" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. 3" />
+            <NumberInput name="credits" step="0.5" className="w-full bg-primary/50 border border-prHighlight rounded-md p-3 text-secondary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="e.g. 3" />
           </div>
 
           <div className="flex flex-col">
