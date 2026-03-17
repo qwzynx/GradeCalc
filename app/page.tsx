@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import NeonButton from "./components/NeonButton";
 import DashboardMetrics from "./components/DashboardMetrics";
 import AddCourseForm from "./components/AddCourseForm";
+import SyllabusImport from "./components/SyllabusImport";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment } from "./types";
@@ -18,6 +19,7 @@ export default function Home() {
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,6 +131,52 @@ export default function Home() {
       fetchCourses();
     } catch (error) {
       console.error("Error adding course", error);
+    }
+  };
+
+  const handleSyllabusImport = async (
+    courseData: { name: string; prof_name?: string; semester?: string; year?: number; credits?: number; category?: string | null },
+    assignmentsData: { name: string; weight: number }[]
+  ) => {
+    try {
+      const newCourse: Partial<Course> = {
+        user_id: userId,
+        name: courseData.name,
+        year: courseData.year || new Date().getFullYear(),
+        semester: courseData.semester || "Fall",
+        in_progress: true,
+      };
+      if (courseData.prof_name) newCourse.prof_name = courseData.prof_name;
+      if (courseData.category) newCourse.category = courseData.category;
+      if (courseData.credits) newCourse.credits = courseData.credits;
+
+      const { data, error } = await supabase
+        .from('courses')
+        .insert([newCourse])
+        .select();
+
+      if (error) throw error;
+
+      const courseId = data?.[0]?.id;
+      if (courseId && assignmentsData.length > 0) {
+        const assignmentsToInsert = assignmentsData.map(a => ({
+          course_id: courseId,
+          name: a.name,
+          weight: a.weight,
+          mark: null,
+        }));
+
+        const { error: assignError } = await supabase
+          .from('assignments')
+          .insert(assignmentsToInsert);
+
+        if (assignError) throw assignError;
+      }
+
+      setShowSyllabusImport(false);
+      fetchCourses();
+    } catch (error) {
+      console.error("Error importing syllabus", error);
     }
   };
 
@@ -276,6 +324,18 @@ export default function Home() {
           <NeonButton onClick={() => setShowAddForm(true)}>
             Initialize New Course
           </NeonButton>
+          <button
+            onClick={() => setShowSyllabusImport(true)}
+            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:border-secondary/50 hover:bg-secondary/10 transition-all duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-alt-color group-hover:text-secondary transition-colors">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <div className="flex flex-col items-start translate-y-px">
+              <span className="text-[9px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-secondary/60 transition-colors leading-none mb-1">AI Import</span>
+              <span className="text-xs font-orbitron text-alt-color group-hover:text-secondary transition-colors leading-none">Syllabus</span>
+            </div>
+          </button>
           
           <button 
             onClick={signOut}
@@ -320,6 +380,18 @@ export default function Home() {
             onSubmit={handleAddCourse} 
             onCancel={() => setShowAddForm(false)} 
           />
+        )}
+
+        {showSyllabusImport && (
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
+          >
+            <SyllabusImport
+              onImport={handleSyllabusImport}
+              onCancel={() => setShowSyllabusImport(false)}
+            />
+          </div>
         )}
 
         {loading ? (

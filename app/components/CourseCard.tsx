@@ -18,7 +18,7 @@ export default function CourseCard({ course, finalPercentage, letterGrade, onCli
     >
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-xl font-orbitron font-bold text-secondary group-hover:text-white transition-colors">{course.name}</h3>
-        <span className="text-xs uppercase tracking-wider bg-prHighlight/50 border border-prHighlight px-2 py-1 rounded text-secondary">{course.semester} {course.year}</span>
+        <span className="text-xs uppercase tracking-wider bg-prHighlight/50 border border-prHighlight px-4 py-1 rounded text-secondary whitespace-nowrap shrink-0">{course.semester} {course.year}</span>
       </div>
       <div className="flex-1 space-y-3 text-sm text-alt-color mt-2">
         <div className="flex justify-between items-center border-b border-prHighlight/30 pb-2">

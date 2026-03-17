@@ -2,8 +2,10 @@ export interface Assignment {
   id?: string;
   course_id: string;
   name: string;
-  mark?: number;
+  mark?: number | null;
   weight?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Course {

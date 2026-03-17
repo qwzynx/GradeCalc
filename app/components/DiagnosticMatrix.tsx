@@ -130,13 +130,13 @@ export default function DiagnosticMatrix({
             <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none w-full">
               {course.mark !== null && course.mark !== undefined ? (
                  <>
-                    <div className="text-3xl font-orbitron font-bold text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]">{course.mark}%</div>
+                    <div className="text-3xl font-orbitron font-bold text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]">{course.mark.toFixed(2)}%</div>
                     <div className="text-[10px] uppercase tracking-widest text-red-500/80 mt-1">Forced</div>
                  </>
               ) : (
                  <>
                     <div className="text-4xl font-orbitron font-bold text-secondary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
-                      {backendMetrics?.final_average ? `${backendMetrics.final_average}%` : 'N/A'}
+                      {backendMetrics?.final_average ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
                     </div>
                     <div className="text-[9px] uppercase tracking-widest text-alt-color mt-1">Average</div>
                  </>

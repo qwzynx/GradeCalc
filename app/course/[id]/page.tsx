@@ -59,7 +59,7 @@ export default function CourseDetail() {
       if (!courseId || !userId) return;
       const { data, error } = await supabase
         .from('courses')
-        .select('*, assignments(*)')
+        .select('*')
         .eq('id', courseId)
         .eq('user_id', userId);
         
@@ -69,7 +69,22 @@ export default function CourseDetail() {
         const fullCourse = data[0];
         setCourse(fullCourse);
         
-        const loadedAssignments = fullCourse.assignments || [];
+        // Fetch assignments separately with proper ordering
+        const { data: assignData, error: assignError } = await supabase
+          .from('assignments')
+          .select('*')
+          .eq('course_id', courseId)
+          .order('created_at', { ascending: true });
+
+        if (assignError) throw assignError;
+
+        // Push null-mark assignments to the bottom, keep created_at order within each group
+        const loadedAssignments = (assignData || []).sort((a, b) => {
+          const aHasMark = a.mark !== null && a.mark !== undefined;
+          const bHasMark = b.mark !== null && b.mark !== undefined;
+          if (aHasMark === bHasMark) return 0; // preserve existing order
+          return aHasMark ? -1 : 1; // nulls go to bottom
+        });
         setAssignments(loadedAssignments);
 
         // Perform calculations locally
@@ -238,7 +253,7 @@ export default function CourseDetail() {
         }
       }
 
-      let finalCalculatedMark: number | undefined = undefined;
+      let finalCalculatedMark: number | null = null;
 
       if (validMarksCount > 0) {
          if (allPointsBased && totalMaxPoints > 0) {
@@ -284,7 +299,7 @@ export default function CourseDetail() {
     const mode = inputModes[0] || "percentage";
     if (mode === "percentage") {
       const mark = formData.get("mark") as string;
-      updatedAssignment.mark = mark ? parseFloat(mark) : undefined;
+      updatedAssignment.mark = mark !== "" ? parseFloat(mark) : null;
     } else {
       const pointsEarned = formData.get("points_earned") as string;
       const pointsTotal = formData.get("points_total") as string;
@@ -295,7 +310,7 @@ export default function CourseDetail() {
           updatedAssignment.mark = parseFloat(((earned / total) * 100).toFixed(2));
         }
       } else {
-        updatedAssignment.mark = undefined;
+        updatedAssignment.mark = null;
       }
     }
 
@@ -461,14 +476,14 @@ export default function CourseDetail() {
               </button>
             </div>
 
-            <div className="overflow-y-auto flex flex-col gap-2 max-h-[350px] pr-1 rounded-2xl">
+            <div className="overflow-y-auto flex flex-col gap-2 max-h-[300px] pr-1">
               {assignments.length > 0 ? (
                 assignments.map(a => (
                   <div key={a.id} className="flex justify-between items-center p-3 bg-primary/30 border border-prHighlight/50 rounded-lg hover:border-secondary transition-colors group/item relative shrink-0">
                     <div className="flex flex-col">
                       <span className="text-secondary text-base font-bold">{a.name}</span>
                       <span className="text-[10px] text-alt-color uppercase tracking-wider">
-                        M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight}%</span>
+                        M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark.toFixed(2)}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight?.toFixed(2)}%</span>
                       </span>
                     </div>
                     <button 
