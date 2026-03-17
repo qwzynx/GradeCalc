@@ -78,12 +78,17 @@ export default function CourseDetail() {
 
         if (assignError) throw assignError;
 
-        // Push null-mark assignments to the bottom, keep created_at order within each group
+        // Primary: Presence of mark (marked first). Secondary: Alphabetical by name.
         const loadedAssignments = (assignData || []).sort((a, b) => {
           const aHasMark = a.mark !== null && a.mark !== undefined;
           const bHasMark = b.mark !== null && b.mark !== undefined;
-          if (aHasMark === bHasMark) return 0; // preserve existing order
-          return aHasMark ? -1 : 1; // nulls go to bottom
+          
+          if (aHasMark !== bHasMark) {
+            return aHasMark ? -1 : 1; // Marked assignments first
+          }
+          
+          // Both have marks or both are null: sort alphabetically
+          return a.name.localeCompare(b.name);
         });
         setAssignments(loadedAssignments);
 

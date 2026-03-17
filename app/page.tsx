@@ -224,6 +224,26 @@ export default function Home() {
     const matchesInProgress = !filterInProgress || course.in_progress;
 
     return matchesSearch && matchesSemester && matchesYear && matchesAcademicYear && matchesCategory && matchesInProgress;
+  }).sort((a, b) => {
+    // 1. In Progress status (true first)
+    if (a.in_progress !== b.in_progress) {
+      return a.in_progress ? -1 : 1;
+    }
+    
+    // 2. Year (descending)
+    if (a.year !== b.year) {
+      return b.year - a.year;
+    }
+    
+    // 3. Semester (descending)
+    const semesterOrder: Record<string, number> = {
+      'Fall': 5,
+      'Summer 2': 4,
+      'Full Summer': 3,
+      'Summer 1': 2,
+      'Winter': 1
+    };
+    return (semesterOrder[b.semester] || 0) - (semesterOrder[a.semester] || 0);
   });
 
   const availableSemesters = Array.from(new Set(courses.map(c => c.semester))).sort();
