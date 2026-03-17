@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Determine MIME type
     const mimeType = file.type || "application/pdf";
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `You are a university syllabus parser. Analyze this document and extract the course information and ALL graded components.
 
