@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import GlassCard from "./GlassCard";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface DashboardMetricsProps {
   averageGpa: string;
@@ -29,6 +30,13 @@ const PIE_COLORS: Record<string, string> = {
 
 export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData }: DashboardMetricsProps) {
   const [is4Scale, setIs4Scale] = useState(false);
+  const { theme } = useTheme();
+
+  const textColor = theme === 'dark' ? '#A0A0A0' : '#333333';
+  const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb';
+  const tooltipBg = theme === 'dark' ? '#1E1E1E' : 'rgba(255, 255, 255, 0.95)';
+  const tooltipBorder = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb';
+  const tooltipText = theme === 'dark' ? '#FFFFFF' : '#000000';
 
   return (
     <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -49,7 +57,7 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
           <h2 className="text-sm uppercase tracking-widest text-primary mb-4 w-full text-center">Grade Distribution</h2>
           {pieData.length > 0 ? (
             <div className="w-60 h-48">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" key={theme}>
                 <PieChart>
                   <Pie
                     data={pieData}
@@ -66,10 +74,10 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
                     ))}
                   </Pie>
                   <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: '#e5e7eb', borderRadius: '8px', color: '#000000', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    itemStyle={{ color: '#000000' }}
+                    contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '8px', color: tooltipText, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                    itemStyle={{ color: tooltipText }}
                   />
-                  <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '12px', color: '#333333' }}/>
+                  <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '12px', color: textColor }}/>
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -81,15 +89,15 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
           <h2 className="text-sm uppercase tracking-widest text-primary mb-4 w-full text-center">Performance Timeline</h2>
           {lineData.length > 0 ? (
             <div className="w-full h-48">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" key={theme}>
                 <LineChart data={lineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis dataKey="name" stroke="#333333" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#333333" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                  <XAxis dataKey="name" stroke={textColor} fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke={textColor} fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
                   <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: '#e5e7eb', borderRadius: '8px', color: '#000000', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                    contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '8px', color: tooltipText, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                     formatter={(value: any) => [`${value}%`, 'Average Mark']}
-                    labelStyle={{ color: '#000000', marginBottom: '8px', fontFamily: 'Orbitron, sans-serif' }}
+                    labelStyle={{ color: tooltipText, marginBottom: '8px', fontFamily: 'Orbitron, sans-serif' }}
                   />
                   <Line type="monotone" dataKey="mark" stroke="#E31D2B" strokeWidth={3} dot={{ fill: '#E31D2B', strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </LineChart>

@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
+import { useTheme } from "@/components/ThemeProvider";
 
 const LETTER_GRADES = [
   { letter: "A+", min: 90, max: 100 },
@@ -51,6 +52,7 @@ export default function DiagnosticMatrix({
   maxMark,
   graphData
 }: DiagnosticMatrixProps) {
+  const { theme } = useTheme();
   const forceInputRef = useRef<HTMLInputElement>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
@@ -159,10 +161,10 @@ export default function DiagnosticMatrix({
                 </Pie>
                 <Tooltip 
                   formatter={(value: any, name: any) => [`${value}%`, name]}
-                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb', borderRadius: '8px', padding: '10px' }}
+                  contentStyle={{ backgroundColor: theme === 'dark' ? '#1E1E1E' : '#ffffff', borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb', borderRadius: '8px', padding: '10px' }}
                   itemStyle={{ color: '#E31D2B', fontFamily: 'Orbitron, sans-serif' }}
                 />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#333333' }} />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#333333' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
