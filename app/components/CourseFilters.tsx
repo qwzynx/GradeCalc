@@ -77,7 +77,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="flex flex-col gap-8">
         {/* Status Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">

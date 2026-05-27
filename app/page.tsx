@@ -408,126 +408,133 @@ export default function Home() {
 
       <main>
         {!loading && courses.length > 0 && (
-          <>
-            <DashboardMetrics averageGpa={averageGpa} averageGpa4_0={averageGpa4_0} pieData={pieData} lineData={lineData} />
-            <CourseFilters 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filterSemester={filterSemester}
-              setFilterSemester={setFilterSemester}
-              filterYear={filterYear}
-              setFilterYear={setFilterYear}
-              filterAcademicYear={filterAcademicYear}
-              setFilterAcademicYear={setFilterAcademicYear}
-              filterCategory={filterCategory}
-              setFilterCategory={setFilterCategory}
-              filterInProgress={filterInProgress}
-              setFilterInProgress={setFilterInProgress}
-              availableSemesters={availableSemesters}
-              availableYears={availableYears}
-              availableAcademicYears={availableAcademicYears}
-              availableCategories={availableCategories}
-            />
-          </>
+          <DashboardMetrics averageGpa={averageGpa} averageGpa4_0={averageGpa4_0} pieData={pieData} lineData={lineData} />
         )}
 
-        {showAddForm && (
-          <AddCourseForm 
-            onSubmit={handleAddCourse} 
-            onCancel={() => setShowAddForm(false)} 
-          />
-        )}
-
-        {showSyllabusImport && (
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-            onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
-          >
-            <SyllabusImport
-              onImport={handleSyllabusImport}
-              onCancel={() => setShowSyllabusImport(false)}
-            />
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex justify-center items-center py-32">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
-              <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-transparent border-b-primary animate-spin opacity-50" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {!loading && courses.length > 0 && (
+            <div className="w-full lg:w-1/4 xl:w-1/5 shrink-0 lg:sticky lg:top-8">
+              <CourseFilters 
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                filterSemester={filterSemester}
+                setFilterSemester={setFilterSemester}
+                filterYear={filterYear}
+                setFilterYear={setFilterYear}
+                filterAcademicYear={filterAcademicYear}
+                setFilterAcademicYear={setFilterAcademicYear}
+                filterCategory={filterCategory}
+                setFilterCategory={setFilterCategory}
+                filterInProgress={filterInProgress}
+                setFilterInProgress={setFilterInProgress}
+                availableSemesters={availableSemesters}
+                availableYears={availableYears}
+                availableAcademicYears={availableAcademicYears}
+                availableCategories={availableCategories}
+              />
             </div>
-          </div>
-        ) : courses.length === 0 ? (
-          <div className="text-center py-32 text-muted flex flex-col items-center">
-            <div className="w-24 h-24 mb-6 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm relative">
-               <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
-               <span className="text-3xl text-primary font-bold">Ø</span>
-            </div>
-            <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses found.</p>
-            <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a new course to begin tracking.</p>
-          </div>
-        ) : filteredCourses.length === 0 ? (
-          <div className="text-center py-20 flex flex-col items-center">
-             <div className="w-16 h-16 mb-4 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm">
-               <span className="text-xl opacity-50 text-primary font-orbitron font-bold">!</span>
-            </div>
-            <p className="text-lg font-orbitron tracking-widest text-primary font-bold">No results found for current filters.</p>
-            <button 
-              onClick={() => {
-                setSearchTerm("");
-                setFilterSemester([]);
-                setFilterYear([]);
-                setFilterAcademicYear([]);
-                setFilterCategory([]);
-                setFilterInProgress(false);
-              }}
-              className="mt-4 text-secondary font-semibold hover:text-primary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest transition-colors"
-            >
-              Reset All Filters
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-12">
-            {(() => {
-              const groupedCourses = filteredCourses.reduce((acc, course) => {
-                const category = course.category && course.category.trim() !== "" ? course.category : "Uncategorized";
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(course);
-                return acc;
-              }, {} as Record<string, Course[]>);
+          )}
 
-              return Object.keys(groupedCourses).sort().map(category => (
-                <div key={category} className="flex flex-col gap-6">
-                  <h2 className="text-2xl font-orbitron font-bold text-secondary border-b border-black/10 pb-2">{category}</h2>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {groupedCourses[category].map((course, idx) => {
-                      const uniqueId = course.id || idx.toString();
-                      let finalPercentage: number | null = null;
-                      if (course.mark !== undefined && course.mark !== null) {
-                        finalPercentage = course.mark;
-                      } else if (course.id) {
-                        const calculated = calculateGrade(course.id);
-                        if (calculated !== null) {
-                          finalPercentage = parseFloat(calculated);
-                        }
-                      }
-                      const letterGrade = finalPercentage !== null ? getYorkUGrade(finalPercentage).letter : "N/A";
-                      
-                      return (
-                        <CourseCard
-                          key={uniqueId}
-                          course={course}
-                          finalPercentage={finalPercentage}
-                          letterGrade={letterGrade}
-                          onClick={() => router.push(`/course/${uniqueId}`)}
-                        />
-                      );})}
-                  </div>
+          <div className="w-full flex-1 min-w-0">
+            {showAddForm && (
+              <AddCourseForm 
+                onSubmit={handleAddCourse} 
+                onCancel={() => setShowAddForm(false)} 
+              />
+            )}
+
+            {showSyllabusImport && (
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+                onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
+              >
+                <SyllabusImport
+                  onImport={handleSyllabusImport}
+                  onCancel={() => setShowSyllabusImport(false)}
+                />
+              </div>
+            )}
+
+            {loading ? (
+              <div className="flex justify-center items-center py-32">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
+                  <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-transparent border-b-primary animate-spin opacity-50" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
                 </div>
-              ));
-            })()}
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="text-center py-32 text-muted flex flex-col items-center">
+                <div className="w-24 h-24 mb-6 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm relative">
+                   <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
+                   <span className="text-3xl text-primary font-bold">Ø</span>
+                </div>
+                <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses found.</p>
+                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a new course to begin tracking.</p>
+              </div>
+            ) : filteredCourses.length === 0 ? (
+              <div className="text-center py-20 flex flex-col items-center">
+                 <div className="w-16 h-16 mb-4 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm">
+                   <span className="text-xl opacity-50 text-primary font-orbitron font-bold">!</span>
+                </div>
+                <p className="text-lg font-orbitron tracking-widest text-primary font-bold">No results found for current filters.</p>
+                <button 
+                  onClick={() => {
+                    setSearchTerm("");
+                    setFilterSemester([]);
+                    setFilterYear([]);
+                    setFilterAcademicYear([]);
+                    setFilterCategory([]);
+                    setFilterInProgress(false);
+                  }}
+                  className="mt-4 text-secondary font-semibold hover:text-primary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest transition-colors"
+                >
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-12">
+                {(() => {
+                  const groupedCourses = filteredCourses.reduce((acc, course) => {
+                    const category = course.category && course.category.trim() !== "" ? course.category : "Uncategorized";
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(course);
+                    return acc;
+                  }, {} as Record<string, Course[]>);
+
+                  return Object.keys(groupedCourses).sort().map(category => (
+                    <div key={category} className="flex flex-col gap-6">
+                      <h2 className="text-2xl font-orbitron font-bold text-secondary border-b border-black/10 pb-2">{category}</h2>
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {groupedCourses[category].map((course, idx) => {
+                          const uniqueId = course.id || idx.toString();
+                          let finalPercentage: number | null = null;
+                          if (course.mark !== undefined && course.mark !== null) {
+                            finalPercentage = course.mark;
+                          } else if (course.id) {
+                            const calculated = calculateGrade(course.id);
+                            if (calculated !== null) {
+                              finalPercentage = parseFloat(calculated);
+                            }
+                          }
+                          const letterGrade = finalPercentage !== null ? getYorkUGrade(finalPercentage).letter : "N/A";
+                          
+                          return (
+                            <CourseCard
+                              key={uniqueId}
+                              course={course}
+                              finalPercentage={finalPercentage}
+                              letterGrade={letterGrade}
+                              onClick={() => router.push(`/course/${uniqueId}`)}
+                            />
+                          );})}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
