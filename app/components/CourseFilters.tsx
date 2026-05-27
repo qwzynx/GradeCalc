@@ -61,7 +61,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <Search className="absolute left-4 w-5 h-5 text-muted" />
           <input
             type="text"
-            placeholder="Search databanks by name, code, or professor..."
+            placeholder="Search courses by name, code, or professor..."
             className="w-full bg-white border border-black/20 rounded-xl py-5 pl-12 pr-4 text-secondary placeholder:text-muted focus:outline-none focus:border-primary transition-all font-orbitron tracking-wider text-sm shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -81,7 +81,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Status Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Live Status</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Status</label>
           </div>
           <div className="flex flex-wrap gap-2">
             <FilterCheckbox
@@ -95,28 +95,28 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Academic Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Cycle</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Year</label>
             {filterAcademicYear.length > 0 && (
                <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
             {availableAcademicYears.map((ay) => (
-              <FilterCheckbox
-                key={ay}
-                label={`${ay}-${ay + 1}`}
-                checked={filterAcademicYear.includes(ay)}
-                onChange={() => toggleFilter(filterAcademicYear, setFilterAcademicYear, ay)}
-              />
+               <FilterCheckbox
+                 key={ay}
+                 label={`${ay}-${ay + 1}`}
+                 checked={filterAcademicYear.includes(ay)}
+                 onChange={() => toggleFilter(filterAcademicYear, setFilterAcademicYear, ay)}
+               />
             ))}
-            {availableAcademicYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Cycles Detected</span>}
+            {availableAcademicYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Found</span>}
           </div>
         </div>
 
         {/* Semester Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Term Phase</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Semester</label>
             {filterSemester.length > 0 && (
                <button onClick={() => setFilterSemester([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
@@ -130,14 +130,14 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterSemester, setFilterSemester, s)}
               />
             ))}
-            {availableSemesters.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Terms Detected</span>}
+            {availableSemesters.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Semesters Found</span>}
           </div>
         </div>
 
         {/* Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Temporal Axis</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Year</label>
             {filterYear.length > 0 && (
                <button onClick={() => setFilterYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
@@ -151,14 +151,14 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterYear, setFilterYear, y.toString())}
               />
             ))}
-            {availableYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Detected</span>}
+            {availableYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Found</span>}
           </div>
         </div>
 
         {/* Category Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Stream Protocol</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Category</label>
             {filterCategory.length > 0 && (
                <button onClick={() => setFilterCategory([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
@@ -172,7 +172,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterCategory, setFilterCategory, c)}
               />
             ))}
-            {availableCategories.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Streams Detected</span>}
+            {availableCategories.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Categories Found</span>}
           </div>
         </div>
       </div>
@@ -182,7 +182,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         <div className="flex items-center gap-4 pt-6 border-t border-black/10">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
-            <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Matrix:</span>
+            <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Filters:</span>
           </div>
           <div className="flex flex-wrap gap-2 flex-1">
             {searchTerm && <FilterBadge label={`Search: ${searchTerm}`} onClear={() => setSearchTerm("")} />}
@@ -203,7 +203,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             }}
             className="text-[10px] font-orbitron text-primary font-bold hover:text-primary transition-all uppercase tracking-[0.2em] border border-primary rounded px-3 py-1 hover:bg-red-50"
           >
-            Purge All
+            Clear All
           </button>
         </div>
       )}

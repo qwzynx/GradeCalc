@@ -464,8 +464,8 @@ export default function Home() {
                <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
                <span className="text-3xl text-primary font-bold">Ø</span>
             </div>
-            <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No databanks found.</p>
-            <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Initialize a new course to begin tracking.</p>
+            <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses found.</p>
+            <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a new course to begin tracking.</p>
           </div>
         ) : filteredCourses.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center">
