@@ -363,7 +363,6 @@ export default function Home() {
           <h1 className="text-4xl font-bold font-orbitron tracking-widest text-primary">
             GradeMatrix
           </h1>
-          <p className="mt-2 text-muted text-sm uppercase tracking-wider">System Status: <span className="text-emerald-600 animate-pulse ml-1 font-semibold">Online</span></p>
         </div>
         
         <div className="flex items-center gap-4">
