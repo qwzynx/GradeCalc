@@ -2,24 +2,33 @@
 
 :root {
   --color-york-red: #E31D2B;
-  --color-white: #FFFFFF;
-  --color-black: #000000;
-  --color-light-grey: #F2F2F2;
-  --color-dark-grey: #333333;
   
-  --background: var(--color-light-grey);
-  --foreground: var(--color-black);
+  --surface: #FFFFFF;
+  --text-primary: #000000;
+  --text-muted: #333333;
+  --bg-color: #F2F2F2;
+}
+
+.dark {
+  --surface: #1E1E1E;
+  --text-primary: #FFFFFF;
+  --text-muted: #A0A0A0;
+  --bg-color: #121212;
 }
 
 @theme inline {
   --color-primary: var(--color-york-red);
-  --color-surface: var(--color-white);
-  --color-secondary: var(--color-black);
-  --color-muted: var(--color-dark-grey);
-  --color-bg-light: var(--color-light-grey);
+  --color-surface: var(--surface);
+  --color-secondary: var(--text-primary);
+  --color-muted: var(--text-muted);
+  --color-bg-light: var(--bg-color);
   
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Map standard colors so hardcoded Tailwind utilities adapt automatically */
+  --color-white: var(--surface);
+  --color-black: var(--text-primary);
+  
+  --color-background: var(--bg-color);
+  --color-foreground: var(--text-primary);
   
   --font-orbitron: var(--font-inter);
   --font-montserrat: var(--font-inter);
@@ -27,8 +36,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-color);
+  color: var(--text-primary);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 

@@ -10,7 +10,8 @@ import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment } from "./types";
 import { useAuth } from "@/components/AuthProvider";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
 
@@ -345,6 +346,7 @@ export default function Home() {
 
   const { averageGpa, averageGpa4_0, pieData, lineData } = calculateDashboardData(filteredCourses);
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   if (authLoading || (loading && !userId)) {
     return (
@@ -365,6 +367,17 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-4">
+          <button 
+            onClick={toggleTheme}
+            className="group flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary hover:bg-white transition-all duration-300"
+            aria-label="Toggle Theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
+            ) : (
+              <Moon className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
+            )}
+          </button>
           <NeonButton onClick={() => setShowAddForm(true)}>
             Initialize New Course
           </NeonButton>
