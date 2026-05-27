@@ -324,20 +324,20 @@ export default function Home() {
 
   if (authLoading || (loading && !userId)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-primary">
-         <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+         <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-8 sm:pt-10">
-      <header className="mb-12 flex flex-col sm:flex-row items-center justify-between border-b border-prHighlight pb-6 gap-4">
+      <header className="mb-12 flex flex-col sm:flex-row items-center justify-between border-b border-black/10 pb-6 gap-4">
         <div>
-          <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+          <h1 className="text-4xl font-bold font-orbitron tracking-widest text-primary">
             GradeMatrix
           </h1>
-          <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">System Status: <span className="text-secondary animate-pulse ml-1">Online</span></p>
+          <p className="mt-2 text-muted text-sm uppercase tracking-wider">System Status: <span className="text-emerald-600 animate-pulse ml-1 font-semibold">Online</span></p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -346,26 +346,26 @@ export default function Home() {
           </NeonButton>
           <button
             onClick={() => setShowSyllabusImport(true)}
-            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:border-secondary/50 hover:bg-secondary/10 transition-all duration-300"
+            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary hover:bg-white transition-all duration-300"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-alt-color group-hover:text-secondary transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
             </svg>
             <div className="flex flex-col items-start translate-y-px">
-              <span className="text-[9px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-secondary/60 transition-colors leading-none mb-1">AI Import</span>
-              <span className="text-xs font-orbitron text-alt-color group-hover:text-secondary transition-colors leading-none">Syllabus</span>
+              <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-primary transition-colors leading-none mb-1">AI Import</span>
+              <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors leading-none">Syllabus</span>
             </div>
           </button>
           
           <button 
             onClick={signOut}
-            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
+            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
           >
             <div className="flex flex-col items-start translate-y-px">
-               <span className="text-[9px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors leading-none mb-1">Session</span>
-               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors leading-none">Sign Out</span>
+               <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-red-600 transition-colors leading-none mb-1">Session</span>
+               <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors leading-none">Sign Out</span>
             </div>
-            <LogOut className="w-4 h-4 text-alt-color group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
+            <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
           </button>
         </div>
       </header>
@@ -404,7 +404,7 @@ export default function Home() {
 
         {showSyllabusImport && (
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
             onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
           >
             <SyllabusImport
@@ -417,25 +417,25 @@ export default function Home() {
         {loading ? (
           <div className="flex justify-center items-center py-32">
             <div className="relative">
-              <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
-              <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-transparent border-b-secondary animate-spin opacity-50" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+              <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
+              <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-transparent border-b-primary animate-spin opacity-50" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
             </div>
           </div>
         ) : courses.length === 0 ? (
-          <div className="text-center py-32 text-alt-color flex flex-col items-center">
-            <div className="w-24 h-24 mb-6 rounded-full border border-prHighlight flex items-center justify-center bg-primary/30 relative">
-               <div className="absolute inset-2 border border-dashed border-alt-color rounded-full animate-spin-slow"></div>
-               <span className="text-3xl">Ø</span>
+          <div className="text-center py-32 text-muted flex flex-col items-center">
+            <div className="w-24 h-24 mb-6 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm relative">
+               <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
+               <span className="text-3xl text-primary font-bold">Ø</span>
             </div>
-            <p className="text-xl font-orbitron tracking-widest text-secondary">No databanks found.</p>
+            <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No databanks found.</p>
             <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Initialize a new course to begin tracking.</p>
           </div>
         ) : filteredCourses.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center">
-             <div className="w-16 h-16 mb-4 rounded-full border border-prHighlight/30 flex items-center justify-center bg-primary/20">
-               <span className="text-xl opacity-50 text-alt-color font-orbitron">!</span>
+             <div className="w-16 h-16 mb-4 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm">
+               <span className="text-xl opacity-50 text-primary font-orbitron font-bold">!</span>
             </div>
-            <p className="text-lg font-orbitron tracking-widest text-alt-color">No results found for current filters.</p>
+            <p className="text-lg font-orbitron tracking-widest text-primary font-bold">No results found for current filters.</p>
             <button 
               onClick={() => {
                 setSearchTerm("");
@@ -445,7 +445,7 @@ export default function Home() {
                 setFilterCategory([]);
                 setFilterInProgress(false);
               }}
-              className="mt-4 text-secondary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest"
+              className="mt-4 text-secondary font-semibold hover:text-primary hover:underline cursor-pointer font-orbitron text-xs uppercase tracking-widest transition-colors"
             >
               Reset All Filters
             </button>
@@ -462,7 +462,7 @@ export default function Home() {
 
               return Object.keys(groupedCourses).sort().map(category => (
                 <div key={category} className="flex flex-col gap-6">
-                  <h2 className="text-2xl font-orbitron text-secondary border-b border-prHighlight/50 pb-2">{category}</h2>
+                  <h2 className="text-2xl font-orbitron font-bold text-secondary border-b border-black/10 pb-2">{category}</h2>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {groupedCourses[category].map((course, idx) => {
                       const uniqueId = course.id || idx.toString();

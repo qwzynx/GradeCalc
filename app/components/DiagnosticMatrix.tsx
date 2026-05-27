@@ -67,31 +67,31 @@ export default function DiagnosticMatrix({
   };
 
   return (
-    <GlassCard className="p-8 pb-12 overflow-hidden relative border-secondary/40 shadow-[0_0_40px_rgba(242,166,90,0.1)]">
-      <div className="flex justify-between items-start mb-3 border-b border-prHighlight/50">
+    <GlassCard className="p-8 pb-12 overflow-hidden relative border-black/10 shadow-lg bg-white">
+      <div className="flex justify-between items-start mb-3 border-b border-black/10">
         <div>
-           <h2 className="text-2xl font-orbitron text-secondary">Diagnostic Matrix</h2>
+           <h2 className="text-2xl font-orbitron font-bold text-primary">Diagnostic Matrix</h2>
         </div>
-        <button onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} className={`px-4 py-2 border transition-all rounded text-xs uppercase tracking-wider flex items-center gap-2 ${forceGradeOpen || (course.mark !== null && course.mark !== undefined) ? 'border-red-500 text-red-500 bg-red-900/20 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'border-prHighlight hover:border-red-500 text-alt-color hover:text-red-400 bg-primary/50'}`}>
+        <button onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} className={`px-4 py-2 border transition-all rounded text-xs uppercase tracking-wider flex items-center gap-2 ${forceGradeOpen || (course.mark !== null && course.mark !== undefined) ? 'border-red-500 text-red-500 bg-red-50 shadow-sm' : 'border-black/20 hover:border-red-500 text-muted hover:text-red-600 bg-white'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
           {course.mark !== undefined && course.mark !== null ? 'Override Active' : 'Force Grade'}
         </button>
       </div>
 
       {forceGradeOpen && (
-        <form onSubmit={handleForceGradeSubmit} className="mb-4 p-2 border border-red-500/50 bg-red-900/10 rounded-md animate-in fade-in slide-in-from-top-2 w-full flex items-end gap-3">
+        <form onSubmit={handleForceGradeSubmit} className="mb-4 p-2 border border-red-200 bg-red-50 rounded-md animate-in fade-in slide-in-from-top-2 w-full flex items-end gap-3">
            {/* Letter Grade Dropdown */}
            <div className="flex-1 min-w-0">
-             <label className="text-[9px] uppercase tracking-widest text-red-400/70 block mb-1">Letter Grade</label>
+             <label className="text-[9px] uppercase tracking-widest text-red-700 block mb-1">Letter Grade</label>
              <select
                value={selectedLetter || ""}
                onChange={handleLetterSelect}
-               className="w-full bg-primary border border-red-500/50 rounded px-2 py-1.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-red-400 cursor-pointer appearance-none"
+               className="w-full bg-white border border-red-200 rounded px-2 py-1.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-red-500 cursor-pointer appearance-none"
                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center' }}
              >
-               <option value="" className="bg-primary text-alt-color font-montserrat">— Letter —</option>
+               <option value="" className="bg-white text-muted font-montserrat">— Letter —</option>
                {LETTER_GRADES.map((g) => (
-                 <option key={g.letter} value={g.letter} className="bg-primary text-secondary font-montserrat">
+                 <option key={g.letter} value={g.letter} className="bg-white text-secondary font-montserrat">
                    {g.letter}  ({g.min}% – {g.max}%)
                  </option>
                ))}
@@ -100,7 +100,7 @@ export default function DiagnosticMatrix({
 
            {/* Manual % Input */}
            <div className="flex-1 min-w-0">
-             <label className="text-[9px] uppercase tracking-widest text-red-400/70 block mb-1">Override %</label>
+             <label className="text-[9px] uppercase tracking-widest text-red-700 block mb-1">Override %</label>
              <NumberInput
                ref={forceInputRef}
                required
@@ -108,16 +108,16 @@ export default function DiagnosticMatrix({
                step="0.01"
                defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""}
                placeholder="Grade %"
-               className="w-full bg-primary border border-red-500/50 rounded px-2 py-1.5 text-sm text-secondary focus:outline-none focus:border-red-400"
+               className="w-full bg-white border border-red-200 rounded px-2 py-1.5 text-sm text-secondary focus:outline-none focus:border-red-500"
                onChange={() => setSelectedLetter(null)}
              />
            </div>
 
            {/* Actions */}
            <div className="flex gap-2 shrink-0">
-             <button type="submit" className="bg-red-900/60 hover:bg-red-500 text-red-500 hover:text-white border border-red-500 rounded px-3 py-1.5 text-sm uppercase tracking-wider font-bold transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]">Execute</button>
+             <button type="submit" className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-500 rounded px-3 py-1.5 text-sm uppercase tracking-wider font-bold transition-all shadow-sm">Execute</button>
              {course.mark !== null && course.mark !== undefined && (
-               <button type="button" onClick={handleRemoveForceGrade} className="bg-transparent border border-alt-color/30 hover:bg-alt-color/20 text-alt-color text-sm uppercase tracking-wider px-3 py-1.5 rounded transition-all">Remove</button>
+               <button type="button" onClick={handleRemoveForceGrade} className="bg-transparent border border-black/20 hover:bg-black/5 text-muted text-sm uppercase tracking-wider px-3 py-1.5 rounded transition-all">Remove</button>
              )}
            </div>
         </form>
@@ -126,19 +126,19 @@ export default function DiagnosticMatrix({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           
           {/* Visual Graph Section */}
-          <div className="h-64 md:h-80 w-full relative drop-shadow-[0_0_15px_rgba(242,166,90,0.15)] flex justify-center items-center flex-col">
+          <div className="h-64 md:h-80 w-full relative drop-shadow-sm flex justify-center items-center flex-col">
             <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none w-full">
               {course.mark !== null && course.mark !== undefined ? (
                  <>
-                    <div className="text-3xl font-orbitron font-bold text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]">{course.mark.toFixed(2)}%</div>
-                    <div className="text-[10px] uppercase tracking-widest text-red-500/80 mt-1">Forced</div>
+                    <div className="text-3xl font-orbitron font-bold text-red-600">{course.mark.toFixed(2)}%</div>
+                    <div className="text-[10px] uppercase tracking-widest text-red-600 mt-1">Forced</div>
                  </>
               ) : (
                  <>
-                    <div className="text-4xl font-orbitron font-bold text-secondary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+                    <div className="text-4xl font-orbitron font-bold text-secondary">
                       {backendMetrics?.final_average ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
                     </div>
-                    <div className="text-[9px] uppercase tracking-widest text-alt-color mt-1">Average</div>
+                    <div className="text-[9px] uppercase tracking-widest text-muted mt-1">Average</div>
                  </>
               )}
             </div>
@@ -159,84 +159,84 @@ export default function DiagnosticMatrix({
                 </Pie>
                 <Tooltip 
                   formatter={(value: any, name: any) => [`${value}%`, name]}
-                  contentStyle={{ backgroundColor: '#111827', borderColor: '#303642', borderRadius: '8px', padding: '10px' }}
-                  itemStyle={{ color: '#F2A65A', fontFamily: 'Orbitron, sans-serif' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb', borderRadius: '8px', padding: '10px' }}
+                  itemStyle={{ color: '#E31D2B', fontFamily: 'Orbitron, sans-serif' }}
                 />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#8a9ab3' }} />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#333333' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
           {/* Advanced Metrics Panel */}
           <div className="grid grid-cols-2 gap-4">
-             <div className="bg-primary/40 border border-prHighlight/50 rounded-lg p-4 flex flex-col justify-between hover:border-secondary/50 transition-colors">
-               <span className="text-[10px] uppercase tracking-widest text-alt-color mb-2">Evaluated Weight</span>
-               <span className="text-2xl font-orbitron text-white">
+             <div className="bg-black/5 border border-black/10 rounded-lg p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+               <span className="text-[10px] uppercase tracking-widest text-muted mb-2">Evaluated Weight</span>
+               <span className="text-2xl font-orbitron text-secondary font-bold">
                  {completedWeight}%
                </span>
              </div>
              
-             <div className="bg-primary/40 border border-prHighlight/50 rounded-lg p-4 flex flex-col justify-between hover:border-secondary/50 transition-colors">
-               <span className="text-[10px] uppercase tracking-widest text-alt-color mb-2">Remaining Box</span>
-               <span className="text-2xl font-orbitron text-secondary drop-shadow-[0_0_8px_rgba(242,166,90,0.5)]">
+             <div className="bg-black/5 border border-black/10 rounded-lg p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+               <span className="text-[10px] uppercase tracking-widest text-muted mb-2">Remaining Box</span>
+               <span className="text-2xl font-orbitron text-primary font-bold">
                  {backendMetrics?.remaining_weight ? `${backendMetrics.remaining_weight}%` : '0%'}
                </span>
              </div>
 
-             <div className="col-span-2 bg-primary/40 border border-prHighlight/50 rounded-lg p-4 flex justify-between items-center hover:border-emerald-500/50 transition-colors group">
+             <div className="col-span-2 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex justify-between items-center hover:border-emerald-500 transition-colors group">
                <div className="flex flex-col">
-                 <span className="text-[10px] uppercase tracking-widest text-alt-color">Est. YorkU GPA</span>
+                 <span className="text-[10px] uppercase tracking-widest text-emerald-800">Est. YorkU GPA</span>
                  <div className="flex items-end gap-2 mt-1">
-                   <span className="text-3xl font-orbitron text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
+                   <span className="text-3xl font-orbitron text-emerald-600 font-bold">
                      {backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa : '0.0'}
                    </span>
-                   <span className="text-lg font-bold text-emerald-400/50 mb-1">/ 9.0</span>
+                   <span className="text-lg font-bold text-emerald-600 mb-1">/ 9.0</span>
                  </div>
                </div>
-               <div className="h-14 w-14 rounded-full border-2 border-emerald-500/30 flex items-center justify-center bg-emerald-900/20 group-hover:bg-emerald-500/20 transition-colors">
-                 <span className="text-2xl font-orbitron font-bold text-emerald-400">{backendMetrics?.yorku_letter || '-'}</span>
+               <div className="h-14 w-14 rounded-full border-2 border-emerald-200 flex items-center justify-center bg-white group-hover:bg-emerald-100 transition-colors">
+                 <span className="text-2xl font-orbitron font-bold text-emerald-600">{backendMetrics?.yorku_letter || '-'}</span>
                </div>
              </div>
 
-             <div className="bg-primary/40 border border-prHighlight/50 rounded-lg p-4 flex flex-col justify-between">
-               <span className="text-[10px] uppercase tracking-widest text-alt-color mb-2 wrap-break-words">Needed for 50%</span>
+             <div className="bg-black/5 border border-black/10 rounded-lg p-4 flex flex-col justify-between">
+               <span className="text-[10px] uppercase tracking-widest text-muted mb-2 wrap-break-words">Needed for 50%</span>
                {backendMetrics?.get_fifty !== undefined && typeof backendMetrics.get_fifty === 'number' && backendMetrics.get_fifty <= 0 ? (
-                 <span className="text-xl font-orbitron text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">Achieved</span>
+                 <span className="text-xl font-orbitron text-emerald-600 font-bold">Achieved</span>
                ) : (
-                 <span className={`text-xl font-orbitron ${backendMetrics?.get_fifty === 'N/A' || (typeof backendMetrics?.get_fifty === 'number' && backendMetrics.get_fifty > 100) ? 'text-red-400' : 'text-white'}`}>
+                 <span className={`text-xl font-orbitron font-bold ${backendMetrics?.get_fifty === 'N/A' || (typeof backendMetrics?.get_fifty === 'number' && backendMetrics.get_fifty > 100) ? 'text-red-600' : 'text-secondary'}`}>
                    {backendMetrics?.get_fifty || 'N/A'}{backendMetrics?.get_fifty !== 'N/A' && backendMetrics?.get_fifty ? '%' : ''}
                  </span>
                )}
              </div>
 
-             <div className="bg-primary/40 border border-prHighlight/50 rounded-lg p-3 flex flex-col justify-between hover:border-secondary/50 transition-colors">
+             <div className="bg-black/5 border border-black/10 rounded-lg p-3 flex flex-col justify-between hover:border-primary/50 transition-colors">
                <div className="flex justify-between items-center mb-2 gap-2">
-                 <span className="text-[10px] uppercase tracking-widest text-alt-color">Target %</span>
+                 <span className="text-[10px] uppercase tracking-widest text-muted">Target %</span>
                   <NumberInput 
                     value={targetGrade || ""} 
                     onChange={handleTargetChange} 
                     placeholder="80"
-                    className="w-15 bg-primary border border-prHighlight focus:border-secondary rounded px-1 py-1 text-sm text-secondary text-right outline-none font-orbitron" 
+                    className="w-15 bg-white border border-black/20 focus:border-primary rounded px-1 py-1 text-sm text-secondary text-right outline-none font-orbitron" 
                   />
                </div>
                <div className="flex flex-col">
-                 <span className="text-[9px] uppercase tracking-widest text-alt-color mb-1">Score Needed</span>
+                 <span className="text-[9px] uppercase tracking-widest text-muted mb-1">Score Needed</span>
                  {backendMetrics?.target_required_score !== undefined && typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score <= 0 ? (
-                   <span className="text-xl font-orbitron text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">Achieved</span>
+                   <span className="text-xl font-orbitron text-emerald-600 font-bold">Achieved</span>
                  ) : (
-                   <span className={`text-xl font-orbitron ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]'}`}>
+                   <span className={`text-xl font-orbitron ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}`}>
                      {backendMetrics?.target_required_score || 'N/A'}{backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score ? '%' : ''}
                    </span>
                  )}
                </div>
              </div>
 
-             <div className="col-span-2 bg-primary/40 border border-prHighlight/50 rounded-lg p-4 flex justify-between items-center hover:border-blue-500/50 transition-colors">
+             <div className="col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-between items-center hover:border-blue-500 transition-colors">
                <div className="flex flex-col">
-                 <span className="text-[10px] uppercase tracking-widest text-alt-color mb-1 block">Maximum Potential Mark</span>
-                 <span className="text-[9px] text-alt-color/50 uppercase tracking-widest">+ 100% on remaining assignments</span>
+                 <span className="text-[10px] uppercase tracking-widest text-blue-800 mb-1 block">Maximum Potential Mark</span>
+                 <span className="text-[9px] text-blue-800/70 uppercase tracking-widest">+ 100% on remaining assignments</span>
                </div>
-               <span className="text-3xl font-orbitron text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]">
+               <span className="text-3xl font-orbitron text-blue-600 font-bold">
                  {maxMark.toFixed(2)}%
                </span>
              </div>

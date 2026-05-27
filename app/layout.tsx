@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${orbitron.variable} ${montserrat.variable} antialiased bg-primary text-secondary selection:bg-prHighlight overflow-x-hidden`}
+        className={`${orbitron.variable} ${montserrat.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden`}
         suppressHydrationWarning
       >
         <AuthProvider>

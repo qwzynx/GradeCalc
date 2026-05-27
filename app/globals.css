@@ -1,20 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --primary: rgb(25, 21, 29);
-  --prHighlight: rgb(48, 39, 56);
-  --secondary: rgb(224, 211, 211);
-  --alt-color: rgb(90, 76, 105);
+  --color-york-red: #E31D2B;
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-light-grey: #F2F2F2;
+  --color-dark-grey: #333333;
   
-  --background: var(--primary);
-  --foreground: var(--secondary);
+  --background: var(--color-light-grey);
+  --foreground: var(--color-black);
 }
 
 @theme inline {
-  --color-primary: var(--primary);
-  --color-prHighlight: var(--prHighlight);
-  --color-secondary: var(--secondary);
-  --color-alt: var(--alt-color);
+  --color-primary: var(--color-york-red);
+  --color-surface: var(--color-white);
+  --color-secondary: var(--color-black);
+  --color-muted: var(--color-dark-grey);
+  --color-bg-light: var(--color-light-grey);
   
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -76,15 +78,15 @@ button:active:not(:disabled),
 }
 
 *::-webkit-scrollbar-track {
-  background: rgb(25, 21, 29);
+  background: var(--color-light-grey);
   border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgb(48, 39, 56);
+  background: var(--color-dark-grey);
   border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgb(90, 76, 105);
+  background: var(--color-york-red);
 }

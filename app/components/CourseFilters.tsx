@@ -53,23 +53,23 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   };
 
   return (
-    <div className="mb-12 p-6 rounded-2xl border border-prHighlight/30 bg-primary/40 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.5)] flex flex-col gap-8">
+    <div className="mb-12 p-6 rounded-2xl border border-black/10 bg-white shadow-md flex flex-col gap-8">
       {/* Search Input */}
       <div className="relative group max-w-2xl">
-        <div className="absolute inset-0 bg-secondary/10 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 bg-black/5 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
         <div className="relative flex items-center">
-          <Search className="absolute left-4 w-5 h-5 text-alt-color/60" />
+          <Search className="absolute left-4 w-5 h-5 text-muted" />
           <input
             type="text"
             placeholder="Search databanks by name, code, or professor..."
-            className="w-full bg-primary/60 border border-prHighlight/40 rounded-xl py-5 pl-12 pr-4 text-secondary placeholder:text-alt-color/40 focus:outline-none focus:border-secondary transition-all font-orbitron tracking-wider text-sm shadow-inner"
+            className="w-full bg-white border border-black/20 rounded-xl py-5 pl-12 pr-4 text-secondary placeholder:text-muted focus:outline-none focus:border-primary transition-all font-orbitron tracking-wider text-sm shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-4 text-alt-color/60 hover:text-secondary transition-colors"
+              className="absolute right-4 text-muted hover:text-primary transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -81,7 +81,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Status Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Live Status</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Live Status</label>
           </div>
           <div className="flex flex-wrap gap-2">
             <FilterCheckbox
@@ -95,9 +95,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Academic Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Academic Cycle</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Cycle</label>
             {filterAcademicYear.length > 0 && (
-               <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-secondary hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -109,16 +109,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterAcademicYear, setFilterAcademicYear, ay)}
               />
             ))}
-            {availableAcademicYears.length === 0 && <span className="text-[10px] text-alt-color/40 uppercase italic">No Cycles Detected</span>}
+            {availableAcademicYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Cycles Detected</span>}
           </div>
         </div>
 
         {/* Semester Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Term Phase</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Term Phase</label>
             {filterSemester.length > 0 && (
-               <button onClick={() => setFilterSemester([])} className="text-[9px] text-secondary hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterSemester([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -130,16 +130,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterSemester, setFilterSemester, s)}
               />
             ))}
-            {availableSemesters.length === 0 && <span className="text-[10px] text-alt-color/40 uppercase italic">No Terms Detected</span>}
+            {availableSemesters.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Terms Detected</span>}
           </div>
         </div>
 
         {/* Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Temporal Axis</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Temporal Axis</label>
             {filterYear.length > 0 && (
-               <button onClick={() => setFilterYear([])} className="text-[9px] text-secondary hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -151,16 +151,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterYear, setFilterYear, y.toString())}
               />
             ))}
-            {availableYears.length === 0 && <span className="text-[10px] text-alt-color/40 uppercase italic">No Years Detected</span>}
+            {availableYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Detected</span>}
           </div>
         </div>
 
         {/* Category Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Stream Protocol</label>
+            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Stream Protocol</label>
             {filterCategory.length > 0 && (
-               <button onClick={() => setFilterCategory([])} className="text-[9px] text-secondary hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterCategory([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -172,17 +172,17 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterCategory, setFilterCategory, c)}
               />
             ))}
-            {availableCategories.length === 0 && <span className="text-[10px] text-alt-color/40 uppercase italic">No Streams Detected</span>}
+            {availableCategories.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Streams Detected</span>}
           </div>
         </div>
       </div>
       
       {/* Active Filters Summary */}
       {(searchTerm || filterSemester.length > 0 || filterYear.length > 0 || filterAcademicYear.length > 0 || filterCategory.length > 0 || filterInProgress) && (
-        <div className="flex items-center gap-4 pt-6 border-t border-prHighlight/20">
+        <div className="flex items-center gap-4 pt-6 border-t border-black/10">
           <div className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse"></div>
-            <span className="text-[10px] font-orbitron text-alt-color uppercase tracking-[0.2em]">Active Matrix:</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
+            <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Matrix:</span>
           </div>
           <div className="flex flex-wrap gap-2 flex-1">
             {searchTerm && <FilterBadge label={`Search: ${searchTerm}`} onClear={() => setSearchTerm("")} />}
@@ -201,7 +201,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               setFilterCategory([]);
               setFilterInProgress(false);
             }}
-            className="text-[10px] font-orbitron text-secondary hover:text-white transition-all uppercase tracking-[0.2em] border border-secondary/30 rounded px-3 py-1 hover:bg-secondary/10"
+            className="text-[10px] font-orbitron text-primary font-bold hover:text-primary transition-all uppercase tracking-[0.2em] border border-primary rounded px-3 py-1 hover:bg-red-50"
           >
             Purge All
           </button>
@@ -216,23 +216,23 @@ const FilterCheckbox = ({ label, checked, onChange }: { label: string; checked: 
     onClick={onChange}
     className={`group flex items-center gap-2 px-3 py-1.5 rounded-md border transition-all duration-300 ${
       checked 
-        ? 'bg-secondary/20 border-secondary text-secondary shadow-[0_0_10px_rgba(242,166,90,0.2)]' 
-        : 'bg-primary/20 border-prHighlight/40 text-alt-color hover:border-secondary/50 hover:text-secondary'
+        ? 'bg-red-50 border-primary text-primary font-semibold shadow-sm' 
+        : 'bg-white border-black/20 text-muted hover:border-primary hover:text-primary'
     }`}
   >
     <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
-      checked ? 'bg-secondary border-secondary' : 'bg-transparent border-prHighlight/40 group-hover:border-secondary/50'
+      checked ? 'bg-primary border-primary' : 'bg-transparent border-black/20 group-hover:border-primary'
     }`}>
-      {checked && <Check className="w-2.5 h-2.5 text-primary stroke-[4px]" />}
+      {checked && <Check className="w-2.5 h-2.5 text-white stroke-[4px]" />}
     </div>
     <span className="text-[10px] font-orbitron uppercase tracking-widest leading-none">{label}</span>
   </button>
 );
 
 const FilterBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
-  <div className="flex items-center gap-2 bg-secondary/10 border border-secondary/30 rounded-lg px-2 py-1 animate-in zoom-in-95 duration-200">
-    <span className="text-[9px] font-orbitron text-secondary uppercase tracking-wider">{label}</span>
-    <button onClick={onClear} className="text-secondary hover:text-white transition-colors">
+  <div className="flex items-center gap-2 bg-red-50 border border-primary/30 rounded-lg px-2 py-1 animate-in zoom-in-95 duration-200">
+    <span className="text-[9px] font-orbitron text-primary font-semibold uppercase tracking-wider">{label}</span>
+    <button onClick={onClear} className="text-primary hover:text-red-700 transition-colors">
       <X className="w-3 h-3" />
     </button>
   </div>

@@ -42,14 +42,14 @@ export default function AssignmentForm({
   const overAmount = parseFloat((projectedTotal - 100).toFixed(2));
 
   return (
-    <GlassCard className="p-4 border-secondary/50 shadow-[0_0_15px_rgba(242,166,90,0.1)]">
+    <GlassCard className="p-4 border-black/10 shadow-sm bg-white">
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="flex justify-between items-center mb-2">
-            <h4 className="text-xs font-orbitron text-secondary uppercase tracking-wider">{editingAssignment ? 'Modify Params' : 'New Assignment'}</h4>
+            <h4 className="text-xs font-orbitron text-primary font-bold uppercase tracking-wider">{editingAssignment ? 'Modify Params' : 'New Assignment'}</h4>
           </div>
           
           <div className="flex gap-3">
-            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder="Designation" className="flex-1 bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary" />
+            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder="Designation" className="flex-1 bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
             
             {/* Auto-split Quantity Input (Only show when adding new) */}
             {!editingAssignment && (
@@ -61,9 +61,9 @@ export default function AssignmentForm({
                   value={splitQuantity}
                   onChange={(e) => setSplitQuantity(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))} 
                   placeholder="Qty" 
-                  className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary text-center" 
+                  className="w-full bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary text-center focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" 
                 />
-                <div className="absolute -top-6 -left-1/2 transform -translate-x-1/2 bg-primary border text-nowrap border-prHighlight px-2 py-1 rounded text-[9px] text-alt-color opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <div className="absolute -top-6 -left-1/2 transform -translate-x-1/2 bg-white border text-nowrap border-black/20 shadow-md px-2 py-1 rounded text-[9px] text-muted opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   Auto-Split Qty
                 </div>
               </div>
@@ -72,26 +72,26 @@ export default function AssignmentForm({
 
           <div className="flex flex-col gap-2 mt-2">
             {Array.from({ length: splitQuantity }).map((_, i) => (
-              <div key={i} className="flex p-3 bg-primary/30 rounded border border-prHighlight/30 relative">
+              <div key={i} className="flex p-3 bg-background border border-black/10 rounded relative">
                 {/* Individual Mode Toggle */}
                 <div className="flex gap-3 items-end w-full mt-4">
                   {splitQuantity > 1 && (
-                    <span className="text-[18px] text-alt-color font-orbitron w-6 mt-6 shrink-0">#{i + 1}</span>
+                    <span className="text-[18px] text-muted font-orbitron w-6 mt-6 shrink-0">#{i + 1}</span>
                   )}
                   
                   {/* Individual Mode Toggle beside inputs */}
-                  <div className="flex flex-col gap-1 shrink-0 bg-primary/20 border border-prHighlight/50 rounded p-1 mb-[2px]">
+                  <div className="flex flex-col gap-1 shrink-0 bg-black/5 border border-black/10 rounded p-1 mb-[2px]">
                     <button 
                       type="button"
                       onClick={() => setInputModes(prev => { const n = [...prev]; n[i] = "percentage"; return n; })}
-                      className={`px-3 py-1.5 rounded text-[9px] uppercase tracking-widest transition-all ${(!inputModes[i] || inputModes[i] === "percentage") ? 'bg-secondary text-primary font-bold shadow-[0_0_10px_rgba(242,166,90,0.3)]' : 'text-alt-color hover:text-secondary'}`}
+                      className={`px-3 py-1.5 rounded text-[9px] uppercase tracking-widest transition-all ${(!inputModes[i] || inputModes[i] === "percentage") ? 'bg-primary text-white font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                     >
                       % Match
                     </button>
                     <button 
                       type="button"
                       onClick={() => setInputModes(prev => { const n = [...prev]; n[i] = "points"; return n; })}
-                      className={`px-3 py-1.5 rounded text-[9px] uppercase tracking-widest transition-all ${inputModes[i] === "points" ? 'bg-secondary text-primary font-bold shadow-[0_0_10px_rgba(242,166,90,0.3)]' : 'text-alt-color hover:text-secondary'}`}
+                      className={`px-3 py-1.5 rounded text-[9px] uppercase tracking-widest transition-all ${inputModes[i] === "points" ? 'bg-primary text-white font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                     >
                       Points
                     </button>
@@ -99,19 +99,19 @@ export default function AssignmentForm({
 
                   {(!inputModes[i] || inputModes[i] === "percentage") ? (
                     <div className="flex-1">
-                      <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Mark %</label>
-                      <NumberInput name={splitQuantity > 1 ? `mark_${i}` : "mark"} step="0.01" defaultValue={editingAssignment?.mark ?? ""} placeholder="Grade" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                      <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Mark %</label>
+                      <NumberInput name={splitQuantity > 1 ? `mark_${i}` : "mark"} step="0.01" defaultValue={editingAssignment?.mark ?? ""} placeholder="Grade" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
                     </div>
                   ) : (
                     <div className="flex-1 flex gap-2 items-center">
                       <div className="flex-1">
-                        <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Earned</label>
-                         <NumberInput name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} step="0.01" placeholder="Pts" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                        <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Earned</label>
+                         <NumberInput name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} step="0.01" placeholder="Pts" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
                       </div>
-                      <span className="text-alt-color font-bold mt-4 shrink-0">/</span>
+                      <span className="text-muted font-bold mt-4 shrink-0">/</span>
                       <div className="flex-1">
-                        <label className="text-[9px] text-alt-color uppercase tracking-wider mb-1 block">Total</label>
-                         <NumberInput name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} step="0.01" placeholder="Max" className="w-full bg-primary/50 border border-prHighlight rounded p-2 text-sm text-secondary focus:border-secondary transition-all" />
+                        <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Total</label>
+                         <NumberInput name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} step="0.01" placeholder="Max" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
                       </div>
                     </div>
                   )}
@@ -119,10 +119,10 @@ export default function AssignmentForm({
               </div>
             ))}
             
-            <div className="w-full mt-1 border-t border-prHighlight/50 pt-1">
-              <label className="flex justify-between text-[9px] text-alt-color uppercase tracking-wider mb-1">
+            <div className="w-full mt-1 border-t border-black/10 pt-1">
+              <label className="flex justify-between text-[9px] text-muted uppercase tracking-wider mb-1">
                 <span>{splitQuantity > 1 ? 'Total Group Weight %' : 'Weight %'}</span>
-                {splitQuantity > 1 && <span className="text-secondary/50 ml-1">(Averaging items over full weight)</span>}
+                {splitQuantity > 1 && <span className="text-muted ml-1">(Averaging items over full weight)</span>}
               </label>
               <NumberInput
                 required
@@ -130,8 +130,8 @@ export default function AssignmentForm({
                 step="0.01"
                 defaultValue={editingAssignment?.weight ?? ""}
                 placeholder="Total Wgt"
-                className={`w-full bg-primary/50 border rounded p-2 text-sm text-secondary transition-colors ${
-                  isOverLimit ? 'border-amber-500/70 focus:border-amber-400' : 'border-prHighlight focus:border-secondary'
+                className={`w-full bg-white shadow-sm border rounded p-2 text-sm text-secondary transition-colors focus:outline-none focus:ring-1 ${
+                  isOverLimit ? 'border-amber-500/70 focus:border-amber-500 focus:ring-amber-500' : 'border-black/20 focus:border-primary focus:ring-primary'
                 }`}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeightInputValue(parseFloat(e.target.value) || 0)}
               />
@@ -139,15 +139,15 @@ export default function AssignmentForm({
 
             {/* Bonus Weight Warning */}
             {isOverLimit && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 animate-in fade-in duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0 mt-0.5">
+              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-200 animate-in fade-in duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 shrink-0 mt-0.5">
                   <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
                   <path d="M12 9v4"/><path d="M12 17h.01"/>
                 </svg>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-orbitron text-amber-400 uppercase tracking-widest">Bonus Weight Detected</span>
-                  <span className="text-[11px] text-amber-300/80 leading-relaxed">
-                    Total weight will be <span className="font-bold text-amber-300">{projectedTotal.toFixed(1)}%</span> — exceeding 100% by <span className="font-bold text-amber-300">{overAmount}%</span>. The extra weight will be counted as <span className="font-bold text-amber-300">bonus marks</span>.
+                  <span className="text-[10px] font-orbitron text-amber-700 font-bold uppercase tracking-widest">Bonus Weight Detected</span>
+                  <span className="text-[11px] text-amber-900 leading-relaxed">
+                    Total weight will be <span className="font-bold text-amber-800">{projectedTotal.toFixed(1)}%</span> — exceeding 100% by <span className="font-bold text-amber-800">{overAmount}%</span>. The extra weight will be counted as <span className="font-bold text-amber-800">bonus marks</span>.
                   </span>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function AssignmentForm({
           <div className="flex gap-2 mt-2">
               <NeonButton type="submit" className="flex-1 py-2 text-xs">Execute {editingAssignment ? 'Update' : 'Add'}</NeonButton>
               {editingAssignment && (
-                  <button type="button" onClick={() => onDelete(editingAssignment)} className="px-3 bg-red-900/20 border border-red-500/50 text-red-500 rounded hover:bg-red-500 hover:text-white transition-colors">
+                  <button type="button" onClick={() => onDelete(editingAssignment)} className="px-3 bg-white border border-red-500 text-red-500 rounded hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                   </button>
               )}
