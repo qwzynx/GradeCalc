@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Orbitron, Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -28,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${orbitron.variable} ${montserrat.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden`}
+        className={`${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden`}
         suppressHydrationWarning
       >
         <AuthProvider>

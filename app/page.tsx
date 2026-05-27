@@ -12,6 +12,8 @@ import { Course, Assignment } from "./types";
 import { useAuth } from "@/components/AuthProvider";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
+
 export default function Home() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -209,6 +211,23 @@ export default function Home() {
     return { letter: 'F', gpa: 0.0 };
   };
 
+  const getYorkUGrade4_0 = (percentage: number | null) => {
+    if (percentage === null || percentage === undefined) return { letter: 'N/A', gpa: null };
+    if (percentage >= 90) return { letter: 'A+', gpa: 4.00 };
+    if (percentage >= 85) return { letter: 'A', gpa: 3.90 };
+    if (percentage >= 80) return { letter: 'A-', gpa: 3.70 };
+    if (percentage >= 77) return { letter: 'B+', gpa: 3.30 };
+    if (percentage >= 73) return { letter: 'B', gpa: 3.00 };
+    if (percentage >= 70) return { letter: 'B-', gpa: 2.70 };
+    if (percentage >= 67) return { letter: 'C+', gpa: 2.30 };
+    if (percentage >= 63) return { letter: 'C', gpa: 2.00 };
+    if (percentage >= 60) return { letter: 'C-', gpa: 1.70 };
+    if (percentage >= 57) return { letter: 'D+', gpa: 1.30 };
+    if (percentage >= 53) return { letter: 'D', gpa: 1.00 };
+    if (percentage >= 50) return { letter: 'D-', gpa: 0.70 };
+    return { letter: 'F', gpa: 0.00 };
+  };
+
   const filteredCourses = courses.filter(course => {
     const matchesSearch = !searchTerm || 
       course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -255,7 +274,8 @@ export default function Home() {
 
   const calculateDashboardData = (dataToCalculate: Course[]) => {
     let totalCredits = 0;
-    let earnedPoints = 0;
+    let earnedPoints9 = 0;
+    const coursesFor4_0: { letter: string, credits: number }[] = [];
     const letterCounts: Record<string, number> = {
       'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0
     };
@@ -293,17 +313,21 @@ export default function Home() {
         timelineDataMap[timeKey].totalMark += finalPercentage;
         timelineDataMap[timeKey].count += 1;
 
-        const gradeInfo = getYorkUGrade(finalPercentage);
-        if (gradeInfo.gpa !== null) {
+        const gradeInfo9 = getYorkUGrade(finalPercentage);
+        const gradeInfo4 = getYorkUGrade4_0(finalPercentage);
+        if (gradeInfo9.gpa !== null && gradeInfo4.gpa !== null) {
           const credits = course.credits || 3;
           totalCredits += credits;
-          earnedPoints += gradeInfo.gpa * credits;
-          letterCounts[gradeInfo.letter] = (letterCounts[gradeInfo.letter] || 0) + 1;
+          earnedPoints9 += gradeInfo9.gpa * credits;
+          coursesFor4_0.push({ letter: gradeInfo4.letter, credits });
+          // Use 9.0 letter grades for pie chart to prevent minus grades showing
+          letterCounts[gradeInfo9.letter] = (letterCounts[gradeInfo9.letter] || 0) + 1;
         }
       }
     });
 
-    const averageGpa = totalCredits > 0 ? (earnedPoints / totalCredits).toFixed(2) : "0.00";
+    const averageGpa = totalCredits > 0 ? (earnedPoints9 / totalCredits).toFixed(2) : "0.00";
+    const averageGpa4_0 = calculateCumulativeGPA4_0(coursesFor4_0);
     
     const pieData = Object.entries(letterCounts)
       .filter(([, count]) => count > 0)
@@ -316,10 +340,10 @@ export default function Home() {
         mark: parseFloat((data.totalMark / data.count).toFixed(2))
       }));
 
-    return { averageGpa, pieData, lineData };
+    return { averageGpa, averageGpa4_0, pieData, lineData };
   };
 
-  const { averageGpa, pieData, lineData } = calculateDashboardData(filteredCourses);
+  const { averageGpa, averageGpa4_0, pieData, lineData } = calculateDashboardData(filteredCourses);
   const { signOut } = useAuth();
 
   if (authLoading || (loading && !userId)) {
@@ -373,7 +397,7 @@ export default function Home() {
       <main>
         {!loading && courses.length > 0 && (
           <>
-            <DashboardMetrics averageGpa={averageGpa} pieData={pieData} lineData={lineData} />
+            <DashboardMetrics averageGpa={averageGpa} averageGpa4_0={averageGpa4_0} pieData={pieData} lineData={lineData} />
             <CourseFilters 
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}

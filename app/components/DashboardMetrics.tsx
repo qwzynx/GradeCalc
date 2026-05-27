@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import GlassCard from "./GlassCard";
 
 interface DashboardMetricsProps {
   averageGpa: string;
+  averageGpa4_0: string;
   pieData: { name: string, value: number }[];
   lineData: { name: string, mark: number }[];
 }
@@ -12,24 +14,36 @@ interface DashboardMetricsProps {
 const PIE_COLORS: Record<string, string> = {
   'A+': '#34d399',
   'A': '#10b981',
+  'A-': '#059669',
   'B+': '#60a5fa',
   'B': '#3b82f6',
+  'B-': '#2563eb',
   'C+': '#fbbf24',
   'C': '#f59e0b',
+  'C-': '#d97706',
   'D+': '#fb923c',
   'D': '#f97316',
+  'D-': '#ea580c',
   'F': '#ef4444'
 };
 
-export default function DashboardMetrics({ averageGpa, pieData, lineData }: DashboardMetricsProps) {
+export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData }: DashboardMetricsProps) {
+  const [is4Scale, setIs4Scale] = useState(false);
+
   return (
     <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <GlassCard className="flex flex-col items-center justify-center p-8 lg:col-span-1">
-        <h2 className="text-sm uppercase tracking-widest text-primary mb-2 text-center">Cumulative GPA</h2>
+      <GlassCard 
+        className="flex flex-col items-center justify-center p-8 lg:col-span-1 cursor-pointer hover:border-primary transition-colors group"
+        onClick={() => setIs4Scale(!is4Scale)}
+      >
+        <h2 className="text-sm uppercase tracking-widest text-primary mb-2 text-center group-hover:scale-105 transition-transform">Cumulative GPA</h2>
         <div className="text-6xl font-orbitron font-bold text-secondary">
-          {averageGpa}
+          {is4Scale ? averageGpa4_0 : averageGpa}
         </div>
-        <div className="text-xs mt-2 uppercase tracking-wider text-muted">Out of 9.0 Scale</div>
+        <div className="text-xs mt-2 uppercase tracking-wider text-muted flex items-center gap-1">
+          <span>{is4Scale ? "Out of 4.0 Scale" : "Out of 9.0 Scale"}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 group-hover:opacity-100 transition-opacity"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
       </GlassCard>
       <GlassCard className="p-6 lg:col-span-1 flex flex-col items-center justify-center min-h-[250px]">
           <h2 className="text-sm uppercase tracking-widest text-primary mb-4 w-full text-center">Grade Distribution</h2>

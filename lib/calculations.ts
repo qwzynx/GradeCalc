@@ -107,3 +107,35 @@ export function calculateSimplePercentage(points: number, fromTotal: number): nu
   }
   return null;
 }
+
+export const GRADE_MAPPING_4_0: Record<string, { value: number; description: string }> = {
+  'A+': { value: 4.00, description: 'Excellent' },
+  'A':  { value: 3.90, description: 'Excellent' },
+  'A-': { value: 3.70, description: 'Excellent' },
+  'B+': { value: 3.30, description: 'Good' },
+  'B':  { value: 3.00, description: 'Good' },
+  'B-': { value: 2.70, description: 'Good' },
+  'C+': { value: 2.30, description: 'Satisfactory' },
+  'C':  { value: 2.00, description: 'Satisfactory' },
+  'C-': { value: 1.70, description: 'Satisfactory' },
+  'D+': { value: 1.30, description: 'Marginal' },
+  'D':  { value: 1.00, description: 'Marginal' },
+  'D-': { value: 0.70, description: 'Marginal' },
+  'F':  { value: 0.00, description: 'Failing' }
+};
+
+export function calculateCumulativeGPA4_0(courseGrades: { letter: string; credits: number }[]): string {
+  let totalCredits = 0;
+  let earnedPoints = 0;
+
+  for (const course of courseGrades) {
+    const mapping = GRADE_MAPPING_4_0[course.letter];
+    if (mapping) {
+      totalCredits += course.credits;
+      earnedPoints += mapping.value * course.credits;
+    }
+  }
+
+  if (totalCredits === 0) return "0.00";
+  return (earnedPoints / totalCredits).toFixed(2);
+}
