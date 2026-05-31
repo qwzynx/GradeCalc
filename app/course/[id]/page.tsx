@@ -376,35 +376,35 @@ export default function CourseDetail() {
 
   if (authLoading || loading || !course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-primary">
-         <div className="h-16 w-16 rounded-full border-4 border-prHighlight border-t-secondary animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+         <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-8 sm:p-10 flex flex-col">
-      <header className="mb-8 border-b border-prHighlight pb-6">
-        <button onClick={() => router.push('/')} className="mb-4 text-alt-color hover:text-white transition-colors flex items-center gap-2 text-sm uppercase tracking-wider">
+      <header className="mb-8 border-b border-black/10 pb-6">
+        <button onClick={() => router.push('/')} className="mb-4 text-muted hover:text-secondary transition-colors flex items-center gap-2 text-sm uppercase tracking-wider">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           System Uplink
         </button>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-alt-color drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
               {course.name}
             </h1>
-            <p className="mt-2 text-alt-color text-sm uppercase tracking-wider">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+            <p className="mt-2 text-muted text-sm uppercase tracking-wider">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
           </div>
           <button 
             onClick={signOut}
-            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300"
+            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
           >
-            <div className="flex flex-col items-start text-right">
-               <span className="text-[10px] text-alt-color/40 uppercase tracking-[0.2em] group-hover:text-red-400/60 transition-colors">Session</span>
-               <span className="text-xs font-orbitron text-alt-color group-hover:text-red-400 transition-colors">Sign Out</span>
+            <div className="flex flex-col items-start translate-y-px">
+               <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-red-600 transition-colors leading-none mb-1">Session</span>
+               <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors leading-none">Sign Out</span>
             </div>
-            <LogOut className="w-4 h-4 text-alt-color group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
+            <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
           </button>
         </div>
       </header>
@@ -442,27 +442,27 @@ export default function CourseDetail() {
           <GlassCard className="p-4 relative">
             <button
               onClick={() => setEditingCourse(true)}
-              className="absolute top-3 right-3 text-alt-color hover:text-white transition-colors bg-prHighlight/20 hover:bg-prHighlight/40 p-1.5 rounded"
+              className="absolute top-3 right-3 text-muted hover:text-secondary transition-colors bg-black/5 hover:bg-black/10 p-1.5 rounded"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
             </button>
-            <h3 className="text-xs font-montserrat text-secondary uppercase tracking-[0.2em] border-b border-prHighlight/50 pb-2 mb-3">Course Parameters</h3>
+            <h3 className="text-xs font-montserrat text-secondary uppercase tracking-[0.2em] border-b border-black/10 pb-2 mb-3">Course Parameters</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Instructor</span>
+                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Instructor</span>
                 <span className="text-secondary text-xs font-montserrat">{course.prof_name || "Unassigned"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Category</span>
+                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Category</span>
                 <span className="text-secondary text-xs font-montserrat">{course.category || "—"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Credits</span>
+                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Credits</span>
                 <span className="text-secondary text-xs font-montserrat">{course.credits || "N/A"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-alt-color/60 block font-montserrat">Status</span>
-                <span className={`text-xs font-montserrat ${course.in_progress ? "text-emerald-400" : "text-alt-color"}`}>
+                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Status</span>
+                <span className={`text-xs font-montserrat ${course.in_progress ? "text-emerald-400" : "text-muted"}`}>
                   {course.in_progress ? "● Active" : "○ Archived"}
                 </span>
               </div>
@@ -471,11 +471,11 @@ export default function CourseDetail() {
 
           {/* Assignments Section — fills remaining height, scrollable */}
           <div className="flex flex-col gap-3 min-h-0">
-            <div className="flex justify-between items-center border-b border-prHighlight pb-2">
+            <div className="flex justify-between items-center border-b border-black/10 pb-2">
               <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
               <button 
                 onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
-                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 text-alt-color hover:text-white"
+                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 text-muted hover:text-secondary"
               >
                 <span>+ Add</span>
               </button>
@@ -484,23 +484,23 @@ export default function CourseDetail() {
             <div className="overflow-y-auto flex flex-col gap-2 max-h-[300px] pr-1">
               {assignments.length > 0 ? (
                 assignments.map(a => (
-                  <div key={a.id} className="flex justify-between items-center p-3 bg-primary/30 border border-prHighlight/50 rounded-lg hover:border-secondary transition-colors group/item relative shrink-0">
+                  <div key={a.id} className="flex justify-between items-center p-3 bg-surface/70 border border-surface rounded-xl shadow-sm hover:border-black/15 backdrop-blur-lg backdrop-filter transition-all hover:shadow-md group/item relative shrink-0">
                     <div className="flex flex-col">
                       <span className="text-secondary text-base font-bold">{a.name}</span>
-                      <span className="text-[10px] text-alt-color uppercase tracking-wider">
+                      <span className="text-[10px] text-muted uppercase tracking-wider">
                         M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark.toFixed(2)}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight?.toFixed(2)}%</span>
                       </span>
                     </div>
                     <button 
                       onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
-                      className="p-2 text-alt-color hover:text-white bg-prHighlight/20 rounded transition-colors shrink-0"
+                      className="p-2 text-muted hover:text-secondary bg-black/5 hover:bg-black/10 rounded transition-colors shrink-0"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                     </button>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-alt-color bg-primary/20 rounded border border-prHighlight/30 outline-dashed outline-1 outline-prHighlight/50 outline-offset-[-5px]">
+                <div className="text-center py-8 text-muted bg-surface/50 rounded-xl border border-black/10 outline-dashed outline-1 outline-black/20 outline-offset-[-5px] shadow-sm">
                   <span className="text-2xl mb-2 opacity-50 block">📂</span>
                   <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">Archive Empty</p>
                 </div>
