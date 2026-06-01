@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { LogOut } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { LogOut, Sun, Moon } from "lucide-react";
 import NeonButton from "../../components/NeonButton";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
 import EditCourseForm from "../../components/EditCourseForm";
@@ -374,6 +375,8 @@ export default function CourseDetail() {
     { name: 'Remaining Weight', value: parseFloat(remainingWeight.toFixed(2)), color: '#f2a65a' }
   ].filter(d => d.value > 0);
 
+  const { theme, toggleTheme } = useTheme();
+
   if (authLoading || loading || !course) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -384,26 +387,40 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen p-8 sm:p-10 flex flex-col">
-      <header className="mb-8 border-b border-black/10 pb-6">
-        <button onClick={() => router.push('/')} className="mb-4 text-muted hover:text-secondary transition-colors flex items-center gap-2 text-sm uppercase tracking-wider">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          System Uplink
-        </button>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
+      <header className="mb-8 border-b border-black/10 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+          <button 
+            onClick={() => router.push('/')} 
+            className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            System Uplink
+          </button>
+          <div className="text-center sm:text-left">
             <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
               {course.name}
             </h1>
-            <p className="mt-2 text-muted text-sm uppercase tracking-wider">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+            <p className="mt-1 text-muted text-[10px] uppercase tracking-[0.2em] font-orbitron">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={toggleTheme}
+            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+            aria-label="Toggle Theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
+            ) : (
+              <Moon className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
+            )}
+          </button>
           <button 
             onClick={signOut}
-            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
+            className="group flex items-center gap-2 px-4 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
           >
-            <div className="flex flex-col items-start translate-y-px">
-               <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-red-600 transition-colors leading-none mb-1">Session</span>
-               <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors leading-none">Sign Out</span>
-            </div>
+            <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors uppercase tracking-wider">Sign Out</span>
             <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
           </button>
         </div>

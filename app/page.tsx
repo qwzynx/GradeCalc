@@ -366,43 +366,48 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-4">
-          <button 
-            onClick={toggleTheme}
-            className="group flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary hover:bg-white transition-all duration-300"
-            aria-label="Toggle Theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
-            ) : (
-              <Moon className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
-            )}
-          </button>
-          <NeonButton onClick={() => setShowAddForm(true)}>
-            Initialize New Course
-          </NeonButton>
-          <button
-            onClick={() => setShowSyllabusImport(true)}
-            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary hover:bg-white transition-all duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
-            </svg>
-            <div className="flex flex-col items-start translate-y-px">
-              <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-primary transition-colors leading-none mb-1">AI Import</span>
-              <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors leading-none">Syllabus</span>
-            </div>
-          </button>
+          {/* Main Action Group */}
+          <div className="flex items-center bg-black/5 p-1 rounded-2xl border border-black/5 shadow-inner">
+            <NeonButton 
+              onClick={() => setShowAddForm(true)}
+              className="!py-2 !px-4 !rounded-xl !text-xs shadow-none hover:shadow-md"
+            >
+              Add Course
+            </NeonButton>
+            <button
+              onClick={() => setShowSyllabusImport(true)}
+              className="group flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-white transition-all duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+              </svg>
+              <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
+            </button>
+          </div>
           
-          <button 
-            onClick={signOut}
-            className="group flex items-center gap-2 px-4 py-3 sm:py-2 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
-          >
-            <div className="flex flex-col items-start translate-y-px">
-               <span className="text-[9px] text-muted uppercase tracking-[0.2em] group-hover:text-red-600 transition-colors leading-none mb-1">Session</span>
-               <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors leading-none">Sign Out</span>
-            </div>
-            <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
-          </button>
+          <div className="w-px h-8 bg-black/10" />
+
+          {/* System Group */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={toggleTheme}
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
+              ) : (
+                <Moon className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
+              )}
+            </button>
+            <button 
+              onClick={signOut}
+              className="group flex items-center gap-2 px-4 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
+            >
+              <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors uppercase tracking-wider">Sign Out</span>
+              <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
+            </button>
+          </div>
         </div>
       </header>
 
