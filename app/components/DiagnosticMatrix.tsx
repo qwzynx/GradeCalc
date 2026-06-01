@@ -2,10 +2,12 @@
 
 import { useRef, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
 import { useTheme } from "@/components/ThemeProvider";
+import { GRADE_MAPPING_4_0 } from "@/lib/calculations";
 
 const LETTER_GRADES = [
   { letter: "A+", min: 90, max: 100 },
@@ -36,6 +38,34 @@ interface DiagnosticMatrixProps {
   graphData: { name: string, value: number, color: string }[];
 }
 
+const CustomTooltip = ({ active, payload }: any) => {
+  return (
+    <AnimatePresence mode="wait">
+      {active && payload && payload.length ? (
+        <motion.div 
+          key="tooltip"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="bg-surface border border-black/10 dark:border-white/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px]"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm uppercase tracking-wider text-muted font-orbitron font-bold">
+              {payload[0].name}
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
+                {payload[0].value.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+};
+
 export default function DiagnosticMatrix({
   course,
   backendMetrics,
@@ -53,6 +83,7 @@ export default function DiagnosticMatrix({
   graphData
 }: DiagnosticMatrixProps) {
   const { theme } = useTheme();
+  const [is4Scale, setIs4Scale] = useState(false);
   const forceInputRef = useRef<HTMLInputElement>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
@@ -160,9 +191,9 @@ export default function DiagnosticMatrix({
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: any, name: any) => [`${value}%`, name]}
-                  contentStyle={{ backgroundColor: theme === 'dark' ? '#1E1E1E' : '#ffffff', borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb', borderRadius: '8px', padding: '10px' }}
-                  itemStyle={{ color: '#E31D2B', fontFamily: 'Orbitron, sans-serif' }}
+                  content={<CustomTooltip />}
+                  animationDuration={300}
+                  animationEasing="ease-out"
                 />
                 <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#333333' }} />
               </PieChart>
@@ -185,20 +216,29 @@ export default function DiagnosticMatrix({
                </span>
              </div>
 
-             <div className="col-span-2 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08] border border-emerald-500/10 dark:border-emerald-500/20 rounded-xl p-4 sm:p-5 flex justify-between items-center hover:border-emerald-500/40 transition-all duration-300 group shadow-xs">
+             <div 
+               className="col-span-2 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08] border border-emerald-500/10 dark:border-emerald-500/20 rounded-xl p-4 sm:p-5 flex justify-between items-center hover:border-emerald-500/40 transition-all duration-300 group shadow-xs cursor-pointer"
+               onClick={() => setIs4Scale(!is4Scale)}
+             >
                <div className="flex flex-col">
-                 <span className="text-[10px] uppercase tracking-[0.15em] text-emerald-800/70 dark:text-emerald-400/70 font-orbitron font-bold">Est. YorkU GPA</span>
-                 <div className="flex items-end gap-2 mt-1.5">
-                   <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 dark:text-emerald-400 font-bold leading-none">
-                     {backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa : '0.0'}
+                 <div className="flex items-center gap-2">
+                   <span className="text-[10px] uppercase tracking-[0.15em] text-emerald-800/70 dark:text-emerald-400/70 font-orbitron font-bold">
+                     {is4Scale ? "Est. 4.0 Scale GPA" : "Est. YorkU GPA"}
                    </span>
-                   <span className="text-sm sm:text-base font-bold text-emerald-600/50 dark:text-emerald-400/40 mb-0.5">/ 9.0</span>
+                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 text-emerald-600 dark:text-emerald-400"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                 </div>
+                 <div className="flex items-end gap-2 mt-1.5">
+                   <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 dark:text-emerald-400 font-bold leading-none animate-in fade-in zoom-in-95 duration-200" key={is4Scale ? '4.0' : '9.0'}>
+                     {is4Scale 
+                       ? (GRADE_MAPPING_4_0[backendMetrics?.yorku_letter || '']?.value.toFixed(2) || '0.00') 
+                       : (backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa.toFixed(2) : '0.00')}
+                   </span>
+                   <span className="text-sm sm:text-base font-bold text-emerald-600/50 dark:text-emerald-400/40 mb-0.5">/ {is4Scale ? "4.0" : "9.0"}</span>
                  </div>
                </div>
                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center bg-emerald-50/50 dark:bg-emerald-500/10 shadow-xs group-hover:border-emerald-500/40 group-hover:shadow-md transition-all duration-300">
                  <span className="text-2xl sm:text-3xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400">{backendMetrics?.yorku_letter || '-'}</span>
                </div>
-
              </div>
 
              <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between">
