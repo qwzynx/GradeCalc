@@ -185,10 +185,10 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             <p className="text-muted text-xs mt-2 max-w-sm">{errorMessage}</p>
           </div>
           <div className="flex gap-3 mt-2">
-            <button onClick={() => { setPhase("upload"); setErrorMessage(""); }} className="px-4 py-2 border border-black/20 hover:border-primary text-muted hover:text-primary rounded text-xs uppercase tracking-wider transition-all shadow-sm bg-white">
+            <button onClick={() => { setPhase("upload"); setErrorMessage(""); }} className="px-5 py-2.5 min-h-[44px] border border-black/20 hover:border-primary text-muted hover:text-primary rounded text-xs uppercase tracking-wider transition-all shadow-sm bg-white">
               Try Again
             </button>
-            <button onClick={onCancel} className="px-4 py-2 border border-black/20 text-muted hover:text-secondary hover:bg-black/5 rounded text-xs uppercase tracking-wider transition-all bg-white shadow-sm">
+            <button onClick={onCancel} className="px-5 py-2.5 min-h-[44px] border border-black/20 text-muted hover:text-secondary hover:bg-black/5 rounded text-xs uppercase tracking-wider transition-all bg-white shadow-sm">
               Cancel
             </button>
           </div>
@@ -334,7 +334,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
         </NeonButton>
         <button
           onClick={() => { setPhase("upload"); setParsedCourse(null); setParsedAssignments([]); }}
-          className="px-4 py-3 border border-black/20 hover:border-secondary bg-white text-muted hover:text-secondary rounded text-xs uppercase tracking-wider transition-all shadow-sm"
+          className="px-6 py-2.5 min-h-[44px] border border-black/20 hover:border-secondary bg-white text-muted hover:text-secondary rounded text-xs uppercase tracking-wider transition-all shadow-sm"
         >
           Re-upload
         </button>

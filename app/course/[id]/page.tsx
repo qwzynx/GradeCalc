@@ -386,25 +386,25 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen p-8 sm:p-10 flex flex-col">
-      <header className="mb-8 border-b border-black/10 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+    <div className="min-h-screen p-4 sm:p-8 lg:p-10 flex flex-col">
+      <header className="mb-6 sm:mb-8 border-b border-black/10 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8 w-full sm:w-auto">
           <button 
             onClick={() => router.push('/')} 
-            className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10"
+            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-3 py-2 sm:py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[40px]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             System Uplink
           </button>
           <div className="text-center sm:text-left">
-            <h1 className="text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)]">
+            <h1 className="text-3xl sm:text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)] leading-tight">
               {course.name}
             </h1>
-            <p className="mt-1 text-muted text-[10px] uppercase tracking-[0.2em] font-orbitron">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+            <p className="mt-1 text-muted text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-orbitron">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
           <button 
             onClick={toggleTheme}
             className="group flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
