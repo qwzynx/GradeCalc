@@ -185,19 +185,20 @@ export default function DiagnosticMatrix({
                </span>
              </div>
 
-             <div className="col-span-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3 sm:p-4 flex justify-between items-center hover:border-emerald-500 transition-colors group">
+             <div className="col-span-2 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08] border border-emerald-500/10 dark:border-emerald-500/20 rounded-xl p-4 sm:p-5 flex justify-between items-center hover:border-emerald-500/40 transition-all duration-300 group shadow-xs">
                <div className="flex flex-col">
-                 <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-emerald-800">Est. YorkU GPA</span>
-                 <div className="flex items-end gap-2 mt-1">
-                   <span className="text-2xl sm:text-3xl font-orbitron text-emerald-600 font-bold">
+                 <span className="text-[10px] uppercase tracking-[0.15em] text-emerald-800/70 dark:text-emerald-400/70 font-orbitron font-bold">Est. YorkU GPA</span>
+                 <div className="flex items-end gap-2 mt-1.5">
+                   <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 dark:text-emerald-400 font-bold leading-none">
                      {backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa : '0.0'}
                    </span>
-                   <span className="text-sm sm:text-lg font-bold text-emerald-600 mb-1">/ 9.0</span>
+                   <span className="text-sm sm:text-base font-bold text-emerald-600/50 dark:text-emerald-400/40 mb-0.5">/ 9.0</span>
                  </div>
                </div>
-               <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full border-2 border-emerald-200 flex items-center justify-center bg-white group-hover:bg-emerald-100 transition-colors">
-                 <span className="text-xl sm:text-2xl font-orbitron font-bold text-emerald-600">{backendMetrics?.yorku_letter || '-'}</span>
+               <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center bg-emerald-50/50 dark:bg-emerald-500/10 shadow-xs group-hover:border-emerald-500/40 group-hover:shadow-md transition-all duration-300">
+                 <span className="text-2xl sm:text-3xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400">{backendMetrics?.yorku_letter || '-'}</span>
                </div>
+
              </div>
 
              <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between">
@@ -233,12 +234,12 @@ export default function DiagnosticMatrix({
                </div>
              </div>
 
-             <div className="col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:border-blue-500 transition-colors">
+             <div className="col-span-2 bg-blue-500/[0.04] dark:bg-blue-500/[0.08] border border-blue-500/10 dark:border-blue-500/20 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-blue-500/40 transition-all duration-300 group shadow-xs">
                <div className="flex flex-col">
-                 <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-blue-800 mb-1 block">Maximum Potential Mark</span>
-                 <span className="text-[8px] sm:text-[9px] text-blue-800/70 uppercase tracking-widest">+ 100% on remaining assignments</span>
+                 <span className="text-[10px] uppercase tracking-[0.15em] text-blue-800/70 dark:text-blue-400/70 font-orbitron font-bold">Maximum Potential Mark</span>
+                 <span className="text-[9px] text-blue-800/50 dark:text-blue-400/50 uppercase tracking-wider mt-0.5">+ 100% on remaining assignments</span>
                </div>
-               <span className="text-2xl sm:text-3xl font-orbitron text-blue-600 font-bold">
+               <span className="text-3xl sm:text-4xl font-orbitron text-blue-600 dark:text-blue-400 font-bold leading-none">
                  {maxMark.toFixed(2)}%
                </span>
              </div>

@@ -102,3 +102,23 @@ button:active:not(:disabled),
 *::-webkit-scrollbar-thumb:hover {
   background: var(--color-york-red);
 }
+
+/* Remove Recharts focus and active highlights */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-legend-wrapper,
+.recharts-responsive-container {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-legend-wrapper:focus,
+.recharts-responsive-container:focus,
+.recharts-wrapper svg:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

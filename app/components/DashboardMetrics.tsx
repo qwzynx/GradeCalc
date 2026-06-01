@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from "./GlassCard";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -28,15 +29,68 @@ const PIE_COLORS: Record<string, string> = {
   'F': '#ef4444'
 };
 
+const CustomPieTooltip = ({ active, payload }: any) => {
+  return (
+    <AnimatePresence mode="wait">
+      {active && payload && payload.length ? (
+        <motion.div 
+          key="pie-tooltip"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="bg-surface border border-black/10 dark:border-white/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px]"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm uppercase tracking-wider text-muted font-orbitron font-bold">
+              {payload[0].name}
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
+                {payload[0].value} Course{payload[0].value > 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+};
+
+const CustomLineTooltip = ({ active, payload, label }: any) => {
+  return (
+    <AnimatePresence mode="wait">
+      {active && payload && payload.length ? (
+        <motion.div 
+          key="line-tooltip"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="bg-surface border border-black/10 dark:border-white/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px]"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm uppercase tracking-wider text-muted font-orbitron font-bold">
+              {label}
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
+                {payload[0].value.toFixed(2)}% Average
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+};
+
 export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData }: DashboardMetricsProps) {
   const [is4Scale, setIs4Scale] = useState(false);
   const { theme } = useTheme();
 
   const textColor = theme === 'dark' ? '#A0A0A0' : '#333333';
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb';
-  const tooltipBg = theme === 'dark' ? '#1E1E1E' : 'rgba(255, 255, 255, 0.95)';
-  const tooltipBorder = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb';
-  const tooltipText = theme === 'dark' ? '#FFFFFF' : '#000000';
 
   return (
     <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
@@ -74,8 +128,8 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
                     ))}
                   </Pie>
                   <RechartsTooltip 
-                    contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '8px', color: tooltipText, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    itemStyle={{ color: tooltipText }}
+                    content={<CustomPieTooltip />}
+                    animationDuration={300}
                   />
                   <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '11px', color: textColor, paddingTop: '10px' }}/>
                 </PieChart>
@@ -85,26 +139,35 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
             <div className="text-muted italic text-sm">No grade data available</div>
           )}
       </GlassCard>
-      <GlassCard className="p-5 sm:p-6 lg:col-span-2 flex flex-col items-center justify-center min-h-[250px]">
-          <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary mb-4 w-full text-center">Performance Timeline</h2>
+      <GlassCard className="p-0 lg:col-span-2 flex flex-col min-h-[280px] overflow-hidden relative group">
+          <div className="p-6 pb-0 pointer-events-none z-10">
+            <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary opacity-70">Performance Timeline</h2>
+          </div>
           {lineData.length > 0 ? (
-            <div className="w-full h-48 sm:h-56">
+            <div className="w-full flex-1">
               <ResponsiveContainer width="100%" height="100%" key={theme}>
-                <LineChart data={lineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                  <XAxis dataKey="name" stroke={textColor} fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke={textColor} fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+                <LineChart data={lineData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.5} />
+                  <XAxis dataKey="name" hide />
+                  <YAxis stroke={textColor} fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} hide />
                   <RechartsTooltip 
-                    contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '8px', color: tooltipText, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    formatter={(value: any) => [`${value}%`, 'Average Mark']}
-                    labelStyle={{ color: tooltipText, marginBottom: '8px', fontFamily: 'Orbitron, sans-serif' }}
+                    content={<CustomLineTooltip />}
+                    animationDuration={300}
                   />
-                  <Line type="monotone" dataKey="mark" stroke="#E31D2B" strokeWidth={2.5} dot={{ fill: '#E31D2B', strokeWidth: 1.5, r: 3 }} activeDot={{ r: 5 }} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="mark" 
+                    stroke="#E31D2B" 
+                    strokeWidth={3} 
+                    dot={{ fill: '#E31D2B', strokeWidth: 2, r: 4 }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }} 
+                    animationDuration={1000}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="text-muted italic text-sm">No timeline data available</div>
+            <div className="flex-1 flex items-center justify-center text-muted italic text-sm">No timeline data available</div>
           )}
       </GlassCard>
     </div>
