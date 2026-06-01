@@ -99,6 +99,20 @@ export default function DiagnosticMatrix({
     }
   };
 
+  // Determine which letter to use for 4.0 scale mapping
+  const getActiveLetter = () => {
+    // If there's a forced mark, find its letter
+    if (course.mark !== null && course.mark !== undefined) {
+      const mark = course.mark;
+      const grade = LETTER_GRADES.find(g => mark >= g.min && mark <= g.max);
+      return grade ? grade.letter : (backendMetrics?.yorku_letter || '-');
+    }
+    // Fallback to backend calculated letter
+    return backendMetrics?.yorku_letter || '-';
+  };
+
+  const activeLetter = getActiveLetter();
+
   return (
     <GlassCard className="p-4 sm:p-8 pb-10 sm:pb-12 overflow-hidden relative border-black/10 shadow-lg bg-white">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-3 border-b border-black/10 pb-2 sm:pb-0 gap-3">
@@ -230,14 +244,16 @@ export default function DiagnosticMatrix({
                  <div className="flex items-end gap-2 mt-1.5">
                    <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 dark:text-emerald-400 font-bold leading-none animate-in fade-in zoom-in-95 duration-200" key={is4Scale ? '4.0' : '9.0'}>
                      {is4Scale 
-                       ? (GRADE_MAPPING_4_0[backendMetrics?.yorku_letter || '']?.value.toFixed(2) || '0.00') 
-                       : (backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa.toFixed(2) : '0.00')}
+                       ? (GRADE_MAPPING_4_0[activeLetter]?.value.toFixed(2) || '0.00') 
+                       : (course.mark !== null && course.mark !== undefined 
+                           ? (LETTER_GRADES.find(g => course.mark! >= g.min && course.mark! <= g.max)?.min / 10).toFixed(2) // Approximation for forced GPA display if needed, but let's stick to calculated
+                           : (backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa.toFixed(2) : '0.00'))}
                    </span>
                    <span className="text-sm sm:text-base font-bold text-emerald-600/50 dark:text-emerald-400/40 mb-0.5">/ {is4Scale ? "4.0" : "9.0"}</span>
                  </div>
                </div>
                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center bg-emerald-50/50 dark:bg-emerald-500/10 shadow-xs group-hover:border-emerald-500/40 group-hover:shadow-md transition-all duration-300">
-                 <span className="text-2xl sm:text-3xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400">{backendMetrics?.yorku_letter || '-'}</span>
+                 <span className="text-2xl sm:text-3xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400">{activeLetter}</span>
                </div>
              </div>
 
