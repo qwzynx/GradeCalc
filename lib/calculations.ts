@@ -1,4 +1,37 @@
-export function calculateGrades(assignments: { percentage?: number | null; weight?: number | null }[], targetGrade: number = 0.0) {
+export const LETTER_GRADES = [
+  { letter: "A+", min: 90, max: 100 },
+  { letter: "A",  min: 80, max: 89  },
+  { letter: "B+", min: 75, max: 79  },
+  { letter: "B",  min: 70, max: 74  },
+  { letter: "C+", min: 65, max: 69  },
+  { letter: "C",  min: 60, max: 64  },
+  { letter: "D+", min: 55, max: 59  },
+  { letter: "D",  min: 50, max: 54  },
+  { letter: "F",  min: 0,  max: 49  },
+] as const;
+
+export function parseTargetGrade(input: string | number): number | null {
+  if (typeof input === 'number') return input;
+  const trimmed = input.trim();
+  if (trimmed === "") return null;
+  
+  const num = parseFloat(trimmed);
+  // If it's a number, ensure it's in a valid range (0-100)
+  if (!isNaN(num) && /^\d+(\.\d+)?$/.test(trimmed)) {
+    return (num >= 0 && num <= 100) ? num : null;
+  }
+  
+  const upperInput = trimmed.toUpperCase();
+  const grade = LETTER_GRADES.find(g => g.letter === upperInput);
+  if (grade) return grade.min;
+  
+  return null;
+}
+
+export function calculateGrades(assignments: { percentage?: number | null; weight?: number | null }[], targetGradeInput: string | number = 0.0) {
+  const targetGrade = parseTargetGrade(targetGradeInput);
+  
+  // If target is invalid, we still want to return basic metrics but indicate target failure
   let totalScore = 0.0;
   let totalWeight = 0.0;
 
@@ -28,7 +61,7 @@ export function calculateGrades(assignments: { percentage?: number | null; weigh
   }
 
   const getFifty = calcRequired(50);
-  const targety = calcRequired(targetGrade);
+  const targety = targetGrade === null ? "N/A" : calcRequired(targetGrade);
 
   let yorkuGpa = 0.0;
   let yorkuLetter = "";
@@ -94,6 +127,7 @@ export function calculateGrades(assignments: { percentage?: number | null; weigh
     remaining_weight: Number(hml.toFixed(2)),
     get_fifty: safeRound(getFifty),
     target_required_score: safeRound(targety),
+    is_target_invalid: targetGrade === null,
     yorku_gpa: Number(yorkuGpa.toFixed(2)),
     yorku_letter: yorkuLetter,
     higher_target_score: safeRound(higher),

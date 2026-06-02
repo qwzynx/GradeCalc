@@ -26,6 +26,7 @@ export interface BackendMetrics {
   remaining_weight: number;
   get_fifty: number | string;
   target_required_score: number | string;
+  is_target_invalid?: boolean;
   yorku_gpa: number;
   yorku_letter: string;
   higher_target_score: number | string;

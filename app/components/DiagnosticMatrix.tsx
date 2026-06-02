@@ -7,24 +7,12 @@ import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
 import { useTheme } from "@/components/ThemeProvider";
-import { GRADE_MAPPING_4_0 } from "@/lib/calculations";
-
-const LETTER_GRADES = [
-  { letter: "A+", min: 90, max: 100 },
-  { letter: "A",  min: 80, max: 89  },
-  { letter: "B+", min: 75, max: 79  },
-  { letter: "B",  min: 70, max: 74  },
-  { letter: "C+", min: 65, max: 69  },
-  { letter: "C",  min: 60, max: 64  },
-  { letter: "D+", min: 55, max: 59  },
-  { letter: "D",  min: 50, max: 54  },
-  { letter: "F",  min: 0,  max: 49  },
-] as const;
+import { GRADE_MAPPING_4_0, LETTER_GRADES } from "@/lib/calculations";
 
 interface DiagnosticMatrixProps {
   course: Course;
   backendMetrics: BackendMetrics | null;
-  targetGrade: number;
+  targetGrade: string | number;
   handleTargetChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   forceGradeOpen: boolean;
   setForceGradeOpen: (open: boolean) => void;
@@ -285,25 +273,30 @@ export default function DiagnosticMatrix({
                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted font-orbitron font-bold group-hover/target:text-primary/70 transition-colors">Target Grade</span>
                  </div>
                  <div className="flex items-baseline gap-1">
-                   <NumberInput 
+                   <input 
+                     type="text"
                      value={targetGrade || ""} 
                      onChange={handleTargetChange} 
                      placeholder="80"
-                     className="w-24 sm:w-32 bg-transparent border-none text-4xl sm:text-5xl font-orbitron font-bold text-secondary focus:text-primary outline-none transition-all p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                     className="w-24 sm:w-48 bg-transparent border-none text-4xl sm:text-5xl font-orbitron font-bold text-secondary focus:text-primary outline-none transition-all p-0 uppercase" 
                    />
-                   <span className="text-xl sm:text-2xl font-orbitron font-bold text-muted/30 group-hover/target:text-primary/30 transition-colors">%</span>
+                   <span className="text-xl sm:text-2xl font-orbitron font-bold text-muted/30 group-hover/target:text-primary/30 transition-colors">
+                     {typeof targetGrade === 'string' && /^[a-zA-Z]/.test(targetGrade) ? '' : '%'}
+                   </span>
                  </div>
                </div>
                
                <div className="flex flex-col items-start sm:items-end text-left sm:text-right pointer-events-none">
                  <span className="text-[10px] uppercase tracking-[0.15em] text-muted mb-1.5 font-orbitron font-bold">Score Needed on Remaining</span>
                  <div className="flex items-baseline gap-2">
-                   {backendMetrics?.target_required_score !== undefined && typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score <= 0 ? (
+                   {backendMetrics?.is_target_invalid && targetGrade !== "" ? (
+                      <span className="text-xl sm:text-2xl font-orbitron text-red-600 font-bold leading-none animate-pulse">Wrong Input</span>
+                   ) : backendMetrics?.target_required_score !== undefined && typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score <= 0 ? (
                      <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 font-bold leading-none">Achieved</span>
                    ) : (
                      <>
                         <span className={`text-3xl sm:text-4xl font-orbitron font-bold leading-none ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600' : 'text-emerald-600'}`}>
-                          {backendMetrics?.target_required_score || 'N/A'}
+                          {backendMetrics?.target_required_score === 'N/A' ? (targetGrade === "" ? "—" : "Wrong Input") : backendMetrics?.target_required_score}
                         </span>
                         {backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score && (
                           <span className={`text-sm font-bold font-orbitron ${backendMetrics?.target_required_score > 100 ? 'text-red-600/50' : 'text-emerald-600/50'}`}>%</span>

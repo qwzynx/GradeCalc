@@ -29,7 +29,7 @@ export default function CourseDetail() {
   const [forceGradeOpen, setForceGradeOpen] = useState(false);
   const [addingAssignment, setAddingAssignment] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
-  const [targetGrade, setTargetGrade] = useState<number>(80);
+  const [targetGrade, setTargetGrade] = useState<string>("80");
   const { user, loading: authLoading } = useAuth();
   const userId = user?.id;
   
@@ -37,7 +37,7 @@ export default function CourseDetail() {
   const [inputModes, setInputModes] = useState<("percentage" | "points")[]>(["percentage"]);
   const [splitQuantity, setSplitQuantity] = useState<number>(1);
 
-  const fetchMetrics = async (target: number, currentAssignments: Assignment[]) => {
+  const fetchMetrics = async (target: string | number, currentAssignments: Assignment[]) => {
     const assignsForCalc = currentAssignments.map((a: Assignment) => ({ percentage: a.mark, weight: a.weight }));
     try {
       const metrics = calculateGrades(assignsForCalc, target) as BackendMetrics;
@@ -48,11 +48,9 @@ export default function CourseDetail() {
   };
 
   const handleTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    setTargetGrade(isNaN(val) ? 0 : val);
-    if (!isNaN(val)) {
-       fetchMetrics(val, assignments);
-    }
+    const val = e.target.value;
+    setTargetGrade(val);
+    fetchMetrics(val, assignments);
   };
 
   const fetchCourseData = async () => {
