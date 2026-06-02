@@ -28,6 +28,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const handleRedirect = (currentUser: User | null) => {
+    const publicPages = ['/login', '/verify'];
+    if (!currentUser && !publicPages.includes(pathname)) {
+      router.push('/login');
+    }
+  };
+
   useEffect(() => {
     // Check active sessions and sets the user
     const getSession = async () => {
@@ -57,14 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const handleRedirect = (currentUser: User | null) => {
-    const publicPages = ['/login', '/verify'];
-    if (!currentUser && !publicPages.includes(pathname)) {
-      router.push('/login');
-    }
-  };
+  }, [pathname, router]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

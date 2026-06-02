@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, TooltipProps } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
@@ -38,6 +38,7 @@ interface DiagnosticMatrixProps {
   graphData: { name: string, value: number, color: string }[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload }: any) => {
   return (
     <AnimatePresence mode="wait">
@@ -243,10 +244,10 @@ export default function DiagnosticMatrix({
                  </div>
                  <div className="flex items-end gap-2 mt-1.5">
                    <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 dark:text-emerald-400 font-bold leading-none animate-in fade-in zoom-in-95 duration-200" key={is4Scale ? '4.0' : '9.0'}>
-                     {is4Scale 
-                       ? (GRADE_MAPPING_4_0[activeLetter]?.value.toFixed(2) || '0.00') 
-                       : (course.mark !== null && course.mark !== undefined 
-                           ? (LETTER_GRADES.find(g => course.mark! >= g.min && course.mark! <= g.max)?.min / 10).toFixed(2) // Approximation for forced GPA display if needed, but let's stick to calculated
+                     {is4Scale
+                       ? (GRADE_MAPPING_4_0[activeLetter]?.value?.toFixed(2) || '0.00')
+                       : (course.mark !== null && course.mark !== undefined
+                           ? ((LETTER_GRADES.find(g => course.mark! >= g.min && course.mark! <= g.max)?.min ?? 0) / 10).toFixed(2) // Approximation for forced GPA display if needed, but let's stick to calculated
                            : (backendMetrics?.yorku_gpa ? backendMetrics.yorku_gpa.toFixed(2) : '0.00'))}
                    </span>
                    <span className="text-sm sm:text-base font-bold text-emerald-600/50 dark:text-emerald-400/40 mb-0.5">/ {is4Scale ? "4.0" : "9.0"}</span>
