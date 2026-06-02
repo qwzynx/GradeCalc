@@ -120,54 +120,73 @@ export default function DiagnosticMatrix({
         <div>
            <h2 className="text-xl sm:text-2xl font-orbitron font-bold text-primary">Diagnostic Matrix</h2>
         </div>
-        <button onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} className={`w-full sm:w-auto px-4 py-2 border transition-all rounded text-[10px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-2 ${forceGradeOpen || (course.mark !== null && course.mark !== undefined) ? 'border-red-500 text-red-500 bg-red-50 shadow-sm' : 'border-black/20 hover:border-red-500 text-muted hover:text-red-600 bg-white'}`}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
-          {course.mark !== undefined && course.mark !== null ? 'Override Active' : 'Force Grade'}
+        <button 
+          onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} 
+          className={`w-full sm:w-auto px-4 py-2 border transition-all rounded-lg text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 font-bold font-orbitron shadow-sm relative -top-1 sm:-top-2 ${
+            course.mark !== undefined && course.mark !== null 
+              ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30' 
+              : forceGradeOpen
+                ? 'border-primary bg-primary text-white shadow-md'
+                : 'border-black/10 dark:border-white/10 bg-surface text-muted hover:text-primary hover:border-primary/50 hover:shadow-md'
+          }`}
+        >
+          {course.mark !== undefined && course.mark !== null ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="22" x2="18" y1="12" y2="12" /><line x1="6" x2="2" y1="12" y2="12" /><line x1="12" x2="12" y1="6" y2="2" /><line x1="12" x2="12" y1="22" y2="18" /></svg>
+          )}
+          {course.mark !== undefined && course.mark !== null ? 'Override Active' : forceGradeOpen ? 'Close Editor' : 'Force Grade'}
         </button>
       </div>
 
       {forceGradeOpen && (
-        <form onSubmit={handleForceGradeSubmit} className="mb-6 p-3 border border-red-200 bg-red-50 rounded-lg animate-in fade-in slide-in-from-top-2 w-full flex flex-col sm:flex-row items-stretch sm:items-end gap-3 sm:gap-4">
-           {/* Letter Grade Dropdown */}
-           <div className="flex-1 min-w-0">
-             <label className="text-[9px] uppercase tracking-widest text-red-700 block mb-1">Letter Grade</label>
-             <select
-               value={selectedLetter || ""}
-               onChange={handleLetterSelect}
-               className="w-full bg-white border border-red-200 rounded px-2 py-2 text-sm text-secondary font-montserrat focus:outline-none focus:border-red-500 cursor-pointer appearance-none min-h-[40px]"
-               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center' }}
-             >
-               <option value="" className="bg-white text-muted font-montserrat">— Letter —</option>
-               {LETTER_GRADES.map((g) => (
-                 <option key={g.letter} value={g.letter} className="bg-white text-secondary font-montserrat">
-                   {g.letter}  ({g.min}% – {g.max}%)
-                 </option>
-               ))}
-             </select>
-           </div>
+        <form onSubmit={handleForceGradeSubmit} className="mb-6 p-4 border border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 rounded-xl animate-in fade-in slide-in-from-top-2 w-full flex flex-col sm:flex-row items-stretch sm:items-end gap-4 shadow-inner">
+          {/* Letter Grade Dropdown */}
+          <div className="flex-1 min-w-0">
+            <label className="text-[10px] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Letter Grade</label>
+            <div className="relative group">
+              <select
+                value={selectedLetter || ""}
+                onChange={handleLetterSelect}
+                className="w-full bg-surface border border-black/10 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer appearance-none min-h-[44px] transition-all group-hover:border-primary/50"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23E31D2B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '12px' }}
+              >
+                <option value="" className="bg-surface text-muted font-montserrat">— Select Letter —</option>
+                {LETTER_GRADES.map((g) => (
+                  <option key={g.letter} value={g.letter} className="bg-surface text-secondary font-montserrat font-semibold">
+                    {g.letter} ({g.min}% – {g.max}%)
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-           {/* Manual % Input */}
-           <div className="flex-1 min-w-0">
-             <label className="text-[9px] uppercase tracking-widest text-red-700 block mb-1">Override %</label>
-             <NumberInput
-               ref={forceInputRef}
-               required
-               name="force_mark"
-               step="0.01"
-               defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""}
-               placeholder="Grade %"
-               className="w-full bg-white border border-red-200 rounded px-2 py-2 text-sm text-secondary focus:outline-none focus:border-red-500 min-h-[40px]"
-               onChange={() => setSelectedLetter(null)}
-             />
-           </div>
+          {/* Manual % Input */}
+          <div className="flex-1 min-w-0">
+            <label className="text-[10px] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Override %</label>
+            <NumberInput
+              ref={forceInputRef}
+              required
+              name="force_mark"
+              step="0.01"
+              defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""}
+              placeholder="Grade %"
+              className="w-full bg-surface border border-black/10 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 min-h-[44px] placeholder:text-muted/50 transition-all hover:border-primary/50 font-montserrat font-semibold"
+              onChange={() => setSelectedLetter(null)}
+            />
+          </div>
 
-           {/* Actions */}
-           <div className="flex gap-2 shrink-0">
-             <button type="submit" className="flex-1 sm:flex-none bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-500 rounded px-4 py-2 text-xs sm:text-sm uppercase tracking-wider font-bold transition-all shadow-sm min-h-[40px]">Execute</button>
-             {course.mark !== null && course.mark !== undefined && (
-               <button type="button" onClick={handleRemoveForceGrade} className="flex-1 sm:flex-none bg-transparent border border-black/20 hover:bg-black/5 text-muted text-xs sm:text-sm uppercase tracking-wider px-4 py-2 rounded transition-all min-h-[40px]">Remove</button>
-             )}
-           </div>
+          {/* Actions */}
+          <div className="flex gap-2 shrink-0">
+            <button type="submit" className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white border border-primary rounded-lg px-6 py-2.5 text-xs sm:text-sm uppercase tracking-widest font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 min-h-[44px] font-orbitron">
+              Execute
+            </button>
+            {course.mark !== null && course.mark !== undefined && (
+              <button type="button" onClick={handleRemoveForceGrade} className="flex-1 sm:flex-none bg-surface border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-muted hover:text-secondary px-4 py-2.5 rounded-lg text-xs sm:text-sm uppercase tracking-widest transition-all min-h-[44px] font-orbitron">
+                Reset
+              </button>
+            )}
+          </div>
         </form>
       )}
 

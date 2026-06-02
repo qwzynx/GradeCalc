@@ -17,6 +17,7 @@
 }
 
 @theme inline {
+  --variant-dark: selector(.dark);
   --color-primary: var(--color-york-red);
   --color-surface: var(--surface);
   --color-secondary: var(--text-primary);
