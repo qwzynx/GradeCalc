@@ -277,36 +277,40 @@ export default function DiagnosticMatrix({
                </div>
              </div>
 
-             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between">
-               <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted mb-2 wrap-break-words">Needed for 50%</span>
-               {backendMetrics?.get_fifty !== undefined && typeof backendMetrics.get_fifty === 'number' && backendMetrics.get_fifty <= 0 ? (
-                 <span className="text-lg sm:text-xl font-orbitron text-emerald-600 font-bold">Achieved</span>
-               ) : (
-                 <span className={`text-lg sm:text-xl font-orbitron font-bold ${backendMetrics?.get_fifty === 'N/A' || (typeof backendMetrics?.get_fifty === 'number' && backendMetrics.get_fifty > 100) ? 'text-red-600' : 'text-secondary'}`}>
-                   {backendMetrics?.get_fifty || 'N/A'}{backendMetrics?.get_fifty !== 'N/A' && backendMetrics?.get_fifty ? '%' : ''}
-                 </span>
-               )}
-             </div>
 
-             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
-               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-                 <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted">Target %</span>
-                  <NumberInput 
-                    value={targetGrade || ""} 
-                    onChange={handleTargetChange} 
-                    placeholder="80"
-                    className="w-full sm:w-15 bg-white border border-black/20 focus:border-primary rounded px-1 py-1 text-sm text-secondary text-right outline-none font-orbitron" 
-                  />
+
+             <div className="col-span-2 bg-black/5 border border-black/10 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-primary/50 hover:bg-primary/[0.02] transition-all duration-300 group/target shadow-xs cursor-text">
+               <div className="flex flex-col flex-1 w-full sm:w-auto">
+                 <div className="flex items-center gap-2 mb-1">
+                   <span className="text-[10px] uppercase tracking-[0.15em] text-muted font-orbitron font-bold group-hover/target:text-primary/70 transition-colors">Target Grade</span>
+                 </div>
+                 <div className="flex items-baseline gap-1">
+                   <NumberInput 
+                     value={targetGrade || ""} 
+                     onChange={handleTargetChange} 
+                     placeholder="80"
+                     className="w-24 sm:w-32 bg-transparent border-none text-4xl sm:text-5xl font-orbitron font-bold text-secondary focus:text-primary outline-none transition-all p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                   />
+                   <span className="text-xl sm:text-2xl font-orbitron font-bold text-muted/30 group-hover/target:text-primary/30 transition-colors">%</span>
+                 </div>
                </div>
-               <div className="flex flex-col">
-                 <span className="text-[9px] uppercase tracking-widest text-muted mb-1">Score Needed</span>
-                 {backendMetrics?.target_required_score !== undefined && typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score <= 0 ? (
-                   <span className="text-lg sm:text-xl font-orbitron text-emerald-600 font-bold">Achieved</span>
-                 ) : (
-                   <span className={`text-lg sm:text-xl font-orbitron ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}`}>
-                     {backendMetrics?.target_required_score || 'N/A'}{backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score ? '%' : ''}
-                   </span>
-                 )}
+               
+               <div className="flex flex-col items-start sm:items-end text-left sm:text-right pointer-events-none">
+                 <span className="text-[10px] uppercase tracking-[0.15em] text-muted mb-1.5 font-orbitron font-bold">Score Needed on Remaining</span>
+                 <div className="flex items-baseline gap-2">
+                   {backendMetrics?.target_required_score !== undefined && typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score <= 0 ? (
+                     <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 font-bold leading-none">Achieved</span>
+                   ) : (
+                     <>
+                        <span className={`text-3xl sm:text-4xl font-orbitron font-bold leading-none ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600' : 'text-emerald-600'}`}>
+                          {backendMetrics?.target_required_score || 'N/A'}
+                        </span>
+                        {backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score && (
+                          <span className={`text-sm font-bold font-orbitron ${backendMetrics?.target_required_score > 100 ? 'text-red-600/50' : 'text-emerald-600/50'}`}>%</span>
+                        )}
+                     </>
+                   )}
+                 </div>
                </div>
              </div>
 
