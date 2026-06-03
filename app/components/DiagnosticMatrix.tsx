@@ -298,8 +298,8 @@ export default function DiagnosticMatrix({
                         <span className={`text-3xl sm:text-4xl font-orbitron font-bold leading-none ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600' : 'text-emerald-600'}`}>
                           {backendMetrics?.target_required_score === 'N/A' ? (targetGrade === "" ? "—" : "Wrong Input") : backendMetrics?.target_required_score}
                         </span>
-                        {backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score && (
-                          <span className={`text-sm font-bold font-orbitron ${backendMetrics?.target_required_score > 100 ? 'text-red-600/50' : 'text-emerald-600/50'}`}>%</span>
+                        {backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score !== undefined && (
+                          <span className={`text-sm font-bold font-orbitron ${(typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600/50' : 'text-emerald-600/50'}`}>%</span>
                         )}
                      </>
                    )}
