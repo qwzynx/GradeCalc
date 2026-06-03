@@ -12,13 +12,18 @@ export const LETTER_GRADES = [
 
 export function parseTargetGrade(input: string | number): number | null {
   if (typeof input === 'number') return input;
-  const trimmed = input.trim();
+  let trimmed = input.trim();
   if (trimmed === "") return null;
   
-  const num = parseFloat(trimmed);
-  // If it's a number, ensure it's in a valid range (0-100)
-  if (!isNaN(num) && /^\d+(\.\d+)?$/.test(trimmed)) {
-    return (num >= 0 && num <= 100) ? num : null;
+  // Remove trailing % if present
+  if (trimmed.endsWith('%')) {
+    trimmed = trimmed.slice(0, -1).trim();
+  }
+
+  // Check if it's a numeric string (allowing decimals)
+  if (/^\d*\.?\d+$/.test(trimmed)) {
+    const num = parseFloat(trimmed);
+    return (!isNaN(num) && num >= 0 && num <= 100) ? num : null;
   }
   
   const upperInput = trimmed.toUpperCase();
@@ -54,7 +59,8 @@ export function calculateGrades(assignments: { percentage?: number | null; weigh
 
   function calcRequired(target: number): number | "N/A" {
     if (hml <= 0) {
-      return "N/A"; // No remaining weight to achieve target
+      // If no remaining weight, check if target is already achieved
+      return finalAverage >= target ? -1 : "N/A";
     }
     const required = ((target * 100) - (finalAverage * totalWeight)) / hml;
     return required;

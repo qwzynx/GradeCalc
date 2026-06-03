@@ -191,7 +191,7 @@ export default function DiagnosticMatrix({
               ) : (
                  <>
                     <div className="text-3xl sm:text-4xl font-orbitron font-bold text-secondary">
-                      {backendMetrics?.final_average ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
+                      {backendMetrics?.final_average !== undefined ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
                     </div>
                     <div className="text-[9px] uppercase tracking-widest text-muted mt-1">Average</div>
                  </>
@@ -295,8 +295,10 @@ export default function DiagnosticMatrix({
                      <span className="text-3xl sm:text-4xl font-orbitron text-emerald-600 font-bold leading-none">Achieved</span>
                    ) : (
                      <>
-                        <span className={`text-3xl sm:text-4xl font-orbitron font-bold leading-none ${backendMetrics?.target_required_score === 'N/A' || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600' : 'text-emerald-600'}`}>
-                          {backendMetrics?.target_required_score === 'N/A' ? (targetGrade === "" ? "—" : "Wrong Input") : backendMetrics?.target_required_score}
+                        <span className={`text-3xl sm:text-4xl font-orbitron font-bold leading-none ${backendMetrics?.is_target_invalid || (typeof backendMetrics?.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600' : 'text-emerald-600'}`}>
+                          {backendMetrics?.is_target_invalid 
+                            ? (targetGrade === "" ? "—" : "Wrong Input") 
+                            : (backendMetrics?.target_required_score === 'N/A' ? "—" : backendMetrics?.target_required_score)}
                         </span>
                         {backendMetrics?.target_required_score !== 'N/A' && backendMetrics?.target_required_score !== undefined && (
                           <span className={`text-sm font-bold font-orbitron ${(typeof backendMetrics.target_required_score === 'number' && backendMetrics.target_required_score > 100) ? 'text-red-600/50' : 'text-emerald-600/50'}`}>%</span>
