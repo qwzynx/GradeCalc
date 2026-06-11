@@ -176,15 +176,30 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Active Filters Summary */}
       {(searchTerm || filterSemester.length > 0 || filterYear.length > 0 || filterAcademicYear.length > 0 || filterCategory.length > 0 || filterInProgress) && (
-        <div className="flex items-center gap-4 pt-6 border-t border-black/10">
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
-            <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Filters:</span>
+        <div className="flex flex-col gap-4 pt-6 border-t border-black/10 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
+              <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Filters</span>
+            </div>
+            <button 
+              onClick={() => {
+                setSearchTerm("");
+                setFilterSemester([]);
+                setFilterYear([]);
+                setFilterAcademicYear([]);
+                setFilterCategory([]);
+                setFilterInProgress(false);
+              }}
+              className="text-[9px] font-orbitron text-primary font-bold hover:bg-primary/10 transition-all uppercase tracking-[0.2em] border border-primary/20 rounded px-2 py-1"
+            >
+              Clear All
+            </button>
           </div>
-          <div className="flex flex-wrap gap-2 flex-1">
+          <div className="flex flex-wrap gap-2">
             {searchTerm && <FilterBadge label={`Search: ${searchTerm}`} onClear={() => setSearchTerm("")} />}
             {filterInProgress && <FilterBadge label="In Progress" onClear={() => setFilterInProgress(false)} />}
             {filterAcademicYear.map(ay => <FilterBadge key={ay} label={`${ay}-${ay+1}`} onClear={() => toggleFilter(filterAcademicYear, setFilterAcademicYear, ay)} />)}
@@ -192,19 +207,6 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             {filterYear.map(y => <FilterBadge key={y} label={y} onClear={() => toggleFilter(filterYear, setFilterYear, y)} />)}
             {filterCategory.map(c => <FilterBadge key={c} label={c} onClear={() => toggleFilter(filterCategory, setFilterCategory, c)} />)}
           </div>
-          <button 
-            onClick={() => {
-              setSearchTerm("");
-              setFilterSemester([]);
-              setFilterYear([]);
-              setFilterAcademicYear([]);
-              setFilterCategory([]);
-              setFilterInProgress(false);
-            }}
-            className="text-[10px] font-orbitron text-primary font-bold hover:text-primary transition-all uppercase tracking-[0.2em] border border-primary rounded px-3 py-1 hover:bg-primary/10"
-          >
-            Clear All
-          </button>
         </div>
       )}
     </div>
