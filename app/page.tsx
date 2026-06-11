@@ -402,7 +402,7 @@ export default function Home() {
             </button>
             <button 
               onClick={signOut}
-              className="group flex items-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
+              className="group flex items-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-primary/10 transition-all duration-300"
             >
               <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors uppercase tracking-wider">Sign Out</span>
               <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />

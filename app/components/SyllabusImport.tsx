@@ -119,7 +119,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
             isDragging
-              ? "border-primary bg-red-50 scale-[1.02]"
+              ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02]"
               : "border-black/20 hover:border-primary hover:bg-black/5 bg-white"
           }`}
           onClick={() => fileInputRef.current?.click()}
@@ -175,7 +175,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
         <div className="text-center py-8 flex flex-col items-center gap-4">
-          <div className="w-14 h-14 rounded-full border-2 border-red-200 flex items-center justify-center bg-red-50">
+          <div className="w-14 h-14 rounded-full border-2 border-red-200 flex items-center justify-center bg-primary/5 dark:bg-primary/10">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
               <circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>
             </svg>
@@ -316,7 +316,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
         </div>
 
         {Math.abs(totalWeight - 100) > 0.5 && (
-          <div className="mt-2 flex items-center gap-2 p-2 rounded bg-amber-50 border border-amber-200">
+          <div className="mt-2 flex items-center gap-2 p-2 rounded bg-amber-500/10 dark:bg-amber-900/20 border border-amber-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 shrink-0">
               <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
             </svg>

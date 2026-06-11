@@ -201,7 +201,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               setFilterCategory([]);
               setFilterInProgress(false);
             }}
-            className="text-[10px] font-orbitron text-primary font-bold hover:text-primary transition-all uppercase tracking-[0.2em] border border-primary rounded px-3 py-1 hover:bg-red-50"
+            className="text-[10px] font-orbitron text-primary font-bold hover:text-primary transition-all uppercase tracking-[0.2em] border border-primary rounded px-3 py-1 hover:bg-primary/10"
           >
             Clear All
           </button>
@@ -216,21 +216,21 @@ const FilterCheckbox = ({ label, checked, onChange }: { label: string; checked: 
     onClick={onChange}
     className={`group flex items-center gap-2 px-3 py-1.5 rounded-md border transition-all duration-300 ${
       checked 
-        ? 'bg-red-50 border-primary text-primary font-semibold shadow-sm' 
+        ? 'bg-primary/10 border-primary text-primary font-semibold shadow-sm' 
         : 'bg-white border-black/20 text-muted hover:border-primary hover:text-primary'
     }`}
   >
     <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
       checked ? 'bg-primary border-primary' : 'bg-transparent border-black/20 group-hover:border-primary'
     }`}>
-      {checked && <Check className="w-2.5 h-2.5 text-white stroke-[4px]" />}
+      {checked && <Check className="w-2.5 h-2.5 text-[#FFFFFF] stroke-[4px]" />}
     </div>
     <span className="text-[10px] font-orbitron uppercase tracking-widest leading-none">{label}</span>
   </button>
 );
 
 const FilterBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
-  <div className="flex items-center gap-2 bg-red-50 border border-primary/30 rounded-lg px-2 py-1 animate-in zoom-in-95 duration-200">
+  <div className="flex items-center gap-2 bg-primary/5 dark:bg-primary/10 border border-primary/30 rounded-lg px-2 py-1 animate-in zoom-in-95 duration-200">
     <span className="text-[9px] font-orbitron text-primary font-semibold uppercase tracking-wider">{label}</span>
     <button onClick={onClear} className="text-primary hover:text-red-700 transition-colors">
       <X className="w-3 h-3" />
