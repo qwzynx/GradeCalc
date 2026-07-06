@@ -6,12 +6,13 @@ import NeonButton from "./components/NeonButton";
 import DashboardMetrics from "./components/DashboardMetrics";
 import AddCourseForm from "./components/AddCourseForm";
 import SyllabusImport from "./components/SyllabusImport";
+import EclassSync from "./components/EclassSync";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
-import { Course, Assignment } from "./types";
+import { Course, Assignment, EclassSyncPlan } from "./types";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeProvider";
-import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react";
+import { LogOut, User as UserIcon, Moon, Sun, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
 
@@ -23,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showSyllabusImport, setShowSyllabusImport] = useState(false);
+  const [showEclassSync, setShowEclassSync] = useState(false);
   
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -181,6 +183,69 @@ export default function Home() {
     } catch (error) {
       console.error("Error importing syllabus", error);
     }
+  };
+
+  const handleEclassApply = async (plan: EclassSyncPlan) => {
+    let updated = 0;
+    let created = 0;
+
+    for (const course of plan.courses) {
+      if (!course.app_course_id) continue;
+
+      for (const item of course.items) {
+        if (item.action === "update" && item.assignment_id) {
+          let { error } = await supabase
+            .from('assignments')
+            .update({ mark: item.new_mark, eclass_item_name: item.eclass_item_name })
+            .eq('id', item.assignment_id);
+
+          // Retry without the sync key if the eclass migration hasn't been run yet
+          if (error) {
+            ({ error } = await supabase
+              .from('assignments')
+              .update({ mark: item.new_mark })
+              .eq('id', item.assignment_id));
+          }
+          if (error) throw error;
+          updated++;
+        } else if (item.action === "create") {
+          const newAssignment: Partial<Assignment> = {
+            course_id: course.app_course_id,
+            name: item.assignment_name || item.eclass_item_name,
+            mark: item.new_mark,
+            eclass_item_name: item.eclass_item_name,
+          };
+          if (item.weight !== null && item.weight !== undefined) newAssignment.weight = item.weight;
+
+          let { error } = await supabase.from('assignments').insert([newAssignment]);
+          if (error) {
+            delete newAssignment.eclass_item_name;
+            ({ error } = await supabase.from('assignments').insert([newAssignment]));
+          }
+          if (error) throw error;
+          created++;
+        }
+      }
+
+      await supabase
+        .from('courses')
+        .update({ eclass_course_id: course.eclass_course_id })
+        .eq('id', course.app_course_id)
+        .eq('user_id', userId);
+    }
+
+    // Snapshot the sync so there's a history of what was scraped and applied
+    const { error: logError } = await supabase.from('eclass_syncs').insert([{
+      user_id: userId,
+      courses_matched: plan.courses.filter(c => c.app_course_id).length,
+      items_updated: updated,
+      items_created: created,
+      snapshot: plan,
+    }]);
+    if (logError) console.warn("Could not log eClass sync (run the eclass_syncs migration?)", logError);
+
+    await fetchCourses();
+    return { updated, created };
   };
 
   const calculateGrade = (courseId: string) => {
@@ -383,6 +448,13 @@ export default function Home() {
               </svg>
               <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
             </button>
+            <button
+              onClick={() => setShowEclassSync(true)}
+              className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
+              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">eClass Sync</span>
+            </button>
           </div>
           
           <div className="hidden sm:block w-px h-8 bg-black/10" />
@@ -456,6 +528,20 @@ export default function Home() {
                 <SyllabusImport
                   onImport={handleSyllabusImport}
                   onCancel={() => setShowSyllabusImport(false)}
+                />
+              </div>
+            )}
+
+            {showEclassSync && (
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+                onClick={(e) => { if (e.target === e.currentTarget) setShowEclassSync(false); }}
+              >
+                <EclassSync
+                  courses={courses}
+                  assignments={assignments}
+                  onApply={handleEclassApply}
+                  onCancel={() => setShowEclassSync(false)}
                 />
               </div>
             )}

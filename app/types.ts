@@ -4,6 +4,7 @@ export interface Assignment {
   name: string;
   mark?: number | null;
   weight?: number;
+  eclass_item_name?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -19,6 +20,32 @@ export interface Course {
   year: number;
   semester: string;
   category?: string;
+  eclass_course_id?: string | null;
+}
+
+export interface EclassPlanItem {
+  eclass_item_name: string;
+  action: "update" | "create";
+  assignment_id: string | null;
+  assignment_name?: string | null;
+  new_mark: number | null;
+  old_mark?: number | null;
+  weight?: number | null;
+  warning?: string | null;
+}
+
+export interface EclassPlanCourse {
+  eclass_course_id: string;
+  eclass_course_name: string;
+  app_course_id: string | null;
+  app_course_name?: string | null;
+  confidence?: "high" | "medium" | "low";
+  items: EclassPlanItem[];
+}
+
+export interface EclassSyncPlan {
+  courses: EclassPlanCourse[];
+  warnings: string[];
 }
 
 export interface BackendMetrics {
