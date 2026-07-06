@@ -10,7 +10,9 @@ import {
 
 const LOGIN_TIMEOUT_MS = 5 * 60 * 1000; // Passport York + Duo can take a while
 
-export const maxDuration = 60;
+// Scraping now also looks up and Gemini-parses each course's syllabus file,
+// so the manual (no-popup) path needs more headroom than a plain grade fetch.
+export const maxDuration = 120;
 
 // ---------------------------------------------------------------------------
 // Popup login jobs — the server launches a visible Chromium window on this
@@ -98,13 +100,13 @@ export async function POST(req: Request) {
     cleanupStaleJobs();
 
     if (action === "start") {
-      const appCourses: IncomingCourse[] = body.courses || [];
-      if (appCourses.length === 0) {
+      if (process.env.VERCEL) {
         return NextResponse.json(
-          { error: "No in-progress courses to sync. Add or import a course first." },
+          { error: "Popup login isn't available on this deployment. Use the manual cookie option instead." },
           { status: 400 }
         );
       }
+      const appCourses: IncomingCourse[] = body.courses || [];
 
       const syncId = crypto.randomUUID();
       jobs.set(syncId, { status: "waiting_login", createdAt: Date.now() });
@@ -141,12 +143,6 @@ export async function POST(req: Request) {
       const appCourses: IncomingCourse[] = body.courses || [];
       if (!rawSession) {
         return NextResponse.json({ error: "Missing eClass session cookie" }, { status: 400 });
-      }
-      if (appCourses.length === 0) {
-        return NextResponse.json(
-          { error: "No in-progress courses to sync. Add or import a course first." },
-          { status: 400 }
-        );
       }
 
       // Accept "abc123", "MoodleSession=abc123" or a full pasted cookie header

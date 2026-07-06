@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import NeonButton from "./components/NeonButton";
 import DashboardMetrics from "./components/DashboardMetrics";
 import AddCourseForm from "./components/AddCourseForm";
-import SyllabusImport from "./components/SyllabusImport";
 import EclassSync from "./components/EclassSync";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
@@ -23,7 +22,6 @@ export default function Home() {
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   const [showEclassSync, setShowEclassSync] = useState(false);
   
   // Search & Filter States
@@ -139,58 +137,62 @@ export default function Home() {
     }
   };
 
-  const handleSyllabusImport = async (
-    courseData: { name: string; prof_name?: string; semester?: string; year?: number; credits?: number; category?: string | null },
-    assignmentsData: { name: string; weight: number }[]
-  ) => {
-    try {
-      const newCourse: Partial<Course> = {
-        user_id: userId,
-        name: courseData.name,
-        year: courseData.year || new Date().getFullYear(),
-        semester: courseData.semester || "Fall",
-        in_progress: true,
-      };
-      if (courseData.prof_name) newCourse.prof_name = courseData.prof_name;
-      if (courseData.category) newCourse.category = courseData.category;
-      if (courseData.credits) newCourse.credits = courseData.credits;
-
-      const { data, error } = await supabase
-        .from('courses')
-        .insert([newCourse])
-        .select();
-
-      if (error) throw error;
-
-      const courseId = data?.[0]?.id;
-      if (courseId && assignmentsData.length > 0) {
-        const assignmentsToInsert = assignmentsData.map(a => ({
-          course_id: courseId,
-          name: a.name,
-          weight: a.weight,
-          mark: null,
-        }));
-
-        const { error: assignError } = await supabase
-          .from('assignments')
-          .insert(assignmentsToInsert);
-
-        if (assignError) throw assignError;
-      }
-
-      setShowSyllabusImport(false);
-      fetchCourses();
-    } catch (error) {
-      console.error("Error importing syllabus", error);
-    }
-  };
+  // Postgres "undefined_column" — only true when the eclass migration hasn't
+  // been run yet. Anything else (e.g. a unique-constraint violation from the
+  // dedup indexes) must NOT be masked by stripping the sync key and retrying,
+  // since that would silently create a duplicate row.
+  const isMissingColumnError = (error: any) => error?.code === "42703";
 
   const handleEclassApply = async (plan: EclassSyncPlan) => {
     let updated = 0;
     let created = 0;
+    let coursesCreated = 0;
 
     for (const course of plan.courses) {
-      if (!course.app_course_id) continue;
+      let targetCourseId = course.app_course_id;
+
+      // Courses the AI drafted from eClass that don't exist in the app yet —
+      // create them first so their assignments have somewhere to land.
+      if (!targetCourseId && course.suggested_course) {
+        // Defense-in-depth: a prior sync may have already created and linked
+        // this eClass course even if this plan's match missed it — never
+        // insert a duplicate course row for an id we've already imported.
+        const { data: existing } = await supabase
+          .from('courses')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('eclass_course_id', course.eclass_course_id)
+          .maybeSingle();
+
+        if (existing?.id) {
+          targetCourseId = existing.id;
+        } else {
+          const sc = course.suggested_course;
+          const newCourse: Partial<Course> = {
+            user_id: userId,
+            name: sc.name,
+            year: sc.year || new Date().getFullYear(),
+            semester: sc.semester || "Fall",
+            in_progress: true,
+            eclass_course_id: course.eclass_course_id,
+          };
+          if (sc.prof_name) newCourse.prof_name = sc.prof_name;
+          if (sc.category) newCourse.category = sc.category;
+          if (sc.credits) newCourse.credits = sc.credits;
+
+          let { data, error } = await supabase.from('courses').insert([newCourse]).select();
+          if (error && isMissingColumnError(error)) {
+            delete newCourse.eclass_course_id;
+            ({ data, error } = await supabase.from('courses').insert([newCourse]).select());
+          }
+          if (error) throw error;
+
+          targetCourseId = data?.[0]?.id ?? null;
+          if (targetCourseId) coursesCreated++;
+        }
+      }
+
+      if (!targetCourseId) continue;
 
       for (const item of course.items) {
         if (item.action === "update" && item.assignment_id) {
@@ -200,7 +202,7 @@ export default function Home() {
             .eq('id', item.assignment_id);
 
           // Retry without the sync key if the eclass migration hasn't been run yet
-          if (error) {
+          if (error && isMissingColumnError(error)) {
             ({ error } = await supabase
               .from('assignments')
               .update({ mark: item.new_mark })
@@ -210,7 +212,7 @@ export default function Home() {
           updated++;
         } else if (item.action === "create") {
           const newAssignment: Partial<Assignment> = {
-            course_id: course.app_course_id,
+            course_id: targetCourseId,
             name: item.assignment_name || item.eclass_item_name,
             mark: item.new_mark,
             eclass_item_name: item.eclass_item_name,
@@ -218,7 +220,7 @@ export default function Home() {
           if (item.weight !== null && item.weight !== undefined) newAssignment.weight = item.weight;
 
           let { error } = await supabase.from('assignments').insert([newAssignment]);
-          if (error) {
+          if (error && isMissingColumnError(error)) {
             delete newAssignment.eclass_item_name;
             ({ error } = await supabase.from('assignments').insert([newAssignment]));
           }
@@ -230,7 +232,7 @@ export default function Home() {
       await supabase
         .from('courses')
         .update({ eclass_course_id: course.eclass_course_id })
-        .eq('id', course.app_course_id)
+        .eq('id', targetCourseId)
         .eq('user_id', userId);
     }
 
@@ -245,7 +247,7 @@ export default function Home() {
     if (logError) console.warn("Could not log eClass sync (run the eclass_syncs migration?)", logError);
 
     await fetchCourses();
-    return { updated, created };
+    return { updated, created, coursesCreated };
   };
 
   const calculateGrade = (courseId: string) => {
@@ -440,20 +442,11 @@ export default function Home() {
               Add Course
             </NeonButton>
             <button
-              onClick={() => setShowSyllabusImport(true)}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
-              </svg>
-              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
-            </button>
-            <button
               onClick={() => setShowEclassSync(true)}
               className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
             >
               <RefreshCw className="w-3.5 h-3.5 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
-              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">eClass Sync</span>
+              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync</span>
             </button>
           </div>
           
@@ -518,18 +511,6 @@ export default function Home() {
                 onSubmit={handleAddCourse} 
                 onCancel={() => setShowAddForm(false)} 
               />
-            )}
-
-            {showSyllabusImport && (
-              <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-                onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
-              >
-                <SyllabusImport
-                  onImport={handleSyllabusImport}
-                  onCancel={() => setShowSyllabusImport(false)}
-                />
-              </div>
             )}
 
             {showEclassSync && (

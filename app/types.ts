@@ -34,6 +34,15 @@ export interface EclassPlanItem {
   warning?: string | null;
 }
 
+export interface EclassSuggestedCourse {
+  name: string;
+  prof_name?: string | null;
+  semester: string;
+  year: number;
+  credits?: number | null;
+  category?: string | null;
+}
+
 export interface EclassPlanCourse {
   eclass_course_id: string;
   eclass_course_name: string;
@@ -41,6 +50,9 @@ export interface EclassPlanCourse {
   app_course_name?: string | null;
   confidence?: "high" | "medium" | "low";
   items: EclassPlanItem[];
+  // Populated when app_course_id is null — an AI-drafted new course the user
+  // can review/edit and opt into creating, instead of importing it separately.
+  suggested_course?: EclassSuggestedCourse | null;
 }
 
 export interface EclassSyncPlan {
