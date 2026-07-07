@@ -5,6 +5,15 @@ import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
 import NumberInput from "./NumberInput";
 import { Course, Assignment, EclassSyncPlan, EclassSuggestedCourse, EclassPlanItem } from "../types";
+import { supabase } from "@/lib/supabase";
+
+// Every API route now requires a signed-in user; attach the current session's
+// access token so the server can verify it.
+async function authHeader(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 interface EclassSyncProps {
   courses: Course[];
@@ -106,7 +115,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     try {
       const res = await fetch("/api/eclass-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await authHeader()) },
         signal: controller.signal,
         body: JSON.stringify({
           action: "login",
@@ -187,7 +196,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     try {
       const res = await fetch("/api/eclass-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await authHeader()) },
         body: JSON.stringify({ action: "manual", session: sessionCookie, courses: buildCoursesPayload() }),
       });
       if (!res.ok) {
@@ -212,7 +221,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/parse-syllabus", { method: "POST", body: formData });
+      const res = await fetch("/api/parse-syllabus", { method: "POST", headers: await authHeader(), body: formData });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || "Failed to parse syllabus");

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { parseSyllabusDocument } from "@/lib/syllabus";
+import { getRequestUser, unauthorized } from "@/lib/api-auth";
 
 export async function POST(req: Request) {
   try {
+    const user = await getRequestUser(req);
+    if (!user) return unauthorized();
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
