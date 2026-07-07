@@ -295,6 +295,12 @@ function parseRangeMax(raw: string): number | null {
   return Math.max(...nums);
 }
 
+// Marks shown/stored by the app are percentages — 2 decimal places is all the
+// precision eClass itself displays, so round everything we compute to that.
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 // "Calculated weight" cells look like "45.46 %" — just the number.
 function parseWeight(raw: string | undefined | null): number | null {
   if (!raw) return null;
@@ -336,7 +342,7 @@ export function computeMarkFromComponents(components: GradeComponent[] | undefin
     );
 
   if (parsed.length === 0) return null;
-  if (parsed.length === 1) return parsed[0].pct;
+  if (parsed.length === 1) return round2(parsed[0].pct);
 
   // Preferred, and correct in every case (including sub-parts worth different
   // amounts): a true weighted average using each component's own declared
@@ -350,7 +356,7 @@ export function computeMarkFromComponents(components: GradeComponent[] | undefin
   if (allWeighted) {
     const sumWeighted = parsed.reduce((s, p) => s + p.pct * (p.weight as number), 0);
     const sumWeight = parsed.reduce((s, p) => s + (p.weight as number), 0);
-    return sumWeighted / sumWeight;
+    return round2(sumWeighted / sumWeight);
   }
 
   // Fallback when weight text wasn't available for every member: if every
@@ -362,9 +368,9 @@ export function computeMarkFromComponents(components: GradeComponent[] | undefin
     const sumPoints = parsed.reduce((s, p) => s + (p.points as number), 0);
     const sumMax = parsed.reduce((s, p) => s + (p.max as number), 0);
     if (sumMax === 0) return null;
-    return (sumPoints / sumMax) * 100;
+    return round2((sumPoints / sumMax) * 100);
   }
-  return parsed.reduce((s, p) => s + p.pct, 0) / parsed.length;
+  return round2(parsed.reduce((s, p) => s + p.pct, 0) / parsed.length);
 }
 
 export function buildPrompt(

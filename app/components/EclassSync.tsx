@@ -29,15 +29,17 @@ function isDecrease(item: EclassPlanItem) {
   );
 }
 
-type Phase = "connect" | "waiting" | "loading" | "review" | "applying" | "done" | "error";
-
-const popupSupported = process.env.NEXT_PUBLIC_ECLASS_POPUP_SUPPORTED === "1";
+type Phase = "connect" | "duo" | "loading" | "review" | "applying" | "done" | "error";
 
 export default function EclassSync({ courses, assignments, onApply, onCancel }: EclassSyncProps) {
   const [phase, setPhase] = useState<Phase>("connect");
-  const [syncId, setSyncId] = useState<string | null>(null);
-  const [showManual, setShowManual] = useState(!popupSupported);
+  const [showManual, setShowManual] = useState(false);
   const [sessionCookie, setSessionCookie] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [duoCode, setDuoCode] = useState<string | null>(null);
+  const [loginStage, setLoginStage] = useState<"opening" | "logging_in" | "duo_wait">("opening");
+  const abortRef = useRef<AbortController | null>(null);
   const [plan, setPlan] = useState<EclassSyncPlan | null>(null);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [createCourse, setCreateCourse] = useState<Record<number, boolean>>({});
@@ -46,8 +48,6 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   const [attachErrors, setAttachErrors] = useState<Record<number, string>>({});
   const [errorMessage, setErrorMessage] = useState("");
   const [summary, setSummary] = useState<{ updated: number; created: number; coursesCreated: number } | null>(null);
-  const syncIdRef = useRef<string | null>(null);
-  syncIdRef.current = syncId;
 
   const itemKey = (ci: number, ii: number) => `${ci}-${ii}`;
 
@@ -93,72 +93,87 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     setPhase("review");
   };
 
-  // Popup flow: server opens a Chromium window for Passport York + Duo login,
-  // then scrapes on its own. We just poll for progress.
-  const handleStartPopup = async () => {
-    setPhase("waiting");
+  // The server drives a headless browser through Passport York + Duo and
+  // streams NDJSON progress events (including the Duo verification code to tap
+  // on the phone), finishing with the sync plan on the same request. This is
+  // the single login path — it runs the same way locally and when deployed.
+  const handleCredentialLogin = async () => {
+    setDuoCode(null);
+    setLoginStage("opening");
+    setPhase("duo");
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const res = await fetch("/api/eclass-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "start", courses: buildCoursesPayload() }),
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: "login",
+          username: username.trim(),
+          password,
+          courses: buildCoursesPayload(),
+        }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Could not open the eClass login window");
+      if (!res.ok || !res.body) {
+        let msg = "Could not start eClass login";
+        try { msg = (await res.json()).error || msg; } catch {}
+        throw new Error(msg);
       }
-      const data = await res.json();
-      setSyncId(data.syncId);
+      setPassword("");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let settled = false;
+
+      // The response is newline-delimited JSON; parse whole lines as they land.
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, nl).trim();
+          buffer = buffer.slice(nl + 1);
+          if (!line) continue;
+          let event: any;
+          try { event = JSON.parse(line); } catch { continue; }
+
+          if (event.type === "duo_code") {
+            setDuoCode(String(event.code));
+          } else if (event.type === "status") {
+            if (event.stage === "scraping") setPhase("loading");
+            else if (event.stage === "duo_wait") setLoginStage("duo_wait");
+            else if (event.stage === "logging_in") setLoginStage("logging_in");
+          } else if (event.type === "done") {
+            settled = true;
+            receivePlan(event.plan);
+          } else if (event.type === "error") {
+            settled = true;
+            throw new Error(event.error || "eClass login failed");
+          }
+        }
+      }
+      if (!settled) throw new Error("The eClass login ended unexpectedly. Please try again.");
     } catch (err: any) {
+      if (err?.name === "AbortError") return;
       setErrorMessage(err.message || "Something went wrong");
       setPhase("error");
+    } finally {
+      abortRef.current = null;
     }
   };
 
-  useEffect(() => {
-    if (!syncId || (phase !== "waiting" && phase !== "loading")) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch("/api/eclass-sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "status", syncId }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Sync failed");
-
-        if (data.status === "scraping") {
-          setPhase("loading");
-        } else if (data.status === "done") {
-          setSyncId(null);
-          receivePlan(data.plan);
-        } else if (data.status === "error") {
-          throw new Error(data.error || "Sync failed");
-        }
-      } catch (err: any) {
-        setSyncId(null);
-        setErrorMessage(err.message || "Something went wrong");
-        setPhase("error");
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncId, phase]);
-
+  // Abort an in-flight login stream, which closes the headless server browser.
   const cancelJob = () => {
-    if (syncIdRef.current) {
-      fetch("/api/eclass-sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "cancel", syncId: syncIdRef.current }),
-      }).catch(() => {});
-      setSyncId(null);
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
     }
   };
 
-  // Close the server-side browser window if the modal unmounts mid-login
+  // Close the server-side browser if the modal unmounts mid-login
   useEffect(() => cancelJob, []);
 
   const handleCancel = () => {
@@ -297,38 +312,49 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
         {closeButton}
         <h2 className="text-xl mb-4 font-orbitron text-primary font-bold border-b border-black/10 pb-2 pr-12">eClass Sync</h2>
 
-        {popupSupported && (
-          <>
-            <p className="text-sm text-muted mb-5">
-              A browser window will open on this computer. Sign into eClass with Passport York + Duo — once you&apos;re in, the window closes and your enrolled courses and grades are scraped automatically. New courses are drafted for you to review, and grades are matched against what&apos;s already in the app.
-            </p>
+        <p className="text-sm text-muted mb-5">
+          Sign in with your Passport York credentials. We complete Passport York + Duo for you in the background and sync your grades automatically — nothing is stored beyond the sync results.
+        </p>
 
-            <NeonButton onClick={handleStartPopup} className="w-full py-3 text-sm mb-3">
-              <span className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                Open eClass Login
-              </span>
-            </NeonButton>
-            <p className="text-[10px] text-muted mb-4">Your credentials go directly to York — this app only reads your grades, and nothing is stored beyond the sync results.</p>
+        <div className="flex flex-col gap-2.5 mb-3">
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Passport York username"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && username.trim() && password) handleCredentialLogin(); }}
+            type="password"
+            placeholder="Passport York password"
+            autoComplete="current-password"
+            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
+          />
+        </div>
 
-            <button
-              type="button"
-              onClick={() => setShowManual((v) => !v)}
-              className="text-[10px] uppercase tracking-widest text-muted hover:text-primary transition-colors font-orbitron"
-            >
-              {showManual ? "▾" : "▸"} Trouble with the popup? Paste a session cookie instead
-            </button>
-          </>
-        )}
+        <NeonButton onClick={handleCredentialLogin} disabled={!username.trim() || !password} className="w-full py-3 text-sm mb-3">
+          <span className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Sign in to eClass
+          </span>
+        </NeonButton>
+        <p className="text-[10px] text-muted mb-4">Your credentials are sent over HTTPS straight to York&apos;s Passport York login and are never stored. You&apos;ll approve the sign-in with Duo on your phone.</p>
 
-        {!popupSupported && (
-          <p className="text-sm text-muted mb-5">
-            Paste your eClass session cookie below — your grades are read and matched against your syllabus automatically. Nothing is stored beyond the sync results.
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={() => setShowManual((v) => !v)}
+          className="text-[10px] uppercase tracking-widest text-muted hover:text-primary transition-colors font-orbitron"
+        >
+          {showManual ? "▾" : "▸"} Prefer not to enter your password? Paste a session cookie instead
+        </button>
 
         {showManual && (
-          <div className={popupSupported ? "mt-3 border-t border-black/10 pt-3" : ""}>
+          <div className="mt-3 border-t border-black/10 pt-3">
             <ol className="list-decimal list-inside flex flex-col gap-1.5 text-xs text-secondary mb-3 bg-black/5 border border-black/10 rounded-lg p-3">
               <li>
                 Sign into <a href="https://eclass.yorku.ca/my/" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">eclass.yorku.ca</a> in another tab.
@@ -359,25 +385,48 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     );
   }
 
-  // --- Waiting for Login Phase ---
-  if (phase === "waiting") {
+  // --- Duo Approval Phase ---
+  if (phase === "duo") {
     return (
       <GlassCard className="max-w-lg w-full text-center py-12 bg-white shadow-xl border-black/10">
         <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="h-14 w-14 rounded-full border-4 border-black/10 border-t-primary animate-spin" style={{ animationDuration: '2s' }}></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
-          </div>
-          <div>
-            <p className="text-primary font-orbitron tracking-wider text-sm font-bold">Waiting for eClass Login</p>
-            <p className="text-muted text-xs mt-2 font-montserrat max-w-sm mx-auto">
-              Complete <span className="text-secondary font-semibold">Passport York + Duo</span> in the browser window that just opened. Grades will sync automatically once you&apos;re signed in.
-            </p>
-          </div>
+          {duoCode ? (
+            <>
+              <div className="w-14 h-14 rounded-full border-2 border-primary/30 flex items-center justify-center bg-primary/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-primary font-orbitron tracking-wider text-sm font-bold">Approve on Duo Mobile</p>
+                <p className="text-muted text-xs mt-2 font-montserrat max-w-sm mx-auto">
+                  Open the Duo prompt on your phone and enter this verification code:
+                </p>
+                <p className="text-4xl font-orbitron font-bold text-secondary tracking-[0.3em] mt-4">{duoCode}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="relative">
+                <div className="h-14 w-14 rounded-full border-4 border-black/10 border-t-primary animate-spin" style={{ animationDuration: '2s' }}></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <p className="text-primary font-orbitron tracking-wider text-sm font-bold">
+                  {loginStage === "duo_wait" ? "Waiting for Duo Approval" : "Signing in to eClass"}
+                </p>
+                <p className="text-muted text-xs mt-2 font-montserrat max-w-sm mx-auto">
+                  {loginStage === "duo_wait"
+                    ? "Check your phone — approve the Duo push, or wait here for a verification code to appear."
+                    : "Completing Passport York login in the background…"}
+                </p>
+              </div>
+            </>
+          )}
           <button onClick={handleCancel} className="mt-2 px-5 py-2.5 min-h-[44px] border border-black/20 text-muted hover:text-secondary hover:bg-black/5 rounded text-xs uppercase tracking-wider transition-all bg-white shadow-sm">
             Cancel
           </button>
