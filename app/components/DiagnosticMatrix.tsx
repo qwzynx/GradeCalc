@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, TooltipProps } from "recharts";
-import { motion, AnimatePresence } from "framer-motion";
+import { PieChart, Pie, Cell, Sector, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { motion } from "framer-motion";
+import ChartTooltipShell from "./ChartTooltipShell";
 import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
@@ -27,33 +28,34 @@ interface DiagnosticMatrixProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CustomTooltip = ({ active, payload }: any) => {
-  return (
-    <AnimatePresence mode="wait">
-      {active && payload && payload.length ? (
-        <motion.div 
-          key="tooltip"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="bg-surface border border-black/10 dark:border-white/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px]"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm uppercase tracking-wider text-muted font-orbitron font-bold">
-              {payload[0].name}
-            </span>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
-                {payload[0].value.toFixed(2)}%
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
-  );
-};
+const renderActiveSlice = (props: any) => (
+  <Sector
+    {...props}
+    outerRadius={props.outerRadius + 5}
+    style={{ filter: `drop-shadow(0 0 6px ${props.fill}80)`, transition: 'all 0.2s ease-out' }}
+  />
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTooltip = ({ active, payload }: any) => (
+  <ChartTooltipShell active={active} payload={payload}>
+    {(p) => (
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: p[0].payload?.color }} />
+          <span className="text-sm uppercase tracking-wider text-muted font-orbitron font-bold">
+            {p[0].name}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
+            {p[0].value.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    )}
+  </ChartTooltipShell>
+);
 
 export default function DiagnosticMatrix({
   course,
@@ -181,7 +183,12 @@ export default function DiagnosticMatrix({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           
           {/* Visual Graph Section */}
-          <div className="h-72 sm:h-80 w-full relative drop-shadow-sm flex justify-center items-center flex-col">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="h-72 sm:h-80 w-full relative drop-shadow-sm flex justify-center items-center flex-col"
+          >
             <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none w-full">
               {course.mark !== null && course.mark !== undefined ? (
                  <>
@@ -207,20 +214,39 @@ export default function DiagnosticMatrix({
                   dataKey="value"
                   stroke="none"
                   cornerRadius={6}
+                  startAngle={90}
+                  endAngle={-270}
+                  activeShape={renderActiveSlice}
+                  inactiveShape={{ opacity: 0.45 }}
+                  animationDuration={900}
+                  animationEasing="ease-out"
                 >
                   {graphData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   content={<CustomTooltip />}
                   animationDuration={300}
                   animationEasing="ease-out"
+                  wrapperStyle={{ visibility: 'visible' }}
                 />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#5D6170' }} />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconSize={9}
+                  wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#5D6170' }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: string, entry: any) => (
+                    <span>
+                      {value}
+                      <span className="tabular-nums font-bold" style={{ opacity: 0.65 }}> {entry?.payload?.value}%</span>
+                    </span>
+                  )}
+                />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </motion.div>
 
           {/* Advanced Metrics Panel */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4">

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import GlassCard from "./GlassCard";
 import { Course, Assignment } from "../types";
 import { User, Activity, CheckCircle2, Bookmark, ListChecks } from "lucide-react";
@@ -136,11 +137,15 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
       </div>
 
       {/* Mini Progress Bar */}
-      <div className="h-1 w-full bg-black/5 dark:bg-white/5 absolute bottom-0 left-0">
-        <div 
-          className={`h-full transition-all duration-1000 ease-out ${progressBarTheme}`} 
-          style={{ width: `${finalPercentage !== null ? Math.min(100, Math.max(0, finalPercentage)) : 0}%` }}
-        />
+      <div className="h-1 group-hover:h-1.5 w-full bg-black/5 dark:bg-white/5 absolute bottom-0 left-0 transition-all duration-300 overflow-hidden">
+        <motion.div
+          className={`h-full rounded-r-full relative ${progressBarTheme}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${finalPercentage !== null ? Math.min(100, Math.max(0, finalPercentage)) : 0}%` }}
+          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="absolute inset-0 rounded-r-full bg-gradient-to-r from-transparent via-transparent to-white/40" />
+        </motion.div>
       </div>
     </GlassCard>
   );
