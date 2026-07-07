@@ -9,12 +9,13 @@ const inter = Inter({
 
 
 export const metadata: Metadata = {
-  title: "Futuristic Grade Calculator",
-  description: "Calculate your grades in style",
+  title: "GradeMatrix",
+  description: "Track your courses, grades, and GPA — built for York University students",
 };
 
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ToastProvider } from "@/components/ToastProvider";
 
 export default function RootLayout({
   children,
@@ -29,7 +30,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

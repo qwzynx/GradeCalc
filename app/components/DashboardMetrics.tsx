@@ -11,6 +11,9 @@ interface DashboardMetricsProps {
   averageGpa4_0: string;
   pieData: { name: string, value: number }[];
   lineData: { name: string, mark: number }[];
+  totalCourses: number;
+  activeCourses: number;
+  totalCredits: number;
 }
 
 const PIE_COLORS: Record<string, string> = {
@@ -85,11 +88,11 @@ const CustomLineTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData }: DashboardMetricsProps) {
+export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData, totalCourses, activeCourses, totalCredits }: DashboardMetricsProps) {
   const [is4Scale, setIs4Scale] = useState(false);
   const { theme } = useTheme();
 
-  const textColor = theme === 'dark' ? '#A0A0A0' : '#333333';
+  const textColor = theme === 'dark' ? '#A0A0A0' : '#5D6170';
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb';
 
   return (
@@ -105,6 +108,20 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
         <div className="text-[10px] sm:text-xs mt-2 uppercase tracking-wider text-muted flex items-center gap-1">
           <span>{is4Scale ? "Out of 4.0 Scale" : "Out of 9.0 Scale"}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 group-hover:opacity-100 transition-opacity"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div className="mt-5 pt-4 border-t border-black/10 dark:border-white/10 w-full grid grid-cols-3 gap-2 text-center">
+          <div className="flex flex-col">
+            <span className="text-lg sm:text-xl font-orbitron font-bold text-secondary tabular-nums">{totalCourses}</span>
+            <span className="text-[9px] uppercase tracking-widest text-muted">Courses</span>
+          </div>
+          <div className="flex flex-col border-x border-black/10 dark:border-white/10">
+            <span className="text-lg sm:text-xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{activeCourses}</span>
+            <span className="text-[9px] uppercase tracking-widest text-muted">Active</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg sm:text-xl font-orbitron font-bold text-secondary tabular-nums">{totalCredits}</span>
+            <span className="text-[9px] uppercase tracking-widest text-muted">Credits</span>
+          </div>
         </div>
       </GlassCard>
       <GlassCard className="p-5 sm:p-6 lg:col-span-1 flex flex-col items-center justify-center min-h-[250px]">
@@ -148,7 +165,7 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
               <ResponsiveContainer width="100%" height="100%" key={theme}>
                 <LineChart data={lineData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.5} />
-                  <XAxis dataKey="name" hide />
+                  <XAxis dataKey="name" stroke={textColor} fontSize={9} tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" />
                   <YAxis stroke={textColor} fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} hide />
                   <RechartsTooltip 
                     content={<CustomLineTooltip />}

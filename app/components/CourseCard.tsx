@@ -1,17 +1,18 @@
 "use client";
 
 import GlassCard from "./GlassCard";
-import { Course } from "../types";
-import { User, Activity, CheckCircle2, Bookmark } from "lucide-react";
+import { Course, Assignment } from "../types";
+import { User, Activity, CheckCircle2, Bookmark, ListChecks } from "lucide-react";
 
 interface CourseCardProps {
   course: Course;
+  assignments?: Assignment[];
   finalPercentage: number | null;
   letterGrade: string;
   onClick: () => void;
 }
 
-export default function CourseCard({ course, finalPercentage, letterGrade, onClick }: CourseCardProps) {
+export default function CourseCard({ course, assignments = [], finalPercentage, letterGrade, onClick }: CourseCardProps) {
   const getGradeColor = (percentage: number | null) => {
     if (percentage === null) return "bg-black/5 text-muted dark:bg-white/5 dark:text-muted border-black/10 dark:border-white/10";
     if (percentage >= 80) return "bg-emerald-500/15 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
@@ -32,6 +33,12 @@ export default function CourseCard({ course, finalPercentage, letterGrade, onCli
 
   const gradeBadgeTheme = getGradeColor(finalPercentage);
   const progressBarTheme = getProgressColor(finalPercentage);
+
+  const gradedCount = assignments.filter(a => a.mark !== null && a.mark !== undefined).length;
+  const gradedWeight = assignments.reduce(
+    (sum, a) => sum + ((a.mark !== null && a.mark !== undefined && a.weight) ? a.weight : 0),
+    0
+  );
 
   return (
     <GlassCard 
@@ -60,8 +67,11 @@ export default function CourseCard({ course, finalPercentage, letterGrade, onCli
           </div>
           
           {/* Prominent Grade Badge */}
-          <div className={`flex flex-col items-center justify-center w-14 h-14 shrink-0 rounded-2xl border shadow-sm ${gradeBadgeTheme}`}>
-            <span className="text-xl font-bold font-orbitron">{letterGrade}</span>
+          <div className={`flex flex-col items-center justify-center w-16 h-16 shrink-0 rounded-2xl border shadow-sm ${gradeBadgeTheme}`}>
+            <span className="text-xl font-bold font-orbitron leading-none">{letterGrade}</span>
+            <span className="text-[10px] font-semibold mt-1 opacity-80 tabular-nums">
+              {finalPercentage !== null ? `${finalPercentage.toFixed(1)}%` : "—"}
+            </span>
           </div>
         </div>
 
@@ -84,6 +94,20 @@ export default function CourseCard({ course, finalPercentage, letterGrade, onCli
               <span className="text-[10px] uppercase tracking-widest opacity-60">Status</span>
               <span className={course.in_progress ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-secondary font-medium"}>
                 {course.in_progress ? "Active" : "Archived"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+              <ListChecks className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-widest opacity-60">Progress</span>
+              <span className="text-secondary font-medium">
+                {assignments.length === 0
+                  ? "No assignments yet"
+                  : `${gradedCount} of ${assignments.length} graded · ${Math.round(gradedWeight)}% weight`}
               </span>
             </div>
           </div>

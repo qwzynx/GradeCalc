@@ -2,11 +2,17 @@
 
 :root {
   --color-york-red: #E31D2B;
-  
+
+  /* Soft ink instead of pure black: since --color-black maps to
+     --text-primary, every black/5..black/20 border and overlay in the app
+     inherits this softer, slightly cool tone in light mode. */
   --surface: #FFFFFF;
-  --text-primary: #000000;
-  --text-muted: #333333;
-  --bg-color: #F2F2F2;
+  --text-primary: #1D1E26;
+  --text-muted: #5D6170;
+  --bg-color: #F3F4F7;
+
+  --scrollbar-track: rgba(29, 30, 38, 0.05);
+  --scrollbar-thumb: rgba(29, 30, 38, 0.18);
 }
 
 .dark {
@@ -14,6 +20,9 @@
   --text-primary: #FFFFFF;
   --text-muted: #A0A0A0;
   --bg-color: #121212;
+
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
 }
 
 @theme inline {
@@ -37,9 +46,18 @@
 }
 
 body {
-  background: var(--bg-color);
+  background-color: var(--bg-color);
+  /* Light mode only: a faint York-red glow at the top and a gentle vertical
+     falloff so white cards stand out against the page instead of blending in. */
+  background-image:
+    radial-gradient(1200px 600px at 50% -200px, rgba(227, 29, 43, 0.05), transparent 65%),
+    linear-gradient(180deg, #F7F8FB 0%, #F0F1F5 100%);
   color: var(--text-primary);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+.dark body {
+  background-image: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -91,12 +109,12 @@ button:active:not(:disabled),
 }
 
 *::-webkit-scrollbar-track {
-  background: var(--color-light-grey);
+  background: var(--scrollbar-track);
   border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--color-dark-grey);
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 

@@ -11,6 +11,7 @@ import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment, EclassSyncPlan } from "./types";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeProvider";
+import { useToast } from "@/components/ToastProvider";
 import { LogOut, User as UserIcon, Moon, Sun, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
@@ -18,6 +19,7 @@ import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
 export default function Home() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [loading, setLoading] = useState(true);
@@ -91,6 +93,7 @@ export default function Home() {
       setAssignments(assignData);
     } catch (error) {
       console.error("Error fetching courses", error);
+      showToast("Could not load your courses. Check your connection and refresh.", "error");
     } finally {
       setLoading(false);
     }
@@ -129,11 +132,13 @@ export default function Home() {
         .insert([newCourse]);
         
       if (error) throw error;
-      
+
       setShowAddForm(false);
       fetchCourses();
+      showToast(`Added ${newCourse.name}`);
     } catch (error) {
       console.error("Error adding course", error);
+      showToast("Could not add the course. Please try again.", "error");
     }
   };
 
@@ -412,6 +417,8 @@ export default function Home() {
   };
 
   const { averageGpa, averageGpa4_0, pieData, lineData } = calculateDashboardData(filteredCourses);
+  const activeCourseCount = filteredCourses.filter(c => c.in_progress).length;
+  const totalCreditsCount = filteredCourses.reduce((sum, c) => sum + (c.credits || 3), 0);
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -478,7 +485,15 @@ export default function Home() {
 
       <main>
         {!loading && courses.length > 0 && (
-          <DashboardMetrics averageGpa={averageGpa} averageGpa4_0={averageGpa4_0} pieData={pieData} lineData={lineData} />
+          <DashboardMetrics
+            averageGpa={averageGpa}
+            averageGpa4_0={averageGpa4_0}
+            pieData={pieData}
+            lineData={lineData}
+            totalCourses={filteredCourses.length}
+            activeCourses={activeCourseCount}
+            totalCredits={totalCreditsCount}
+          />
         )}
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -540,8 +555,18 @@ export default function Home() {
                    <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
                    <span className="text-3xl text-primary font-bold">Ø</span>
                 </div>
-                <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses found.</p>
-                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a new course to begin tracking.</p>
+                <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses yet.</p>
+                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a course manually or pull everything in from eClass.</p>
+                <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
+                  <NeonButton onClick={() => setShowAddForm(true)}>Add Your First Course</NeonButton>
+                  <button
+                    onClick={() => setShowEclassSync(true)}
+                    className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+                  >
+                    <RefreshCw className="w-4 h-4 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
+                    <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync from eClass</span>
+                  </button>
+                </div>
               </div>
             ) : filteredCourses.length === 0 ? (
               <div className="text-center py-20 flex flex-col items-center">
@@ -594,6 +619,7 @@ export default function Home() {
                             <CourseCard
                               key={uniqueId}
                               course={course}
+                              assignments={course.id ? assignments[course.id] || [] : []}
                               finalPercentage={finalPercentage}
                               letterGrade={letterGrade}
                               onClick={() => router.push(`/course/${uniqueId}`)}

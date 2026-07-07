@@ -217,7 +217,7 @@ export default function DiagnosticMatrix({
                   animationDuration={300}
                   animationEasing="ease-out"
                 />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#333333' }} />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#5D6170' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>

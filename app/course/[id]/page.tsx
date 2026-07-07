@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeProvider";
+import { useToast } from "@/components/ToastProvider";
 import { LogOut, Sun, Moon } from "lucide-react";
 import NeonButton from "../../components/NeonButton";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
@@ -31,6 +32,7 @@ export default function CourseDetail() {
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [targetGrade, setTargetGrade] = useState<string>("80");
   const { user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const userId = user?.id;
   
   // Assignment input modes
@@ -100,6 +102,7 @@ export default function CourseDetail() {
 
     } catch (error) {
       console.error("Error fetching course data", error);
+      showToast("Could not load this course. Check your connection and refresh.", "error");
     } finally {
       setLoading(false);
     }
@@ -143,8 +146,10 @@ export default function CourseDetail() {
       
       setEditingCourse(false);
       fetchCourseData();
+      showToast("Course updated");
     } catch (error) {
       console.error("Error updating course", error);
+      showToast("Could not update the course. Please try again.", "error");
     }
   };
 
@@ -160,10 +165,12 @@ export default function CourseDetail() {
         .eq('user_id', userId);
         
       if (error) throw error;
-      
+
+      showToast("Course deleted");
       router.push('/');
     } catch (error) {
       console.error("Error deleting course", error);
+      showToast("Could not delete the course. Please try again.", "error");
     }
   };
 
@@ -185,8 +192,10 @@ export default function CourseDetail() {
         
       setForceGradeOpen(false);
       fetchCourseData();
+      showToast(`Grade override set to ${markValue}%`);
     } catch (error) {
       console.error("Error setting force grade", error);
+      showToast("Could not set the grade override. Please try again.", "error");
     }
   };
 
@@ -203,8 +212,10 @@ export default function CourseDetail() {
         
       setForceGradeOpen(false);
       fetchCourseData();
+      showToast("Grade override removed");
     } catch (error) {
       console.error("Error removing force grade", error);
+      showToast("Could not remove the grade override. Please try again.", "error");
     }
   };
 
@@ -286,8 +297,10 @@ export default function CourseDetail() {
       setInputModes(["percentage"]);
       setSplitQuantity(1);
       fetchCourseData();
+      showToast(`Added ${baseName}`);
     } catch (error) {
       console.error("Error adding assignment", error);
+      showToast("Could not add the assignment. Please try again.", "error");
     }
   };
 
@@ -331,8 +344,10 @@ export default function CourseDetail() {
         
       setEditingAssignment(null);
       fetchCourseData();
+      showToast("Assignment updated");
     } catch (error) {
       console.error("Error updating assignment", error);
+      showToast("Could not update the assignment. Please try again.", "error");
     }
   };
 
@@ -350,8 +365,10 @@ export default function CourseDetail() {
         
       setEditingAssignment(null);
       fetchCourseData();
+      showToast(`Deleted ${assignment.name}`);
     } catch (error) {
       console.error("Error deleting assignment", error);
+      showToast("Could not delete the assignment. Please try again.", "error");
     }
   };
 
@@ -391,8 +408,8 @@ export default function CourseDetail() {
             onClick={() => router.push('/')} 
             className="w-full sm:w-auto group flex items-center justify-center gap-2 px-3 py-2 sm:py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[40px]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            System Uplink
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+            Back to Dashboard
           </button>
           <div className="text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)] leading-tight">
@@ -487,37 +504,76 @@ export default function CourseDetail() {
           {/* Assignments Section — fills remaining height, scrollable */}
           <div className="flex flex-col gap-3 min-h-0">
             <div className="flex justify-between items-center border-b border-black/10 pb-2">
-              <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
-              <button 
+              <div className="flex items-center gap-3 min-w-0">
+                <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
+                {assignments.length > 0 && (
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 ${
+                      totalAssignmentWeight > 100
+                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
+                        : totalAssignmentWeight === 100
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                          : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-muted'
+                    }`}
+                    title={totalAssignmentWeight > 100 ? "Total weight exceeds 100% — the extra counts as bonus" : "Total weight of all assignments"}
+                  >
+                    {parseFloat(totalAssignmentWeight.toFixed(2))}% of 100% weighted
+                  </span>
+                )}
+              </div>
+              <button
                 onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
-                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 text-muted hover:text-secondary"
+                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-muted hover:text-primary bg-black/5 hover:bg-primary/10 border border-transparent hover:border-primary/30 shrink-0"
               >
                 <span>+ Add</span>
               </button>
             </div>
 
-            <div className="overflow-y-auto flex flex-col gap-2 max-h-[300px] pr-1">
+            <div className="overflow-y-auto flex flex-col gap-2 max-h-[420px] pr-1">
               {assignments.length > 0 ? (
-                assignments.map(a => (
-                  <div key={a.id} className="flex justify-between items-center p-3 bg-surface/70 border border-surface rounded-xl shadow-sm hover:border-black/15 backdrop-blur-lg backdrop-filter transition-all hover:shadow-md group/item relative shrink-0">
-                    <div className="flex flex-col">
-                      <span className="text-secondary text-base font-bold">{a.name}</span>
-                      <span className="text-[10px] text-muted uppercase tracking-wider">
-                        M: {a.mark !== null && a.mark !== undefined ? <span className="text-secondary">{a.mark.toFixed(2)}%</span> : 'N/A'} • W: <span className="text-secondary">{a.weight?.toFixed(2)}%</span>
-                      </span>
+                assignments.map(a => {
+                  const hasMark = a.mark !== null && a.mark !== undefined;
+                  const markTheme = !hasMark
+                    ? "bg-black/5 dark:bg-white/5 text-muted border-black/10 dark:border-white/10"
+                    : a.mark! >= 80
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                      : a.mark! >= 70
+                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+                        : a.mark! >= 50
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                          : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+                  return (
+                    <div key={a.id} className="flex justify-between items-center gap-3 p-3 bg-surface/70 border border-surface rounded-xl shadow-sm hover:border-black/15 backdrop-blur-lg backdrop-filter transition-all hover:shadow-md group/item relative shrink-0">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-secondary text-base font-bold truncate" title={a.name}>{a.name}</span>
+                        <span className="text-[10px] text-muted uppercase tracking-wider">
+                          Weight: <span className="text-secondary">{a.weight !== null && a.weight !== undefined ? `${parseFloat(a.weight.toFixed(2))}%` : '—'}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`min-w-[64px] text-center text-xs font-bold font-orbitron tabular-nums px-2 py-1.5 rounded-lg border ${markTheme}`}>
+                          {hasMark ? `${parseFloat(a.mark!.toFixed(2))}%` : 'Pending'}
+                        </span>
+                        <button
+                          onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
+                          className="p-2 text-muted hover:text-secondary bg-black/5 hover:bg-black/10 rounded transition-colors"
+                          aria-label={`Edit ${a.name}`}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                        </button>
+                      </div>
                     </div>
-                    <button 
-                      onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
-                      className="p-2 text-muted hover:text-secondary bg-black/5 hover:bg-black/10 rounded transition-colors shrink-0"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <div className="text-center py-8 text-muted bg-surface/50 rounded-xl border border-black/10 outline-dashed outline-1 outline-black/20 outline-offset-[-5px] shadow-sm">
-                  <span className="text-2xl mb-2 opacity-50 block">📂</span>
-                  <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">Archive Empty</p>
+                <div className="text-center py-8 text-muted bg-surface/50 rounded-xl border border-black/10 outline-dashed outline-1 outline-black/20 outline-offset-[-5px] shadow-sm flex flex-col items-center gap-3">
+                  <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">No assignments yet</p>
+                  <button
+                    onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
+                    className="text-[10px] uppercase tracking-widest font-bold text-primary border border-primary/30 rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors"
+                  >
+                    + Add your first assignment
+                  </button>
                 </div>
               )}
             </div>
