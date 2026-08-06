@@ -6,6 +6,7 @@ import NeonButton from "./components/NeonButton";
 import DashboardMetrics from "./components/DashboardMetrics";
 import AddCourseForm from "./components/AddCourseForm";
 import EclassSync from "./components/EclassSync";
+import SyllabusImport from "./components/SyllabusImport";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment, EclassSyncPlan } from "./types";
@@ -25,6 +26,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEclassSync, setShowEclassSync] = useState(false);
+  const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -139,6 +141,54 @@ export default function Home() {
     } catch (error) {
       console.error("Error adding course", error);
       showToast("Could not add the course. Please try again.", "error");
+    }
+  };
+
+  const handleSyllabusImport = async (
+    courseData: { name: string; prof_name?: string; semester?: string; year?: number; credits?: number; category?: string | null },
+    assignmentsData: { name: string; weight: number }[]
+  ) => {
+    try {
+      const newCourse: Partial<Course> = {
+        user_id: userId,
+        name: courseData.name,
+        year: courseData.year || new Date().getFullYear(),
+        semester: courseData.semester || "Fall",
+        in_progress: true,
+      };
+      if (courseData.prof_name) newCourse.prof_name = courseData.prof_name;
+      if (courseData.category) newCourse.category = courseData.category;
+      if (courseData.credits) newCourse.credits = courseData.credits;
+
+      const { data, error } = await supabase
+        .from('courses')
+        .insert([newCourse])
+        .select();
+
+      if (error) throw error;
+
+      const courseId = data?.[0]?.id;
+      if (courseId && assignmentsData.length > 0) {
+        const assignmentsToInsert = assignmentsData.map(a => ({
+          course_id: courseId,
+          name: a.name,
+          weight: a.weight,
+          mark: null,
+        }));
+
+        const { error: assignError } = await supabase
+          .from('assignments')
+          .insert(assignmentsToInsert);
+
+        if (assignError) throw assignError;
+      }
+
+      setShowSyllabusImport(false);
+      fetchCourses();
+      showToast(`Imported ${newCourse.name} from syllabus`);
+    } catch (error) {
+      console.error("Error importing syllabus", error);
+      showToast("Could not import the syllabus. Please try again.", "error");
     }
   };
 
@@ -453,6 +503,15 @@ export default function Home() {
               Add Course
             </NeonButton>
             <button
+              onClick={() => setShowSyllabusImport(true)}
+              className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+              </svg>
+              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
+            </button>
+            <button
               onClick={() => setShowEclassSync(true)}
               className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
             >
@@ -532,6 +591,18 @@ export default function Home() {
               />
             )}
 
+            {showSyllabusImport && (
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+                onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
+              >
+                <SyllabusImport
+                  onImport={handleSyllabusImport}
+                  onCancel={() => setShowSyllabusImport(false)}
+                />
+              </div>
+            )}
+
             {showEclassSync && (
               <div
                 className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
@@ -560,9 +631,18 @@ export default function Home() {
                    <span className="text-3xl text-primary font-bold">Ø</span>
                 </div>
                 <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses yet.</p>
-                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a course manually or pull everything in from eClass.</p>
+                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a course manually, import a syllabus, or pull everything in from eClass.</p>
                 <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
                   <NeonButton onClick={() => setShowAddForm(true)}>Add Your First Course</NeonButton>
+                  <button
+                    onClick={() => setShowSyllabusImport(true)}
+                    className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+                    </svg>
+                    <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Import Syllabus</span>
+                  </button>
                   <button
                     onClick={() => setShowEclassSync(true)}
                     className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
