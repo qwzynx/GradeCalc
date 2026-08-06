@@ -352,6 +352,9 @@ export default function Home() {
     const letterCounts: Record<string, number> = {
       'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0
     };
+    const letterCredits: Record<string, number> = {
+      'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0
+    };
 
     const semesterOrder: Record<string, number> = {
       'Winter': 1,
@@ -395,6 +398,7 @@ export default function Home() {
           coursesFor4_0.push({ letter: gradeInfo4.letter, credits });
           // Use 9.0 letter grades for pie chart to prevent minus grades showing
           letterCounts[gradeInfo9.letter] = (letterCounts[gradeInfo9.letter] || 0) + 1;
+          letterCredits[gradeInfo9.letter] = (letterCredits[gradeInfo9.letter] || 0) + credits;
         }
       }
     });
@@ -404,7 +408,7 @@ export default function Home() {
     
     const pieData = Object.entries(letterCounts)
       .filter(([, count]) => count > 0)
-      .map(([name, value]) => ({ name, value }));
+      .map(([name, value]) => ({ name, value, credits: letterCredits[name] || 0 }));
 
     const lineData = Object.entries(timelineDataMap)
       .sort((a, b) => a[1].order - b[1].order)

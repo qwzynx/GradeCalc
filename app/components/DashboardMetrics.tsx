@@ -26,7 +26,7 @@ import { useTheme } from "@/components/ThemeProvider";
 interface DashboardMetricsProps {
   averageGpa: string;
   averageGpa4_0: string;
-  pieData: { name: string, value: number }[];
+  pieData: { name: string, value: number, credits: number }[];
   lineData: { name: string, mark: number }[];
   totalCourses: number;
   activeCourses: number;
@@ -71,13 +71,12 @@ const CustomPieTooltip = ({ active, payload, total }: any) => (
         </div>
         <div className="flex items-baseline gap-1.5">
           <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
-            {p[0].value} Course{p[0].value > 1 ? 's' : ''}
+            {p[0].payload.credits} Credit{p[0].payload.credits !== 1 ? 's' : ''}
           </span>
-          {total > 0 && (
-            <span className="text-[10px] font-bold text-muted tabular-nums">
-              · {((p[0].value / total) * 100).toFixed(0)}%
-            </span>
-          )}
+          <span className="text-[10px] font-bold text-muted tabular-nums">
+            · {p[0].value} Course{p[0].value > 1 ? 's' : ''}
+            {total > 0 && ` · ${((p[0].value / total) * 100).toFixed(0)}%`}
+          </span>
         </div>
       </div>
     )}
