@@ -1,163 +1,221 @@
 # 📊 GradeMatrix
 
-GradeMatrix is an advanced, high-performance academic tracker and syllabus parsing platform. It features a modern neon-glassmorphic user interface, AI-powered syllabus extraction, interactive grading diagnostics, and robust authentication. Designed with students in mind, it simplifies academic planning and target-grade calculations.
+**GradeMatrix** is a grade-tracking and academic-planning app for university students. It calculates live course averages, projects the score you need on remaining work to hit a target grade, converts between GPA scales, and can fill itself in automatically by parsing a syllabus with AI or by syncing directly with York University's eClass (Moodle).
+
+<p>
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js&logoColor=white">
+  <img alt="React" src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3ECF8E?style=flat-square&logo=supabase&logoColor=white">
+  <img alt="Google Gemini" src="https://img.shields.io/badge/Gemini_API-AI_parsing-8E75B2?style=flat-square&logo=googlegemini&logoColor=white">
+  <img alt="Playwright" src="https://img.shields.io/badge/Playwright-eClass_sync-2EAD33?style=flat-square&logo=playwright&logoColor=white">
+</p>
 
 ---
 
 ## ✨ Key Features
 
-### 1. 🤖 AI-Powered Syllabus Parsing
-Upload any university syllabus in PDF format, and GradeMatrix's AI service (integrated with Gemini) will automatically:
-* Identify course metadata (course code, name, professor, semester, calendar year, and credits).
-* Parse the grading scheme and individual assignments.
-* Apply splitting rules to subdivide exams, projects, and quiz aggregates into discrete tracking items.
-* Check out the implementation in [app/api/parse-syllabus/route.ts](file:///G:/main-projects/grade-calc-2/app/api/parse-syllabus/route.ts) and the frontend wrapper [app/components/SyllabusImport.tsx](file:///G:/main-projects/grade-calc-2/app/components/SyllabusImport.tsx).
+### 1. 🧮 Diagnostic Matrix per course
+For every course, [`app/components/DiagnosticMatrix.tsx`](app/components/DiagnosticMatrix.tsx) computes:
+* **Current average** — live-calculated from graded assignments only.
+* **Remaining weight** — how much of the course's grade is still ungraded.
+* **Target grade planner** — enter a desired final grade and see the exact average required on the remaining weight to reach it.
+* **Maximum potential mark** — the best possible final grade if everything outstanding is scored 100%.
+* **Forced grade overrides** — pin a course's final mark manually to simulate an outcome.
+* **Bonus marks** — flag an assignment `is_bonus` (e.g. a 5% course bonus) and its weight sits outside the course's normal 100%; the earned share (`mark × weight`) is added on top of the final average, which also lowers the score needed on whatever's left to hit a target. See [`lib/calculations.ts`](lib/calculations.ts).
 
-### 2. 🧮 Dual-Scale GPA Calculations
-GradeMatrix supports dual GPA calculations simultaneously:
-* **Standard 4.0 Scale Cumulative GPA**: Uses standard North American Letter Grade mappings.
-* **York University 9.0 Scale GPA**: Converts averages according to York University's specific 9-point grading system (where A+=9, A=8, B+=7, B=6, C+=5, C=4, D+=3, D=2, F=0).
-* Powered by core logic in [lib/calculations.ts](file:///G:/main-projects/grade-calc-2/lib/calculations.ts).
+### 2. 🔁 eClass Sync (York University)
+[`app/components/EclassSync.tsx`](app/components/EclassSync.tsx) can log into `eclass.yorku.ca` on your behalf and pull your real grades in:
+* A headless browser (Playwright) drives the Passport York login and streams Duo two-factor push status back to the UI over NDJSON.
+* Scraped grade items are matched against your existing courses/assignments by an AI-assisted plan, shown as a **diff-style review** (create vs. update, including any mark decreases) before anything is written.
+* Unmatched eClass courses can be created directly from the sync plan.
+* Sync attempts are rate-limited server-side ([`lib/rate-limit.ts`](lib/rate-limit.ts)) since each login triggers a real Duo push against Passport York.
+* Implemented across [`app/api/eclass-sync/route.ts`](app/api/eclass-sync/route.ts), [`lib/eclass.ts`](lib/eclass.ts), and [`lib/eclass-login.ts`](lib/eclass-login.ts).
 
-### 3. 🎯 Diagnostic Matrix Panel
-For every course, the [app/components/DiagnosticMatrix.tsx](file:///G:/main-projects/grade-calc-2/app/components/DiagnosticMatrix.tsx) offers deep analytical metrics:
-* **Current Average**: Live-calculated score based on graded coursework.
-* **Remaining Weight Box**: Percentage of course weight yet to be evaluated.
-* **Target Grade Planner**: Enter a desired final grade to dynamically calculate the exact average required on remaining components.
-* **Maximum Potential Mark**: Real-time projection of the highest possible grade if you score 100% on all outstanding assessments.
-* **Forced Grade Overrides**: Override automated calculations to simulate specific final grade outcomes.
+### 3. 🤖 AI-Powered Syllabus Parsing
+Upload a syllabus PDF and [`app/components/SyllabusImport.tsx`](app/components/SyllabusImport.tsx) (backed by the Gemini API) will:
+* Identify course metadata — code, name, professor, semester, year, and credits.
+* Parse the grading scheme into individual weighted assignments.
+* Split aggregated categories (e.g. "Quizzes 20%") into discrete trackable items.
+* See [`app/api/parse-syllabus/route.ts`](app/api/parse-syllabus/route.ts) and [`lib/syllabus.ts`](lib/syllabus.ts).
 
-### 4. 📈 Dynamic Visualization Charts
-Interactive graphics powered by **Recharts** populate the dashboard:
-* **Grade Distribution**: A custom-themed pie chart highlighting your course standing count.
-* **Performance Timeline**: A timeline charting your historical term-by-term GPA trends.
-* Implemented in [app/components/DashboardMetrics.tsx](file:///G:/main-projects/grade-calc-2/app/components/DashboardMetrics.tsx).
+### 4. 🎓 Dual-Scale GPA Calculations
+* **Standard 4.0 scale** cumulative GPA using North American letter-grade mappings.
+* **York University 9.0 scale** GPA (A+ = 9 … F = 0).
+* Both are aggregated across courses weighted by credit hours in [`lib/calculations.ts`](lib/calculations.ts).
 
-### 5. 🔍 Multi-Tiered Filtering
-Search through courses dynamically or apply persistent filters based on:
-* Semester (Fall, Winter, Summer, etc.)
-* Academic Year / Calendar Year
-* Custom course department categories (e.g., `LE/EECS`, `SC/MATH`)
-* Course Status (In-Progress vs. Archived)
-* Filters are stored in browser localStorage. See [app/components/CourseFilters.tsx](file:///G:/main-projects/grade-calc-2/app/components/CourseFilters.tsx).
+### 5. 📈 Dynamic Visualization Charts
+Interactive charts on the dashboard, powered by **Recharts**:
+* **Grade distribution** — a donut chart of course standing, weighted by credits.
+* **Performance timeline** — a term-by-term GPA trend area chart.
+* Implemented in [`app/components/DashboardMetrics.tsx`](app/components/DashboardMetrics.tsx).
+
+### 6. 🔍 Multi-Tiered Filtering
+Filter and search the course list by:
+* Semester (Fall, Winter, Full Summer, Summer 1/2)
+* Academic year
+* Custom department category (e.g. `LE/EECS`, `SC/MATH`)
+* Status (in-progress vs. archived)
+* Filters persist in `localStorage`. See [`app/components/CourseFilters.tsx`](app/components/CourseFilters.tsx).
+
+### 7. 🔐 Authentication
+Email/password auth via Supabase, with API routes independently verifying the caller's session token server-side. See [`app/login/page.tsx`](app/login/page.tsx), [`components/AuthProvider.tsx`](components/AuthProvider.tsx), and [`lib/api-auth.ts`](lib/api-auth.ts).
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend Framework**: Next.js 16 (App Router) & React 19
-* **Styling & UI**: Tailwind CSS v4, Lucide React icons, and Framer Motion for smooth micro-animations
-* **Data Visualization**: Recharts (fully responsive charts)
-* **Backend Database & Auth**: Supabase (utilizing postgres tables, row-level security, and authentication)
-* **Artificial Intelligence**: Google Gemini API via `@google/generative-ai`
+| Layer | Technology |
+|---|---|
+| Framework | [Next.js 16](https://nextjs.org/) (App Router) + [React 19](https://react.dev/) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 4, [Lucide](https://lucide.dev/) icons, [Framer Motion](https://www.framer.com/motion/) |
+| Charts | [Recharts](https://recharts.org/) |
+| Database & Auth | [Supabase](https://supabase.com/) (Postgres, row-level security, auth) |
+| AI | Google Gemini API (`@google/generative-ai`) — syllabus parsing & sync matching |
+| Browser automation | Playwright / `playwright-core` + `@sparticuz/chromium` — headless eClass login |
+| PDF parsing | `pdf-parse` |
+| Linting | ESLint 9 (`eslint-config-next`) |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* Node.js v18+ or later
-* A Supabase project with Database Tables
-* A Google Gemini API Key
+* Node.js 18 or later
+* A [Supabase](https://supabase.com/) project
+* A [Google Gemini](https://ai.google.dev/) API key
+* (Optional) A York University account, only if you want to use eClass Sync
 
 ### Installation
 
-1. **Clone the repository and install dependencies**:
+1. **Clone the repository and install dependencies**
    ```bash
-   git clone <repository-url>
-   cd grade-calc-2
+   git clone https://github.com/qwzynx/GradeCalc.git
+   cd GradeCalc
    npm install
    ```
 
-2. **Configure Environment Variables**:
-   Create a [`.env.local`](file:///G:/main-projects/grade-calc-2/.env.local) file in the root directory and add the following keys:
+2. **Configure environment variables**
+
+   Create a `.env.local` file in the project root:
    ```env
    NEXT_PUBLIC_SUPABASE_URL="https://your-project-id.supabase.co"
-   NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
    NEXT_PUBLIC_SITE_URL="http://localhost:3000"
    GEMINI_API_KEY="your-gemini-api-key"
    ```
 
-3. **Database Tables Setup**:
-   Configure two tables in your Supabase database:
-   
-   * **`courses`**:
-     * `id`: uuid (Primary Key)
-     * `user_id`: uuid (Foreign Key referencing auth.users)
-     * `name`: text
-     * `prof_name`: text (optional)
-     * `credits`: numeric (default 3.0)
-     * `mark`: numeric (optional, used for overrides)
-     * `in_progress`: boolean (default true)
-     * `year`: integer
-     * `semester`: text
-     * `category`: text (optional)
-   
-   * **`assignments`**:
-     * `id`: uuid (Primary Key)
-     * `course_id`: uuid (Foreign Key referencing courses.id, cascade delete)
-     * `name`: text
-     * `mark`: numeric (optional)
-     * `weight`: numeric
+   | Variable | Purpose |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key (used client-side and to verify user JWTs server-side) |
+   | `NEXT_PUBLIC_SITE_URL` | Base URL of the app (used in Supabase auth redirects) |
+   | `GEMINI_API_KEY` | Google Gemini API key for syllabus parsing and eClass sync matching |
 
-4. **Launch the Development Server**:
+3. **Set up the database**
+
+   Run the SQL migrations in [`supabase/migrations/`](supabase/migrations/) against your Supabase project, in order, via the SQL editor or `supabase db push`:
+
+   | Migration | Adds |
+   |---|---|
+   | [`20260706_eclass_sync.sql`](supabase/migrations/20260706_eclass_sync.sql) | `eclass_course_id` / `eclass_item_name` sync keys, `eclass_syncs` history table + RLS |
+   | [`20260706_eclass_dedup_constraints.sql`](supabase/migrations/20260706_eclass_dedup_constraints.sql) | Unique indexes preventing duplicate synced courses/assignments |
+   | [`20260808_assignment_bonus.sql`](supabase/migrations/20260808_assignment_bonus.sql) | `is_bonus` boolean column on `assignments` |
+
+   Your `courses` and `assignments` tables should end up with roughly this shape:
+
+   * **`courses`**
+     * `id` — uuid, primary key
+     * `user_id` — uuid, references `auth.users`
+     * `name` — text
+     * `prof_name` — text, optional
+     * `credits` — numeric, default `3.0`
+     * `mark` — numeric, optional (manual override)
+     * `in_progress` — boolean, default `true`
+     * `year` — integer
+     * `semester` — text
+     * `category` — text, optional
+     * `eclass_course_id` — text, optional (eClass sync key)
+
+   * **`assignments`**
+     * `id` — uuid, primary key
+     * `course_id` — uuid, references `courses.id`, cascade delete
+     * `name` — text
+     * `mark` — numeric, optional
+     * `weight` — numeric
+     * `is_bonus` — boolean, default `false` — weight sits outside the course's 100%
+     * `eclass_item_name` — text, optional (eClass sync key)
+
+4. **Run the development server**
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) to view the application.
+   Open [http://localhost:3000](http://localhost:3000).
 
-5. **Build for Production**:
-   ```bash
-   npm run build
-   npm run start
-   ```
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the Next.js dev server |
+| `npm run build` | Build for production |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
 ---
 
-## 📂 Project Architecture
+## 📂 Project Structure
 
 ```
-grade-calc-2/
-├── app/                      # Next.js App Router root
+GradeCalc/
+├── app/
 │   ├── api/
-│   │   └── parse-syllabus/   # API route for PDF parsing via Gemini LLM
-│   │       └── route.ts      # [route.ts](file:///G:/main-projects/grade-calc-2/app/api/parse-syllabus/route.ts)
-│   ├── components/           # Core dashboard and analytics UI components
+│   │   ├── eclass-sync/route.ts      # eClass login, scrape, and AI-matched sync plan
+│   │   └── parse-syllabus/route.ts   # Syllabus PDF -> AI-parsed courses/assignments
+│   ├── components/
 │   │   ├── AddCourseForm.tsx
 │   │   ├── AssignmentForm.tsx
 │   │   ├── CourseCard.tsx
-│   │   ├── CourseFilters.tsx # [CourseFilters.tsx](file:///G:/main-projects/grade-calc-2/app/components/CourseFilters.tsx)
-│   │   ├── DashboardMetrics.tsx
-│   │   ├── DiagnosticMatrix.tsx # [DiagnosticMatrix.tsx](file:///G:/main-projects/grade-calc-2/app/components/DiagnosticMatrix.tsx)
-│   │   ├── SyllabusImport.tsx# [SyllabusImport.tsx](file:///G:/main-projects/grade-calc-2/app/components/SyllabusImport.tsx)
-│   │   └── ...
-│   ├── course/
-│   │   └── [id]/             # Dynamic course detail dashboard
-│   │       └── page.tsx      # [page.tsx](file:///G:/main-projects/grade-calc-2/app/course/%5Bid%5D/page.tsx)
-│   ├── globals.css           # Global theme styles
-│   ├── layout.tsx            # Main layout wrapper
-│   ├── page.tsx              # Main dashboard index [page.tsx](file:///G:/main-projects/grade-calc-2/app/page.tsx)
-│   └── types.ts              # Core types definition [types.ts](file:///G:/main-projects/grade-calc-2/app/types.ts)
-├── components/               # Global layout providers
-│   ├── AuthProvider.tsx      # Supabase Auth Provider [AuthProvider.tsx](file:///G:/main-projects/grade-calc-2/components/AuthProvider.tsx)
-│   └── ThemeProvider.tsx     # Light/Dark Theme management [ThemeProvider.tsx](file:///G:/main-projects/grade-calc-2/components/ThemeProvider.tsx)
-├── lib/                      # Core helpers
-│   ├── calculations.ts       # Grade math helper [calculations.ts](file:///G:/main-projects/grade-calc-2/lib/calculations.ts)
-│   └── supabase.ts           # Supabase Client initialization [supabase.ts](file:///G:/main-projects/grade-calc-2/lib/supabase.ts)
-└── package.json              # Dependencies and scripts [package.json](file:///G:/main-projects/grade-calc-2/package.json)
+│   │   ├── CourseFilters.tsx
+│   │   ├── DashboardMetrics.tsx      # Recharts dashboard (distribution + timeline)
+│   │   ├── DiagnosticMatrix.tsx      # Per-course grade diagnostics
+│   │   ├── EclassSync.tsx            # eClass sync flow UI (login -> Duo -> review -> apply)
+│   │   ├── EditCourseForm.tsx
+│   │   ├── SyllabusImport.tsx        # AI syllabus import UI
+│   │   └── ...                       # Shared UI: GlassCard, NeonButton, NumberInput, etc.
+│   ├── course/[id]/page.tsx          # Course detail dashboard
+│   ├── login/page.tsx                # Supabase auth (sign in / sign up)
+│   ├── layout.tsx
+│   ├── page.tsx                      # Main dashboard
+│   └── types.ts                      # Shared TypeScript types
+├── components/                       # App-wide providers
+│   ├── AuthProvider.tsx
+│   ├── ThemeProvider.tsx
+│   └── ToastProvider.tsx
+├── lib/
+│   ├── api-auth.ts                   # Server-side Supabase JWT verification
+│   ├── calculations.ts               # Grade math: averages, targets, GPA scales, bonuses
+│   ├── eclass.ts                     # eClass scraping + AI sync-plan generation
+│   ├── eclass-login.ts               # Playwright-driven Passport York + Duo login
+│   ├── rate-limit.ts                 # In-memory sliding-window rate limiter
+│   ├── supabase.ts                   # Supabase client (browser)
+│   └── syllabus.ts                   # Gemini-based PDF syllabus parsing
+├── supabase/migrations/              # SQL migrations (run manually against your project)
+└── package.json
 ```
 
 ---
 
-## 💻 Code Walkthrough & Logic
+## 💻 Core Logic
 
-### Grade Calculations
-The project utilizes helper functions defined in [lib/calculations.ts](file:///G:/main-projects/grade-calc-2/lib/calculations.ts):
-* `[calculateGrades](file:///G:/main-projects/grade-calc-2/lib/calculations.ts#L36)` takes an array of course assignments alongside a target grade. It evaluates the current average, remaining weight, required scores on future evaluations to meet the target, and York University scale conversions.
-* `[calculateCumulativeGPA4_0](file:///G:/main-projects/grade-calc-2/lib/calculations.ts#L167)` aggregates final grades weighted by course credit hours and computes standard 4.0 cumulative GPA.
+### Grade calculations ([`lib/calculations.ts`](lib/calculations.ts))
+* `calculateGrades(assignments, targetGradeInput)` — takes a course's assignments (with `weight`, optional `percentage`, and optional `is_bonus`) and a target grade, and returns the current average, remaining weight, bonus points earned/potential, the score needed on remaining work to hit the target (or just pass at 50), and the York 9.0-scale GPA/letter.
+* `calculateCumulativeGPA4_0(courseGrades)` — aggregates final letter grades weighted by credit hours into a 4.0-scale cumulative GPA.
+* `parseTargetGrade(input)` — accepts either a numeric percentage or a letter grade (`"A+"`, `"B"`, …) as the target.
 
-### Data Types
-Refer to [app/types.ts](file:///G:/main-projects/grade-calc-2/app/types.ts) for:
-* `[Course](file:///G:/main-projects/grade-calc-2/app/types.ts#L11)`: Stores name, credits, semester, year, category, and override marks.
-* `[Assignment](file:///G:/main-projects/grade-calc-2/app/types.ts#L1)`: Stores individual names, marks, and relative weight percentages.
-* `[BackendMetrics](file:///G:/main-projects/grade-calc-2/app/types.ts#L24)`: Outlines standard output of target calculations.
+### Data types ([`app/types.ts`](app/types.ts))
+* `Course` — name, credits, semester, year, category, override mark, eClass sync key.
+* `Assignment` — name, mark, weight, `is_bonus` flag, eClass sync key.
+* `BackendMetrics` — the shape returned by `calculateGrades` (final average, bonus points, target requirements, GPA/letter, etc).
+* `EclassSyncPlan` / `EclassPlanCourse` / `EclassPlanItem` — the reviewable diff produced by an eClass sync before it's applied.
