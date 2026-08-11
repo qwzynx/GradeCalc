@@ -24,6 +24,8 @@ interface DiagnosticMatrixProps {
   lostWeight: number;
   remainingWeight: number;
   maxMark: number;
+  bonusPoints: number;
+  bonusPotential: number;
   graphData: { name: string, value: number, color: string }[];
 }
 
@@ -71,6 +73,8 @@ export default function DiagnosticMatrix({
   lostWeight,
   remainingWeight,
   maxMark,
+  bonusPoints,
+  bonusPotential,
   graphData
 }: DiagnosticMatrixProps) {
   const { theme } = useTheme();
@@ -201,6 +205,11 @@ export default function DiagnosticMatrix({
                       {backendMetrics?.final_average !== undefined ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
                     </div>
                     <div className="text-[9px] uppercase tracking-widest text-muted mt-1">Average</div>
+                    {bonusPoints > 0 && (
+                      <div className="text-[10px] font-orbitron font-bold tracking-widest text-violet-600 dark:text-violet-400 mt-1">
+                        incl. +{bonusPoints.toFixed(2)}% bonus
+                      </div>
+                    )}
                  </>
               )}
             </div>
@@ -338,7 +347,9 @@ export default function DiagnosticMatrix({
              <div className="col-span-2 bg-blue-500/[0.04] dark:bg-blue-500/[0.08] border border-blue-500/10 dark:border-blue-500/20 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-blue-500/40 transition-all duration-300 group shadow-xs">
                <div className="flex flex-col">
                  <span className="text-[10px] uppercase tracking-[0.15em] text-blue-800/70 dark:text-blue-400/70 font-orbitron font-bold">Maximum Potential Mark</span>
-                 <span className="text-[9px] text-blue-800/50 dark:text-blue-400/50 uppercase tracking-wider mt-0.5">+ 100% on remaining assignments</span>
+                 <span className="text-[9px] text-blue-800/50 dark:text-blue-400/50 uppercase tracking-wider mt-0.5">
+                   + 100% on remaining assignments{bonusPotential > 0 ? ` + ${parseFloat(bonusPotential.toFixed(2))}% bonus` : ''}
+                 </span>
                </div>
                <span className="text-3xl sm:text-4xl font-orbitron text-blue-600 dark:text-blue-400 font-bold leading-none">
                  {maxMark.toFixed(2)}%

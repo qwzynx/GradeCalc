@@ -35,11 +35,15 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
   const gradeBadgeTheme = getGradeColor(finalPercentage);
   const progressBarTheme = getProgressColor(finalPercentage);
 
-  const gradedCount = assignments.filter(a => a.mark !== null && a.mark !== undefined).length;
-  const gradedWeight = assignments.reduce(
+  // Bonuses are tracked separately — they're outside the course's 100%.
+  const scored = assignments.filter(a => !a.is_bonus);
+  const bonuses = assignments.filter(a => a.is_bonus);
+  const gradedCount = scored.filter(a => a.mark !== null && a.mark !== undefined).length;
+  const gradedWeight = scored.reduce(
     (sum, a) => sum + ((a.mark !== null && a.mark !== undefined && a.weight) ? a.weight : 0),
     0
   );
+  const bonusWeight = bonuses.reduce((sum, a) => sum + (a.weight ?? 0), 0);
 
   return (
     <GlassCard 
@@ -106,9 +110,12 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
             <div className="flex flex-col">
               <span className="text-[10px] uppercase tracking-widest opacity-60">Progress</span>
               <span className="text-secondary font-medium">
-                {assignments.length === 0
+                {scored.length === 0
                   ? "No assignments yet"
-                  : `${gradedCount} of ${assignments.length} graded · ${Math.round(gradedWeight)}% weight`}
+                  : `${gradedCount} of ${scored.length} graded · ${Math.round(gradedWeight)}% weight`}
+                {bonusWeight > 0 && (
+                  <span className="text-violet-600 dark:text-violet-400"> · +{parseFloat(bonusWeight.toFixed(2))}% bonus</span>
+                )}
               </span>
             </div>
           </div>

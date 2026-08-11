@@ -33,26 +33,43 @@ export function parseTargetGrade(input: string | number): number | null {
   return null;
 }
 
-export function calculateGrades(assignments: { percentage?: number | null; weight?: number | null }[], targetGradeInput: string | number = 0.0) {
+export function calculateGrades(
+  assignments: { percentage?: number | null; weight?: number | null; is_bonus?: boolean | null }[],
+  targetGradeInput: string | number = 0.0
+) {
   const targetGrade = parseTargetGrade(targetGradeInput);
-  
+
   // If target is invalid, we still want to return basic metrics but indicate target failure
   let totalScore = 0.0;
   let totalWeight = 0.0;
+  // Bonus items never enter totalWeight — they sit on top of the 100% scale.
+  let bonusPoints = 0.0;
+  let pendingBonus = 0.0;
 
   for (const item of assignments) {
     const p = item.percentage;
     const w = item.weight;
-    if (p !== undefined && p !== null && w !== undefined && w !== null) {
+    if (w === undefined || w === null) continue;
+
+    if (item.is_bonus) {
+      if (p !== undefined && p !== null) {
+        bonusPoints += (p * w) / 100;
+      } else {
+        // Not graded yet: the full bonus is still up for grabs.
+        pendingBonus += w;
+      }
+    } else if (p !== undefined && p !== null) {
       totalScore += p * w;
       totalWeight += w;
     }
   }
 
-  let finalAverage = 0.0;
-  if (totalWeight > 0) {
-    finalAverage = totalScore / totalWeight;
-  }
+  // Average over graded coursework only, before any bonus is applied.
+  const baseAverage = totalWeight > 0 ? totalScore / totalWeight : 0.0;
+  // With nothing graded there is no average to add a bonus to — reporting the
+  // raw bonus as the course grade would be nonsense (e.g. "5%" for a 5% bonus).
+  const finalAverage = totalWeight > 0 ? baseAverage + bonusPoints : 0.0;
+  const bonusPotential = bonusPoints + pendingBonus;
 
   // hml represents the remaining weight (100 - totalWeight)
   const hml = 100.0 - totalWeight;
@@ -62,7 +79,10 @@ export function calculateGrades(assignments: { percentage?: number | null; weigh
       // If no remaining weight, check if target is already achieved
       return finalAverage >= target ? -1 : "N/A";
     }
-    const required = ((target * 100) - (finalAverage * totalWeight)) / hml;
+    // Bonus already banked counts toward the target, so it lowers the bar on
+    // what's left. Only earned bonus is credited here — pending bonus isn't
+    // assumed, the same way ungraded assignments aren't.
+    const required = (((target - bonusPoints) * 100) - (baseAverage * totalWeight)) / hml;
     return required;
   }
 
@@ -131,6 +151,8 @@ export function calculateGrades(assignments: { percentage?: number | null; weigh
   return {
     final_average: Number(finalAverage.toFixed(2)),
     remaining_weight: Number(hml.toFixed(2)),
+    bonus_points: Number(bonusPoints.toFixed(2)),
+    bonus_potential: Number(bonusPotential.toFixed(2)),
     get_fifty: safeRound(getFifty),
     target_required_score: safeRound(targety),
     is_target_invalid: targetGrade === null,

@@ -28,31 +28,61 @@ export default function AssignmentForm({
   currentTotalWeight
 }: AssignmentFormProps) {
   const [weightInputValue, setWeightInputValue] = useState<number>(editingAssignment?.weight ?? 0);
+  const [isBonus, setIsBonus] = useState<boolean>(editingAssignment?.is_bonus ?? false);
 
   useEffect(() => {
     setWeightInputValue(editingAssignment?.weight ?? 0);
+    setIsBonus(editingAssignment?.is_bonus ?? false);
   }, [editingAssignment]);
+
+  const selectBonus = (bonus: boolean) => {
+    setIsBonus(bonus);
+    // Auto-split makes no sense for a single bonus allowance.
+    if (bonus) setSplitQuantity(1);
+  };
 
   // Weight from OTHER assignments (excluding the one being edited)
   const otherWeight = editingAssignment?.weight
     ? currentTotalWeight - (editingAssignment.weight ?? 0)
     : currentTotalWeight;
   const projectedTotal = otherWeight + weightInputValue;
-  const isOverLimit = projectedTotal > 100;
+  // A bonus is meant to exceed 100%, so the warning only applies to real weight.
+  const isOverLimit = !isBonus && projectedTotal > 100;
   const overAmount = parseFloat((projectedTotal - 100).toFixed(2));
 
   return (
     <GlassCard className="p-4 border-black/10 shadow-sm bg-white">
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="flex justify-between items-center mb-2">
-            <h4 className="text-xs font-orbitron text-primary font-bold uppercase tracking-wider">{editingAssignment ? 'Modify Params' : 'New Assignment'}</h4>
+            <h4 className="text-xs font-orbitron text-primary font-bold uppercase tracking-wider">
+              {editingAssignment ? 'Modify Params' : isBonus ? 'New Bonus' : 'New Assignment'}
+            </h4>
           </div>
-          
+
+          {/* Type selector: a bonus sits outside the course's 100% */}
+          <input type="hidden" name="is_bonus" value={isBonus ? "1" : ""} />
+          <div className="flex gap-1 bg-black/5 border border-black/10 rounded p-1">
+            <button
+              type="button"
+              onClick={() => selectBonus(false)}
+              className={`flex-1 px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${!isBonus ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+            >
+              Assignment
+            </button>
+            <button
+              type="button"
+              onClick={() => selectBonus(true)}
+              className={`flex-1 px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${isBonus ? 'bg-violet-600 text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+            >
+              Bonus
+            </button>
+          </div>
+
           <div className="flex gap-3">
-            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder="Designation" className="flex-1 bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
-            
+            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder={isBonus ? "Bonus name" : "Designation"} className="flex-1 bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
+
             {/* Auto-split Quantity Input (Only show when adding new) */}
-            {!editingAssignment && (
+            {!editingAssignment && !isBonus && (
               <div className="w-16 relative group">
                 <NumberInput 
                   name="quantity" 
@@ -99,8 +129,17 @@ export default function AssignmentForm({
 
                   {(!inputModes[i] || inputModes[i] === "percentage") ? (
                     <div className="flex-1">
-                      <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Mark %</label>
-                      <NumberInput name={splitQuantity > 1 ? `mark_${i}` : "mark"} step="0.01" defaultValue={editingAssignment?.mark ?? ""} placeholder="Grade" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                      <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">{isBonus ? 'Earned % of Bonus' : 'Mark %'}</label>
+                      <NumberInput
+                        // Remount on type change so a new bonus picks up the
+                        // "earned in full" default instead of keeping "".
+                        key={`mark-${i}-${isBonus}`}
+                        name={splitQuantity > 1 ? `mark_${i}` : "mark"}
+                        step="0.01"
+                        defaultValue={editingAssignment ? (editingAssignment.mark ?? "") : (isBonus ? 100 : "")}
+                        placeholder={isBonus ? "100" : "Grade"}
+                        className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                      />
                     </div>
                   ) : (
                     <div className="flex-1 flex gap-2 items-center">
@@ -121,21 +160,36 @@ export default function AssignmentForm({
             
             <div className="w-full mt-1 border-t border-black/10 pt-1">
               <label className="flex justify-between text-[9px] text-muted uppercase tracking-wider mb-1">
-                <span>{splitQuantity > 1 ? 'Total Group Weight %' : 'Weight %'}</span>
-                {splitQuantity > 1 && <span className="text-muted ml-1">(Averaging items over full weight)</span>}
+                <span>{isBonus ? 'Bonus Value %' : splitQuantity > 1 ? 'Total Group Weight %' : 'Weight %'}</span>
+                {isBonus
+                  ? <span className="text-violet-600 ml-1">(Added on top of 100%)</span>
+                  : splitQuantity > 1 && <span className="text-muted ml-1">(Averaging items over full weight)</span>}
               </label>
               <NumberInput
                 required
                 name="weight"
                 step="0.01"
                 defaultValue={editingAssignment?.weight ?? ""}
-                placeholder="Total Wgt"
+                placeholder={isBonus ? "e.g. 5" : "Total Wgt"}
                 className={`w-full bg-white shadow-sm border rounded p-2 text-sm text-secondary transition-colors focus:outline-none focus:ring-1 ${
                   isOverLimit ? 'border-amber-500/70 focus:border-amber-500 focus:ring-amber-500' : 'border-black/20 focus:border-primary focus:ring-primary'
                 }`}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeightInputValue(parseFloat(e.target.value) || 0)}
               />
             </div>
+
+            {isBonus && (
+              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-violet-500/10 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600 shrink-0 mt-0.5">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <span className="text-[11px] text-violet-900 dark:text-violet-200 leading-relaxed">
+                  A bonus is excluded from the course&apos;s 100% weight. Its earned share —{" "}
+                  <span className="font-bold">value × earned %</span> — is added straight on top of your final average.
+                  Leave the earned % at 100 if you get the whole bonus, or clear it while it&apos;s still pending.
+                </span>
+              </div>
+            )}
 
             {/* Bonus Weight Warning */}
             {isOverLimit && (

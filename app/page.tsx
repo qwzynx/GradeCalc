@@ -15,7 +15,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useToast } from "@/components/ToastProvider";
 import { LogOut, User as UserIcon, Moon, Sun, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { calculateCumulativeGPA4_0 } from "@/lib/calculations";
+import { calculateCumulativeGPA4_0, calculateGrades } from "@/lib/calculations";
 
 export default function Home() {
   const router = useRouter();
@@ -307,18 +307,18 @@ export default function Home() {
 
   const calculateGrade = (courseId: string) => {
     const courseAssigns = assignments[courseId] || [];
-    let totalWeight = 0;
-    let earnedMark = 0;
-    
-    courseAssigns.forEach(a => {
-        if (a.mark !== undefined && a.mark !== null && a.weight !== undefined && a.weight !== null) {
-            totalWeight += a.weight;
-            earnedMark += (a.mark * a.weight);
-        }
-    });
 
-    if (totalWeight === 0) return null;
-    return (earnedMark / totalWeight).toFixed(1);
+    // Bonuses alone don't make a grade — there has to be graded coursework
+    // for them to sit on top of.
+    const hasGradedWork = courseAssigns.some(
+      a => !a.is_bonus && a.mark !== undefined && a.mark !== null && a.weight !== undefined && a.weight !== null
+    );
+    if (!hasGradedWork) return null;
+
+    const { final_average } = calculateGrades(
+      courseAssigns.map(a => ({ percentage: a.mark, weight: a.weight, is_bonus: a.is_bonus }))
+    );
+    return final_average.toFixed(1);
   };
 
   const getYorkUGrade = (percentage: number | null) => {

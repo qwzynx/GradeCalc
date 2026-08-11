@@ -4,6 +4,9 @@ export interface Assignment {
   name: string;
   mark?: number | null;
   weight?: number;
+  // Bonus items sit outside the course's 100%: their weight is never part of
+  // the denominator, and the earned portion is added on top of the average.
+  is_bonus?: boolean;
   eclass_item_name?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -63,6 +66,10 @@ export interface EclassSyncPlan {
 export interface BackendMetrics {
   final_average: number;
   remaining_weight: number;
+  /** Bonus percentage points already earned and folded into final_average. */
+  bonus_points: number;
+  /** Everything bonus could still add: earned bonus + full weight of ungraded bonuses. */
+  bonus_potential: number;
   get_fifty: number | string;
   target_required_score: number | string;
   is_target_invalid?: boolean;

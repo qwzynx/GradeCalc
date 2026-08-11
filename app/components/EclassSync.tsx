@@ -77,6 +77,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
           name: a.name,
           weight: a.weight ?? null,
           mark: a.mark ?? null,
+          is_bonus: a.is_bonus ?? false,
           eclass_item_name: a.eclass_item_name ?? null,
         })),
       }));

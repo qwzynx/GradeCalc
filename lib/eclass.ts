@@ -21,6 +21,8 @@ export interface IncomingAssignment {
   name: string;
   weight: number | null;
   mark: number | null;
+  /** Extra credit: its weight sits on top of the course's 100%, not inside it. */
+  is_bonus?: boolean;
   eclass_item_name: string | null;
 }
 
@@ -384,7 +386,7 @@ export function buildPrompt(
 ) {
   return `You are the sync engine for a university grade tracker app. The app's courses and assignments were originally imported from course syllabi. Below you get (1) the app's current data, (2) grade report tables scraped from York University's eClass (Moodle), and (3) graded components extracted by AI from each course's actual syllabus document on eClass, when one could be found.
 
-APP COURSES (source of truth for weights, from the syllabus):
+APP COURSES (source of truth for weights, from the syllabus). An assignment with "is_bonus": true is extra credit: its weight sits ON TOP of the course's 100% rather than inside it, so never count it when checking whether a course's weights add up, and never warn that it's missing from the syllabus's graded scheme:
 ${JSON.stringify(appCourses, null, 1)}
 
 ECLASS DATA (grade_table_html: scraped HTML table, null means grades are hidden. syllabus: ground-truth graded components extracted from the course's actual syllabus file on eClass, null if no syllabus file could be found/parsed):

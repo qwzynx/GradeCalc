@@ -16,6 +16,14 @@ import { Course, Assignment, BackendMetrics } from "../../types";
 import { supabase } from "@/lib/supabase";
 import { calculateGrades } from "@/lib/calculations";
 
+// Postgres "undefined_column" — the only way to hit it here is the is_bonus
+// migration not having been run yet, which deserves a fixable message rather
+// than a generic "try again".
+const assignmentErrorMessage = (error: unknown, fallback: string) =>
+  (error as { code?: string } | null)?.code === "42703"
+    ? "Bonus marks need a database update — run the 20260808_assignment_bonus migration in Supabase."
+    : fallback;
+
 export default function CourseDetail() {
   const { id } = useParams();
   const router = useRouter();
@@ -40,7 +48,7 @@ export default function CourseDetail() {
   const [splitQuantity, setSplitQuantity] = useState<number>(1);
 
   const fetchMetrics = async (target: string | number, currentAssignments: Assignment[]) => {
-    const assignsForCalc = currentAssignments.map((a: Assignment) => ({ percentage: a.mark, weight: a.weight }));
+    const assignsForCalc = currentAssignments.map((a: Assignment) => ({ percentage: a.mark, weight: a.weight, is_bonus: a.is_bonus }));
     try {
       const metrics = calculateGrades(assignsForCalc, target) as BackendMetrics;
       setBackendMetrics(metrics);
@@ -79,15 +87,20 @@ export default function CourseDetail() {
 
         if (assignError) throw assignError;
 
-        // Primary: Presence of mark (marked first). Secondary: Alphabetical by name.
+        // Primary: Bonuses last (they're extras, not part of the 100%).
+        // Secondary: Presence of mark (marked first). Tertiary: Alphabetical by name.
         const loadedAssignments = (assignData || []).sort((a, b) => {
+          if (!!a.is_bonus !== !!b.is_bonus) {
+            return a.is_bonus ? 1 : -1;
+          }
+
           const aHasMark = a.mark !== null && a.mark !== undefined;
           const bHasMark = b.mark !== null && b.mark !== undefined;
-          
+
           if (aHasMark !== bHasMark) {
             return aHasMark ? -1 : 1; // Marked assignments first
           }
-          
+
           // Both have marks or both are null: sort alphabetically
           return a.name.localeCompare(b.name);
         });
@@ -227,9 +240,9 @@ export default function CourseDetail() {
     const weight = formData.get("weight") as string;
     const weightValue = weight ? parseFloat(weight) : undefined;
     const baseName = formData.get("name") as string;
-    
+    const isBonus = formData.get("is_bonus") === "1";
+
     try {
-      const promises = [];
       const isSplitGroup = splitQuantity > 1;
       
       let sumPercentages = 0;
@@ -285,14 +298,12 @@ export default function CourseDetail() {
         name: isSplitGroup ? `${baseName} (Group Average)` : baseName,
         mark: finalCalculatedMark,
         weight: weightValue, // Do NOT split the weight
+        is_bonus: isBonus,
       };
-      
-      promises.push(
-        supabase.from('assignments').insert([newAssignment])
-      );
-      
-      await Promise.all(promises);
-      
+
+      const { error } = await supabase.from('assignments').insert([newAssignment]);
+      if (error) throw error;
+
       setAddingAssignment(false);
       setInputModes(["percentage"]);
       setSplitQuantity(1);
@@ -300,7 +311,7 @@ export default function CourseDetail() {
       showToast(`Added ${baseName}`);
     } catch (error) {
       console.error("Error adding assignment", error);
-      showToast("Could not add the assignment. Please try again.", "error");
+      showToast(assignmentErrorMessage(error, "Could not add the assignment. Please try again."), "error");
     }
   };
 
@@ -311,6 +322,7 @@ export default function CourseDetail() {
     const formData = new FormData(e.currentTarget);
     const updatedAssignment: Partial<Assignment> = {
       name: formData.get("name") as string,
+      is_bonus: formData.get("is_bonus") === "1",
     };
 
     const mode = inputModes[0] || "percentage";
@@ -347,7 +359,7 @@ export default function CourseDetail() {
       showToast("Assignment updated");
     } catch (error) {
       console.error("Error updating assignment", error);
-      showToast("Could not update the assignment. Please try again.", "error");
+      showToast(assignmentErrorMessage(error, "Could not update the assignment. Please try again."), "error");
     }
   };
 
@@ -374,20 +386,27 @@ export default function CourseDetail() {
 
   const { signOut } = useAuth();
 
-  // Total weight across all assignments
-  const totalAssignmentWeight = assignments.reduce((sum, a) => sum + (a.weight ?? 0), 0);
+  // Total weight of the graded scheme — bonuses sit outside the 100%
+  const totalAssignmentWeight = assignments.reduce((sum, a) => sum + (a.is_bonus ? 0 : a.weight ?? 0), 0);
+  const totalBonusWeight = assignments.reduce((sum, a) => sum + (a.is_bonus ? a.weight ?? 0 : 0), 0);
 
   // Calculate Graph Data safely
+  const bonusPoints = backendMetrics?.bonus_points ?? 0;
+  const bonusPotential = backendMetrics?.bonus_potential ?? 0;
   const completedWeight = backendMetrics ? 100 - backendMetrics.remaining_weight : 0;
-  const earnedWeight = backendMetrics && completedWeight > 0 ? (backendMetrics.final_average * completedWeight) / 100 : 0;
+  // Strip the bonus back out: the slices below describe the 100% scale only,
+  // with whatever bonus was earned shown as its own slice on top.
+  const baseAverage = backendMetrics ? backendMetrics.final_average - bonusPoints : 0;
+  const earnedWeight = completedWeight > 0 ? (baseAverage * completedWeight) / 100 : 0;
   const lostWeight = Math.max(0, completedWeight - earnedWeight); // Prevent negative loss from bonus points
   const remainingWeight = backendMetrics ? backendMetrics.remaining_weight : 100;
-  const maxMark = earnedWeight + remainingWeight;
+  const maxMark = earnedWeight + remainingWeight + bonusPotential;
 
   const graphData = [
     { name: 'Earned Mark', value: parseFloat(earnedWeight.toFixed(2)), color: '#34d399' },
     { name: 'Lost Mark', value: parseFloat(lostWeight.toFixed(2)), color: '#ef4444' },
-    { name: 'Remaining Weight', value: parseFloat(remainingWeight.toFixed(2)), color: '#f2a65a' }
+    { name: 'Remaining Weight', value: parseFloat(remainingWeight.toFixed(2)), color: '#f2a65a' },
+    { name: 'Bonus', value: parseFloat(bonusPoints.toFixed(2)), color: '#8b5cf6' }
   ].filter(d => d.value > 0);
 
   const { theme, toggleTheme } = useTheme();
@@ -520,6 +539,14 @@ export default function CourseDetail() {
                     {parseFloat(totalAssignmentWeight.toFixed(2))}% of 100% weighted
                   </span>
                 )}
+                {totalBonusWeight > 0 && (
+                  <span
+                    className="text-[9px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-400"
+                    title="Bonus available on top of the 100%"
+                  >
+                    +{parseFloat(totalBonusWeight.toFixed(2))}% bonus
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
@@ -543,11 +570,21 @@ export default function CourseDetail() {
                           ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
                   return (
-                    <div key={a.id} className="flex justify-between items-center gap-3 p-3 bg-surface/70 border border-surface rounded-xl shadow-sm hover:border-black/15 backdrop-blur-lg backdrop-filter transition-all hover:shadow-md group/item relative shrink-0">
+                    <div key={a.id} className={`flex justify-between items-center gap-3 p-3 bg-surface/70 border rounded-xl shadow-sm hover:border-black/15 backdrop-blur-lg backdrop-filter transition-all hover:shadow-md group/item relative shrink-0 ${a.is_bonus ? 'border-violet-500/30' : 'border-surface'}`}>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-secondary text-base font-bold truncate" title={a.name}>{a.name}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-secondary text-base font-bold truncate" title={a.name}>{a.name}</span>
+                          {a.is_bonus && (
+                            <span className="text-[8px] px-1.5 py-0.5 rounded border border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold uppercase tracking-wider shrink-0">
+                              Bonus
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] text-muted uppercase tracking-wider">
-                          Weight: <span className="text-secondary">{a.weight !== null && a.weight !== undefined ? `${parseFloat(a.weight.toFixed(2))}%` : '—'}</span>
+                          {a.is_bonus ? 'Worth up to' : 'Weight'}: <span className={a.is_bonus ? 'text-violet-700 dark:text-violet-400' : 'text-secondary'}>{a.weight !== null && a.weight !== undefined ? `${a.is_bonus ? '+' : ''}${parseFloat(a.weight.toFixed(2))}%` : '—'}</span>
+                          {a.is_bonus && a.mark !== null && a.mark !== undefined && (
+                            <span className="text-muted"> · adds {parseFloat((((a.weight ?? 0) * a.mark) / 100).toFixed(2))}%</span>
+                          )}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -597,6 +634,8 @@ export default function CourseDetail() {
              lostWeight={lostWeight}
              remainingWeight={remainingWeight}
              maxMark={maxMark}
+             bonusPoints={bonusPoints}
+             bonusPotential={bonusPotential}
              graphData={graphData}
            />
 
