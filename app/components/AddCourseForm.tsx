@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import GlassCard from "./GlassCard";
 import NeonButton from "./NeonButton";
 import NumberInput from "./NumberInput";
@@ -10,50 +9,30 @@ interface AddCourseFormProps {
   onCancel: () => void;
 }
 
+// Rendered inside <AnimatedOverlay>, which owns the backdrop, the enter/exit
+// animation, scroll locking and Escape-to-close.
 export default function AddCourseForm({ onSubmit, onCancel }: AddCourseFormProps) {
-  const [isClosing, setIsClosing] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    // Slight delay to ensure the mount transition triggers
-    const timer = setTimeout(() => setIsMounted(true), 10);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setIsMounted(false);
-    // Wait for animation duration (300ms) before unmounting
-    setTimeout(() => {
-      onCancel();
-    }, 300);
-  };
-
   return (
-    <div 
-      className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto transition-opacity duration-300 ease-in-out ${isMounted ? 'opacity-100' : 'opacity-0'}`} 
-      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
-    >
-      <GlassCard className={`max-w-2xl w-full relative transition-all duration-300 ease-out transform ${isMounted ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 -translate-y-4'}`}>
-        <button type="button" onClick={handleClose} className="absolute top-4 right-4 text-muted hover:text-secondary transition-colors bg-black/5 p-2 rounded z-20">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-        <h2 className="text-2xl mb-6 font-orbitron font-bold text-secondary border-b border-black/10 pb-2 pr-12">Initialize New Course Parameters</h2>
-        <form onSubmit={onSubmit} className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
+    <GlassCard className="w-full relative p-5 sm:p-6">
+      <button type="button" onClick={onCancel} aria-label="Close" className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-10 h-10 text-muted hover:text-secondary transition-colors bg-black/5 rounded-lg z-20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <h2 className="text-lg sm:text-2xl mb-5 sm:mb-6 font-orbitron font-bold text-secondary border-b border-black/10 pb-2 pr-12 leading-tight">Initialize New Course Parameters</h2>
+      <form onSubmit={onSubmit} className="flex flex-col gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="sm:col-span-2">
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Course Designation *</label>
-            <input required name="name" type="text" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. CS 101" />
+            <input required name="name" type="text" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. CS 101" />
           </div>
-          
+
           <div>
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Professor</label>
-            <input name="prof_name" type="text" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. Dr. Smith" />
+            <input name="prof_name" type="text" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. Dr. Smith" />
           </div>
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Category *</label>
-            <select required name="category" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer">
+            <select required name="category" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer">
               <option value="" disabled className="bg-white text-muted">Select Stream</option>
               <option value="LE/EECS" className="bg-white text-secondary">LE/EECS</option>
               <option value="SC/MATH" className="bg-white text-secondary">SC/MATH</option>
@@ -65,12 +44,12 @@ export default function AddCourseForm({ onSubmit, onCancel }: AddCourseFormProps
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Year *</label>
-            <NumberInput required name="year" defaultValue={new Date().getFullYear()} className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+            <NumberInput required name="year" inputMode="numeric" defaultValue={new Date().getFullYear()} className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
           </div>
-          
+
           <div>
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Semester *</label>
-            <select required name="semester" defaultValue="Fall" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer">
+            <select required name="semester" defaultValue="Fall" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer">
               <option value="Fall" className="bg-white text-secondary">Fall</option>
               <option value="Winter" className="bg-white text-secondary">Winter</option>
               <option value="Full Summer" className="bg-white text-secondary">Full Summer</option>
@@ -81,21 +60,20 @@ export default function AddCourseForm({ onSubmit, onCancel }: AddCourseFormProps
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Credits</label>
-            <NumberInput name="credits" step="0.5" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. 3" />
+            <NumberInput name="credits" step="0.5" inputMode="decimal" className="w-full bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g. 3" />
           </div>
 
           <div className="flex flex-col">
             <label className="block text-xs uppercase tracking-wider text-muted mb-2">Status</label>
-            <label htmlFor="in_progress" className="flex-1 flex items-center gap-3 bg-white border border-black/20 shadow-sm rounded-md p-3 transition-all hover:border-primary cursor-pointer group">
+            <label htmlFor="in_progress" className="flex-1 flex items-center gap-3 bg-white border border-black/20 shadow-sm rounded-md p-3 min-h-[44px] transition-all hover:border-primary cursor-pointer group">
               <input name="in_progress" id="in_progress" type="checkbox" defaultChecked className="w-5 h-5 accent-primary bg-white border-black/20 rounded focus:ring-primary focus:ring-offset-background cursor-pointer" />
               <span className="text-sm uppercase tracking-wider text-secondary group-hover:text-primary transition-colors select-none font-semibold">In Progress</span>
             </label>
           </div>
         </div>
-        
-        <NeonButton type="submit" className="mt-4 w-full py-4 text-lg">Execute Insertion</NeonButton>
+
+        <NeonButton type="submit" className="mt-2 sm:mt-4 w-full py-3.5 sm:py-4 text-base sm:text-lg">Execute Insertion</NeonButton>
       </form>
     </GlassCard>
-    </div>
   );
 }

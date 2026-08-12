@@ -51,7 +51,7 @@ export default function AssignmentForm({
   const overAmount = parseFloat((projectedTotal - 100).toFixed(2));
 
   return (
-    <GlassCard className="p-4 border-black/10 shadow-sm bg-white">
+    <GlassCard className="p-4 sm:p-5 border-black/10 shadow-sm bg-white">
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="flex justify-between items-center mb-2">
             <h4 className="text-xs font-orbitron text-primary font-bold uppercase tracking-wider">
@@ -65,33 +65,35 @@ export default function AssignmentForm({
             <button
               type="button"
               onClick={() => selectBonus(false)}
-              className={`flex-1 px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${!isBonus ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+              className={`flex-1 px-3 py-2 min-h-[44px] rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${!isBonus ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
             >
               Assignment
             </button>
             <button
               type="button"
               onClick={() => selectBonus(true)}
-              className={`flex-1 px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${isBonus ? 'bg-violet-600 text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+              className={`flex-1 px-3 py-2 min-h-[44px] rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all ${isBonus ? 'bg-violet-600 text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
             >
               Bonus
             </button>
           </div>
 
           <div className="flex gap-3">
-            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder={isBonus ? "Bonus name" : "Designation"} className="flex-1 bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
+            <input required name="name" type="text" defaultValue={editingAssignment?.name || ""} placeholder={isBonus ? "Bonus name" : "Designation"} className="flex-1 min-w-0 bg-white border border-black/20 shadow-sm rounded p-2 min-h-[44px] text-sm text-secondary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
 
             {/* Auto-split Quantity Input (Only show when adding new) */}
             {!editingAssignment && !isBonus && (
-              <div className="w-16 relative group">
-                <NumberInput 
-                  name="quantity" 
-                  min="1" 
-                  max="10" 
+              <div className="w-16 shrink-0 relative group">
+                <NumberInput
+                  name="quantity"
+                  min="1"
+                  max="10"
+                  inputMode="numeric"
+                  aria-label="Auto-split quantity"
                   value={splitQuantity}
-                  onChange={(e) => setSplitQuantity(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))} 
-                  placeholder="Qty" 
-                  className="w-full bg-white border border-black/20 shadow-sm rounded p-2 text-sm text-secondary text-center focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all" 
+                  onChange={(e) => setSplitQuantity(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                  placeholder="Qty"
+                  className="w-full bg-white border border-black/20 shadow-sm rounded p-2 min-h-[44px] text-sm text-secondary text-center focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
                 <div className="absolute -top-6 -left-1/2 transform -translate-x-1/2 bg-white border text-nowrap border-black/20 shadow-md px-2 py-1 rounded text-[9px] text-muted opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   Auto-Split Qty
@@ -102,33 +104,34 @@ export default function AssignmentForm({
 
           <div className="flex flex-col gap-2 mt-2">
             {Array.from({ length: splitQuantity }).map((_, i) => (
-              <div key={i} className="flex p-3 bg-background border border-black/10 rounded relative">
-                {/* Individual Mode Toggle */}
-                <div className="flex gap-3 items-end w-full mt-4">
+              <div key={i} className="p-3 bg-background border border-black/10 rounded relative">
+                {/* Stacks on phones — side by side there isn't room for the
+                    mode toggle and two point fields without crushing both. */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end w-full">
                   {splitQuantity > 1 && (
-                    <span className="text-[18px] text-muted font-orbitron w-6 mt-6 shrink-0">#{i + 1}</span>
+                    <span className="text-sm sm:text-[18px] text-muted font-orbitron sm:w-6 sm:mb-2 shrink-0">#{i + 1}</span>
                   )}
-                  
-                  {/* Individual Mode Toggle beside inputs */}
-                  <div className="flex flex-col gap-1 shrink-0 bg-black/5 border border-black/10 rounded p-1 mb-[2px]">
-                    <button 
+
+                  {/* Mode toggle: a row above the inputs on phones, a column beside them on desktop */}
+                  <div className="flex flex-row sm:flex-col gap-1 shrink-0 bg-black/5 border border-black/10 rounded p-1">
+                    <button
                       type="button"
                       onClick={() => setInputModes(prev => { const n = [...prev]; n[i] = "percentage"; return n; })}
-                      className={`px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all min-w-[80px] ${(!inputModes[i] || inputModes[i] === "percentage") ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+                      className={`flex-1 sm:flex-none px-3 py-2 min-h-[40px] rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all sm:min-w-[80px] ${(!inputModes[i] || inputModes[i] === "percentage") ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                     >
                       % Match
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setInputModes(prev => { const n = [...prev]; n[i] = "points"; return n; })}
-                      className={`px-3 py-2 rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all min-w-[80px] ${inputModes[i] === "points" ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
+                      className={`flex-1 sm:flex-none px-3 py-2 min-h-[40px] rounded text-[10px] sm:text-xs uppercase tracking-widest transition-all sm:min-w-[80px] ${inputModes[i] === "points" ? 'bg-primary text-[#FFFFFF] font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                     >
                       Points
                     </button>
                   </div>
 
                   {(!inputModes[i] || inputModes[i] === "percentage") ? (
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">{isBonus ? 'Earned % of Bonus' : 'Mark %'}</label>
                       <NumberInput
                         // Remount on type change so a new bonus picks up the
@@ -136,21 +139,22 @@ export default function AssignmentForm({
                         key={`mark-${i}-${isBonus}`}
                         name={splitQuantity > 1 ? `mark_${i}` : "mark"}
                         step="0.01"
+                        inputMode="decimal"
                         defaultValue={editingAssignment ? (editingAssignment.mark ?? "") : (isBonus ? 100 : "")}
                         placeholder={isBonus ? "100" : "Grade"}
-                        className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        className="w-full bg-white shadow-sm border border-black/20 rounded p-2 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   ) : (
-                    <div className="flex-1 flex gap-2 items-center">
-                      <div className="flex-1">
+                    <div className="flex-1 min-w-0 flex gap-2 items-end">
+                      <div className="flex-1 min-w-0">
                         <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Earned</label>
-                         <NumberInput name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} step="0.01" placeholder="Pts" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                         <NumberInput name={splitQuantity > 1 ? `points_earned_${i}` : "points_earned"} step="0.01" inputMode="decimal" placeholder="Pts" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
                       </div>
-                      <span className="text-muted font-bold mt-4 shrink-0">/</span>
-                      <div className="flex-1">
+                      <span className="text-muted font-bold shrink-0 pb-3">/</span>
+                      <div className="flex-1 min-w-0">
                         <label className="text-[9px] text-muted uppercase tracking-wider mb-1 block">Total</label>
-                         <NumberInput name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} step="0.01" placeholder="Max" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                         <NumberInput name={splitQuantity > 1 ? `points_total_${i}` : "points_total"} step="0.01" inputMode="decimal" placeholder="Max" className="w-full bg-white shadow-sm border border-black/20 rounded p-2 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
                       </div>
                     </div>
                   )}
@@ -169,9 +173,10 @@ export default function AssignmentForm({
                 required
                 name="weight"
                 step="0.01"
+                inputMode="decimal"
                 defaultValue={editingAssignment?.weight ?? ""}
                 placeholder={isBonus ? "e.g. 5" : "Total Wgt"}
-                className={`w-full bg-white shadow-sm border rounded p-2 text-sm text-secondary transition-colors focus:outline-none focus:ring-1 ${
+                className={`w-full bg-white shadow-sm border rounded p-2 min-h-[44px] text-sm text-secondary transition-colors focus:outline-none focus:ring-1 ${
                   isOverLimit ? 'border-amber-500/70 focus:border-amber-500 focus:ring-amber-500' : 'border-black/20 focus:border-primary focus:ring-primary'
                 }`}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeightInputValue(parseFloat(e.target.value) || 0)}

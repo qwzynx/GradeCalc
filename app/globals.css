@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Drive `dark:` from the .dark class that ThemeProvider toggles.
+   Without this, Tailwind v4 falls back to its default
+   `@media (prefers-color-scheme: dark)`, which follows the OS rather than the
+   in-app theme switch — so dark: utilities fired for anyone on a dark OS even
+   in light mode, and never fired for the app's own dark toggle on a light OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 :root {
   --color-york-red: #E31D2B;
 
@@ -26,7 +38,6 @@
 }
 
 @theme inline {
-  --variant-dark: selector(.dark);
   --color-primary: var(--color-york-red);
   --color-surface: var(--surface);
   --color-secondary: var(--text-primary);
@@ -39,14 +50,30 @@
   
   --color-background: var(--bg-color);
   --color-foreground: var(--text-primary);
-  
+
+  /* Always-white, independent of the light/dark surface mapping above. Needed
+     anywhere text sits on a fixed-colour backdrop (e.g. the red login screen). */
+  --color-paper: #FFFFFF;
+  /* Muted text on that same fixed red backdrop. */
+  --color-alt-color: #FFE8EA;
+
+  --animate-spin-slow: spin-slow 8s linear infinite;
+
   --font-orbitron: var(--font-inter);
   --font-montserrat: var(--font-inter);
   --font-sans: var(--font-inter);
 }
 
+html {
+  /* Stop iOS/Android from re-scaling text in landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--bg-color);
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
   /* Light mode only: a faint York-red glow at the top and a gentle vertical
      falloff so white cards stand out against the page instead of blending in. */
   background-image:
@@ -62,6 +89,73 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-inter), sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Device adaptation
+   --------------------------------------------------------------------------- */
+
+/* Page shell padding: scales with the viewport and clears notches / rounded
+   corners on phones (paired with viewportFit: "cover" in the layout). These
+   rules are deliberately unlayered so they win over Tailwind's padding
+   utilities — set page padding with .app-shell, not with p-* classes. */
+.app-shell {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-shell {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+    padding-top: max(2rem, env(safe-area-inset-top));
+  }
+}
+
+/* Modal padding with the same notch clearance */
+.overlay-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* iOS Safari zooms the whole page when a focused field is under 16px. Bump
+   every text field on touch devices so tapping an input never zooms; add
+   data-keep-size to opt a field out (used by the oversized target-grade input). */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([data-keep-size]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Scrolling a modal shouldn't drag the page behind it */
+body.overlay-open {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Hide number input arrows/spinners across all browsers */

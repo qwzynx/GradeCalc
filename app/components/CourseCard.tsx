@@ -15,7 +15,7 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, assignments = [], finalPercentage, letterGrade, onClick }: CourseCardProps) {
   const getGradeColor = (percentage: number | null) => {
-    if (percentage === null) return "bg-black/5 text-muted dark:bg-white/5 dark:text-muted border-black/10 dark:border-white/10";
+    if (percentage === null) return "bg-black/5 text-muted dark:text-muted border-black/10";
     if (percentage >= 80) return "bg-emerald-500/15 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
     if (percentage >= 70) return "bg-blue-500/15 text-blue-700 border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
     if (percentage >= 60) return "bg-amber-500/15 text-amber-700 border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
@@ -24,7 +24,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
   };
 
   const getProgressColor = (percentage: number | null) => {
-    if (percentage === null) return "bg-black/5 dark:bg-white/5";
+    if (percentage === null) return "bg-black/5";
     if (percentage >= 80) return "bg-emerald-500 dark:bg-emerald-500";
     if (percentage >= 70) return "bg-blue-500 dark:bg-blue-500";
     if (percentage >= 60) return "bg-amber-500 dark:bg-amber-500";
@@ -47,17 +47,17 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
 
   return (
     <GlassCard 
-      className="group flex flex-col h-full !p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer border border-transparent hover:border-black/5 dark:hover:border-white/5"
+      className="group flex flex-col h-full !p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer border border-transparent hover:border-black/5"
       onClick={onClick}
     >
       {/* Background Hover Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/[0.02] to-transparent dark:from-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      <div className="p-6 flex flex-col flex-grow relative z-10">
-        <div className="flex justify-between items-start mb-6">
-          <div className="pr-4">
+      <div className="p-5 sm:p-6 flex flex-col flex-grow relative z-10">
+        <div className="flex justify-between items-start gap-3 mb-5 sm:mb-6">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-[10px] uppercase tracking-wider bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded text-muted font-medium">
+              <span className="text-[10px] uppercase tracking-wider bg-black/5 px-2 py-0.5 rounded text-muted font-medium">
                 {course.semester} {course.year}
               </span>
               {course.category && (
@@ -66,14 +66,14 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-bold text-secondary group-hover:text-primary transition-colors leading-tight">
+            <h3 className="text-lg sm:text-xl font-bold text-secondary group-hover:text-primary transition-colors leading-tight break-words hyphens-auto">
               {course.name}
             </h3>
           </div>
-          
+
           {/* Prominent Grade Badge */}
-          <div className={`flex flex-col items-center justify-center w-16 h-16 shrink-0 rounded-2xl border shadow-sm ${gradeBadgeTheme}`}>
-            <span className="text-xl font-bold font-orbitron leading-none">{letterGrade}</span>
+          <div className={`flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-2xl border shadow-sm ${gradeBadgeTheme}`}>
+            <span className="text-lg sm:text-xl font-bold font-orbitron leading-none">{letterGrade}</span>
             <span className="text-[10px] font-semibold mt-1 opacity-80 tabular-nums">
               {finalPercentage !== null ? `${finalPercentage.toFixed(1)}%` : "—"}
             </span>
@@ -82,17 +82,17 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
 
         <div className="flex-1 flex flex-col gap-4 text-sm text-muted">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center shrink-0">
               <User className="w-4 h-4 text-secondary" />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="text-[10px] uppercase tracking-widest opacity-60">Instructor</span>
-              <span className="text-secondary font-medium">{course.prof_name || "Unassigned"}</span>
+              <span className="text-secondary font-medium truncate" title={course.prof_name || "Unassigned"}>{course.prof_name || "Unassigned"}</span>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center shrink-0">
               {course.in_progress ? <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <CheckCircle2 className="w-4 h-4 text-secondary" />}
             </div>
             <div className="flex flex-col">
@@ -104,12 +104,12 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center shrink-0">
               <ListChecks className="w-4 h-4 text-secondary" />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="text-[10px] uppercase tracking-widest opacity-60">Progress</span>
-              <span className="text-secondary font-medium">
+              <span className="text-secondary font-medium text-[13px] sm:text-sm">
                 {scored.length === 0
                   ? "No assignments yet"
                   : `${gradedCount} of ${scored.length} graded · ${Math.round(gradedWeight)}% weight`}
@@ -121,7 +121,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5 flex justify-between items-center">
+        <div className="mt-5 sm:mt-6 pt-4 border-t border-black/5 flex flex-wrap gap-2 justify-between items-center">
           <div className="flex items-center gap-1.5">
              <Bookmark className="w-3.5 h-3.5 opacity-50" />
              <span className="text-[11px] font-medium text-muted">
@@ -135,7 +135,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
                 Forced
               </span>
             ) : (
-              <span className="text-muted bg-black/5 dark:bg-white/5 px-2 py-1 rounded">
+              <span className="text-muted bg-black/5 px-2 py-1 rounded">
                 Calculated
               </span>
             )}
@@ -144,7 +144,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
       </div>
 
       {/* Mini Progress Bar */}
-      <div className="h-1 group-hover:h-1.5 w-full bg-black/5 dark:bg-white/5 absolute bottom-0 left-0 transition-all duration-300 overflow-hidden">
+      <div className="h-1 group-hover:h-1.5 w-full bg-black/5 absolute bottom-0 left-0 transition-all duration-300 overflow-hidden">
         <motion.div
           className={`h-full rounded-r-full relative ${progressBarTheme}`}
           initial={{ width: 0 }}

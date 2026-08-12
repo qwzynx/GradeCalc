@@ -31,7 +31,7 @@ export default function ChartTooltipShell({ active, payload, label, className = 
 
   return (
     <div
-      className={`bg-surface border border-black/10 dark:border-white/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px] transition-all duration-200 ease-out ${
+      className={`bg-surface border border-black/10 p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] pointer-events-none min-w-[120px] transition-all duration-200 ease-out ${
         isActive ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-1.5"
       } ${className}`}
     >

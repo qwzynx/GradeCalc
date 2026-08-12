@@ -10,10 +10,11 @@ import SyllabusImport from "./components/SyllabusImport";
 import CourseCard from "./components/CourseCard";
 import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment, EclassSyncPlan } from "./types";
+import AnimatedOverlay from "./components/AnimatedOverlay";
+import HeaderControls from "./components/HeaderControls";
 import { useAuth } from "@/components/AuthProvider";
-import { useTheme } from "@/components/ThemeProvider";
 import { useToast } from "@/components/ToastProvider";
-import { LogOut, User as UserIcon, Moon, Sun, RefreshCw } from "lucide-react";
+import { RefreshCw, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { calculateCumulativeGPA4_0, calculateGrades } from "@/lib/calculations";
 
@@ -36,6 +37,9 @@ export default function Home() {
   const [filterCategory, setFilterCategory] = useState<string[]>([]);
   const [filterInProgress, setFilterInProgress] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  // Below lg the filter panel would push every course card off the first
+  // screen, so it collapses behind a toggle. At lg+ the sidebar is always open.
+  const [showFilters, setShowFilters] = useState(false);
 
   // Load filters from localStorage on mount
   useEffect(() => {
@@ -388,6 +392,14 @@ export default function Home() {
     return (semesterOrder[b.semester] || 0) - (semesterOrder[a.semester] || 0);
   });
 
+  const activeFilterCount =
+    (searchTerm ? 1 : 0) +
+    (filterInProgress ? 1 : 0) +
+    filterSemester.length +
+    filterYear.length +
+    filterAcademicYear.length +
+    filterCategory.length;
+
   const availableSemesters = Array.from(new Set(courses.map(c => c.semester))).sort();
   const availableYears = Array.from(new Set(courses.map(c => c.year))).sort((a, b) => b - a);
   const availableAcademicYears = Array.from(new Set(courses.map(c => 
@@ -473,75 +485,60 @@ export default function Home() {
   const { averageGpa, averageGpa4_0, pieData, lineData } = calculateDashboardData(filteredCourses);
   const activeCourseCount = filteredCourses.filter(c => c.in_progress).length;
   const totalCreditsCount = filteredCourses.reduce((sum, c) => sum + (c.credits || 3), 0);
-  const { signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   if (authLoading || (loading && !userId)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
          <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 sm:pt-10">
-      <header className="mb-12 flex flex-col sm:flex-row items-center justify-between border-b border-black/10 pb-6 gap-4">
-        <div>
-          <h1 className="text-4xl font-bold font-orbitron tracking-widest text-primary">
+    <div className="min-h-dvh app-shell mx-auto w-full max-w-[1800px]">
+      {/* Two rows below lg (title + system controls, then the action group),
+          collapsing to a single row once there's width for it at lg. */}
+      <header className="mb-8 sm:mb-10 lg:mb-12 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-black/10 pb-5 sm:pb-6">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-orbitron tracking-wider sm:tracking-widest text-primary">
             GradeMatrix
           </h1>
+          <div className="flex items-center gap-2 lg:hidden">
+            <HeaderControls />
+          </div>
         </div>
-        
-        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+
+        <div className="flex items-center gap-3 lg:gap-4">
           {/* Main Action Group */}
-          <div className="flex items-center bg-black/5 p-1 rounded-2xl border border-black/5 shadow-inner">
-            <NeonButton 
+          <div className="flex flex-1 lg:flex-none items-center gap-1 bg-black/5 p-1 rounded-2xl border border-black/5 shadow-inner">
+            <NeonButton
               onClick={() => setShowAddForm(true)}
-              className="!py-2 !px-4 sm:!px-6 !rounded-xl !text-[10px] sm:!text-xs shadow-none hover:shadow-md"
+              className="flex-1 lg:flex-none !py-2 !px-3 sm:!px-6 !rounded-xl !text-[10px] sm:!text-xs shadow-none hover:shadow-md whitespace-nowrap"
             >
               Add Course
             </NeonButton>
             <button
               onClick={() => setShowSyllabusImport(true)}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
+              className="group flex flex-1 lg:flex-none items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[44px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted group-hover:text-primary transition-colors">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
               </svg>
               <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
             </button>
             <button
               onClick={() => setShowEclassSync(true)}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[40px]"
+              className="group flex flex-1 lg:flex-none items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[44px]"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
+              <RefreshCw className="w-3.5 h-3.5 shrink-0 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
               <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync</span>
             </button>
           </div>
-          
-          <div className="hidden sm:block w-px h-8 bg-black/10" />
 
-          {/* System Group */}
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={toggleTheme}
-              className="group flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
-              aria-label="Toggle Theme"
-            >
-              {theme === "dark" ? (
-                <Sun className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
-              ) : (
-                <Moon className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
-              )}
-            </button>
-            <button 
-              onClick={signOut}
-              className="group flex items-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-primary/10 transition-all duration-300"
-            >
-              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors uppercase tracking-wider">Sign Out</span>
-              <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
-            </button>
+          <div className="hidden lg:block w-px h-8 bg-black/10" />
+
+          <div className="hidden lg:flex items-center gap-2">
+            <HeaderControls showLabel />
           </div>
         </div>
       </header>
@@ -559,10 +556,29 @@ export default function Home() {
           />
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           {!loading && courses.length > 0 && (
-            <div className="w-full lg:w-1/4 xl:w-1/5 shrink-0 lg:sticky lg:top-8">
-              <CourseFilters 
+            <div className="w-full lg:w-1/4 xl:w-1/5 shrink-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:pr-1">
+              <button
+                type="button"
+                onClick={() => setShowFilters(v => !v)}
+                aria-expanded={showFilters}
+                className="lg:hidden w-full mb-4 flex items-center justify-between gap-3 px-4 py-3 min-h-[48px] rounded-2xl border border-black/10 bg-white shadow-sm text-secondary"
+              >
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-muted" />
+                  <span className="text-xs font-orbitron font-bold uppercase tracking-widest">Search &amp; Filters</span>
+                  {activeFilterCount > 0 && (
+                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-[10px] font-bold text-[#FFFFFF] tabular-nums">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${showFilters ? "rotate-180" : ""}`} />
+              </button>
+
+              <div className={showFilters ? "block" : "hidden lg:block"}>
+              <CourseFilters
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 filterSemester={filterSemester}
@@ -580,42 +596,33 @@ export default function Home() {
                 availableAcademicYears={availableAcademicYears}
                 availableCategories={availableCategories}
               />
+              </div>
             </div>
           )}
 
           <div className="w-full flex-1 min-w-0">
-            {showAddForm && (
-              <AddCourseForm 
-                onSubmit={handleAddCourse} 
-                onCancel={() => setShowAddForm(false)} 
+            <AnimatedOverlay open={showAddForm} onClose={() => setShowAddForm(false)} width="2xl">
+              <AddCourseForm
+                onSubmit={handleAddCourse}
+                onCancel={() => setShowAddForm(false)}
               />
-            )}
+            </AnimatedOverlay>
 
-            {showSyllabusImport && (
-              <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-                onClick={(e) => { if (e.target === e.currentTarget) setShowSyllabusImport(false); }}
-              >
-                <SyllabusImport
-                  onImport={handleSyllabusImport}
-                  onCancel={() => setShowSyllabusImport(false)}
-                />
-              </div>
-            )}
+            <AnimatedOverlay open={showSyllabusImport} onClose={() => setShowSyllabusImport(false)} width="2xl">
+              <SyllabusImport
+                onImport={handleSyllabusImport}
+                onCancel={() => setShowSyllabusImport(false)}
+              />
+            </AnimatedOverlay>
 
-            {showEclassSync && (
-              <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-                onClick={(e) => { if (e.target === e.currentTarget) setShowEclassSync(false); }}
-              >
-                <EclassSync
-                  courses={courses}
-                  assignments={assignments}
-                  onApply={handleEclassApply}
-                  onCancel={() => setShowEclassSync(false)}
-                />
-              </div>
-            )}
+            <AnimatedOverlay open={showEclassSync} onClose={() => setShowEclassSync(false)} width="4xl">
+              <EclassSync
+                courses={courses}
+                assignments={assignments}
+                onApply={handleEclassApply}
+                onCancel={() => setShowEclassSync(false)}
+              />
+            </AnimatedOverlay>
 
             {loading ? (
               <div className="flex justify-center items-center py-32">
@@ -625,18 +632,18 @@ export default function Home() {
                 </div>
               </div>
             ) : courses.length === 0 ? (
-              <div className="text-center py-32 text-muted flex flex-col items-center">
-                <div className="w-24 h-24 mb-6 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm relative">
+              <div className="text-center py-20 sm:py-32 text-muted flex flex-col items-center">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mb-6 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm relative">
                    <div className="absolute inset-2 border border-dashed border-primary rounded-full animate-spin-slow"></div>
                    <span className="text-3xl text-primary font-bold">Ø</span>
                 </div>
-                <p className="text-xl font-orbitron tracking-widest text-secondary font-bold">No courses yet.</p>
-                <p className="mt-2 text-sm uppercase tracking-wider opacity-70">Add a course manually, import a syllabus, or pull everything in from eClass.</p>
-                <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
+                <p className="text-lg sm:text-xl font-orbitron tracking-widest text-secondary font-bold">No courses yet.</p>
+                <p className="mt-2 text-xs sm:text-sm uppercase tracking-wider opacity-70 max-w-md text-balance">Add a course manually, import a syllabus, or pull everything in from eClass.</p>
+                <div className="mt-8 w-full max-w-sm sm:max-w-none flex flex-col sm:flex-row sm:justify-center items-stretch sm:items-center gap-3">
                   <NeonButton onClick={() => setShowAddForm(true)}>Add Your First Course</NeonButton>
                   <button
                     onClick={() => setShowSyllabusImport(true)}
-                    className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+                    className="group flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-primary transition-colors">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
@@ -645,7 +652,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => setShowEclassSync(true)}
-                    className="group flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+                    className="group flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
                   >
                     <RefreshCw className="w-4 h-4 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
                     <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync from eClass</span>
@@ -673,7 +680,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-12">
+              <div className="flex flex-col gap-10 sm:gap-12">
                 {(() => {
                   const groupedCourses = filteredCourses.reduce((acc, course) => {
                     const category = course.category && course.category.trim() !== "" ? course.category : "Uncategorized";
@@ -683,9 +690,11 @@ export default function Home() {
                   }, {} as Record<string, Course[]>);
 
                   return Object.keys(groupedCourses).sort().map(category => (
-                    <div key={category} className="flex flex-col gap-6">
-                      <h2 className="text-2xl font-orbitron font-bold text-secondary border-b border-black/10 pb-2">{category}</h2>
-                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div key={category} className="flex flex-col gap-5 sm:gap-6">
+                      <h2 className="text-xl sm:text-2xl font-orbitron font-bold text-secondary border-b border-black/10 pb-2 break-words">{category}</h2>
+                      {/* The sidebar eats a quarter of the row at lg, so a third
+                          column only earns its place from xl up. */}
+                      <div className="grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                         {groupedCourses[category].map((course, idx) => {
                           const uniqueId = course.id || idx.toString();
                           let finalPercentage: number | null = null;

@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { useTheme } from "@/components/ThemeProvider";
 import { useToast } from "@/components/ToastProvider";
-import { LogOut, Sun, Moon } from "lucide-react";
-import NeonButton from "../../components/NeonButton";
+import HeaderControls from "../../components/HeaderControls";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
 import EditCourseForm from "../../components/EditCourseForm";
 import AssignmentForm from "../../components/AssignmentForm";
@@ -384,8 +382,6 @@ export default function CourseDetail() {
     }
   };
 
-  const { signOut } = useAuth();
-
   // Total weight of the graded scheme — bonuses sit outside the 100%
   const totalAssignmentWeight = assignments.reduce((sum, a) => sum + (a.is_bonus ? 0 : a.weight ?? 0), 0);
   const totalBonusWeight = assignments.reduce((sum, a) => sum + (a.is_bonus ? a.weight ?? 0 : 0), 0);
@@ -409,54 +405,45 @@ export default function CourseDetail() {
     { name: 'Bonus', value: parseFloat(bonusPoints.toFixed(2)), color: '#8b5cf6' }
   ].filter(d => d.value > 0);
 
-  const { theme, toggleTheme } = useTheme();
 
   if (authLoading || loading || !course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
          <div className="h-16 w-16 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 lg:p-10 flex flex-col">
-      <header className="mb-6 sm:mb-8 border-b border-black/10 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8 w-full sm:w-auto">
-          <button 
-            onClick={() => router.push('/')} 
-            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-3 py-2 sm:py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[40px]"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-            Back to Dashboard
-          </button>
-          <div className="text-center sm:text-left">
-            <h1 className="text-3xl sm:text-4xl font-bold font-orbitron tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)] leading-tight">
+    <div className="min-h-dvh app-shell mx-auto w-full max-w-screen-2xl flex flex-col">
+      {/* Below lg: [back] + system controls on one row, the course title on its
+          own line so long names get the full width. Single row at lg. */}
+      <header className="mb-6 sm:mb-8 border-b border-black/10 pb-5 sm:pb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-8 min-w-0">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => router.push('/')}
+              className="group flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[44px] shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+              Back to Dashboard
+            </button>
+
+            <div className="flex items-center gap-2 lg:hidden">
+              <HeaderControls />
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-orbitron tracking-wide sm:tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)] leading-tight break-words">
               {course.name}
             </h1>
-            <p className="mt-1 text-muted text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-orbitron">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+            <p className="mt-1 text-muted text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-orbitron break-words">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
-          <button 
-            onClick={toggleTheme}
-            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
-            aria-label="Toggle Theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
-            ) : (
-              <Moon className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
-            )}
-          </button>
-          <button 
-            onClick={signOut}
-            className="group flex items-center gap-2 px-4 h-10 rounded-xl bg-white shadow-sm border border-black/10 hover:border-red-600 hover:bg-red-50 transition-all duration-300"
-          >
-            <span className="text-xs font-orbitron font-semibold text-secondary group-hover:text-red-600 transition-colors uppercase tracking-wider">Sign Out</span>
-            <LogOut className="w-4 h-4 text-muted group-hover:text-red-600 group-hover:translate-x-0.5 transition-all" />
-          </button>
+        <div className="hidden lg:flex items-center justify-end gap-3 shrink-0">
+          <HeaderControls showLabel />
         </div>
       </header>
 
@@ -484,16 +471,17 @@ export default function CourseDetail() {
         />
       </AnimatedOverlay>
 
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1 max-w-screen-2xl mx-auto w-full">
-        
+      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start flex-1 w-full">
+
         {/* LEFT COLUMN */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
+        <div className="lg:col-span-4 w-full flex flex-col gap-4 order-2 lg:order-1">
 
           {/* Compact Metrics Box */}
           <GlassCard className="p-4 relative">
             <button
               onClick={() => setEditingCourse(true)}
-              className="absolute top-3 right-3 text-muted hover:text-secondary transition-colors bg-black/5 hover:bg-black/10 p-1.5 rounded"
+              aria-label="Edit course"
+              className="absolute top-2 right-2 flex items-center justify-center w-9 h-9 text-muted hover:text-secondary transition-colors bg-black/5 hover:bg-black/10 rounded-lg"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
             </button>
@@ -522,8 +510,8 @@ export default function CourseDetail() {
 
           {/* Assignments Section — fills remaining height, scrollable */}
           <div className="flex flex-col gap-3 min-h-0">
-            <div className="flex justify-between items-center border-b border-black/10 pb-2">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex flex-wrap justify-between items-center gap-2 border-b border-black/10 pb-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
                 <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
                 {assignments.length > 0 && (
                   <span
@@ -532,7 +520,7 @@ export default function CourseDetail() {
                         ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
                         : totalAssignmentWeight === 100
                           ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-muted'
+                          : 'bg-black/5 border-black/10 text-muted'
                     }`}
                     title={totalAssignmentWeight > 100 ? "Total weight exceeds 100% — the extra counts as bonus" : "Total weight of all assignments"}
                   >
@@ -550,18 +538,20 @@ export default function CourseDetail() {
               </div>
               <button
                 onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
-                className="text-xs uppercase tracking-wider transition-all flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-muted hover:text-primary bg-black/5 hover:bg-primary/10 border border-transparent hover:border-primary/30 shrink-0"
+                className="text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1 px-3 py-2 min-h-[40px] rounded-lg text-muted hover:text-primary bg-black/5 hover:bg-primary/10 border border-transparent hover:border-primary/30 shrink-0"
               >
                 <span>+ Add</span>
               </button>
             </div>
 
-            <div className="overflow-y-auto flex flex-col gap-2 max-h-[420px] pr-1">
+            {/* Caps at a comfortable slice of the viewport on phones rather
+                than a fixed pixel height that can exceed a short screen. */}
+            <div className="overflow-y-auto overscroll-contain flex flex-col gap-2 max-h-[60dvh] lg:max-h-[420px] pr-1">
               {assignments.length > 0 ? (
                 assignments.map(a => {
                   const hasMark = a.mark !== null && a.mark !== undefined;
                   const markTheme = !hasMark
-                    ? "bg-black/5 dark:bg-white/5 text-muted border-black/10 dark:border-white/10"
+                    ? "bg-black/5 text-muted border-black/10"
                     : a.mark! >= 80
                       ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
                       : a.mark! >= 70
@@ -588,12 +578,12 @@ export default function CourseDetail() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className={`min-w-[64px] text-center text-xs font-bold font-orbitron tabular-nums px-2 py-1.5 rounded-lg border ${markTheme}`}>
+                        <span className={`min-w-[60px] sm:min-w-[64px] text-center text-xs font-bold font-orbitron tabular-nums px-2 py-2 rounded-lg border ${markTheme}`}>
                           {hasMark ? `${parseFloat(a.mark!.toFixed(2))}%` : 'Pending'}
                         </span>
                         <button
                           onClick={() => { setEditingAssignment(a); setAddingAssignment(false); }}
-                          className="p-2 text-muted hover:text-secondary bg-black/5 hover:bg-black/10 rounded transition-colors"
+                          className="flex items-center justify-center w-10 h-10 shrink-0 text-muted hover:text-secondary bg-black/5 hover:bg-black/10 rounded-lg transition-colors"
                           aria-label={`Edit ${a.name}`}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
@@ -617,8 +607,9 @@ export default function CourseDetail() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Advanced Calculations & Graph */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
+        {/* RIGHT COLUMN: Advanced Calculations & Graph.
+            Leads on phones — the summary matters more than the parameter list. */}
+        <div className="lg:col-span-8 w-full min-w-0 flex flex-col gap-8 order-1 lg:order-2">
            
            <DiagnosticMatrix
              course={course}

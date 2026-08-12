@@ -22,6 +22,7 @@ const chartSwapVariants = {
   exit: { opacity: 0, scale: 0.94, transition: { duration: 0.25, ease: "easeIn" as const } }
 };
 import { useTheme } from "@/components/ThemeProvider";
+import { useIsMobile, useIsHydrated } from "@/lib/useMediaQuery";
 
 interface DashboardMetricsProps {
   averageGpa: string;
@@ -116,6 +117,13 @@ const CustomLineTooltip = ({ active, payload, label, data }: any) => (
 export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, lineData, totalCourses, activeCourses, totalCredits }: DashboardMetricsProps) {
   const [is4Scale, setIs4Scale] = useState(false);
   const { theme } = useTheme();
+  // Recharts sizes in pixels, so the things CSS can't reach — tick density,
+  // plot margins, legend height — are switched from the same breakpoint here.
+  const isMobile = useIsMobile();
+  // isMobile resolves one render after hydration; holding the charts back until
+  // then means Recharts renders once, with final geometry, and its entrance
+  // animation isn't interrupted (which left the pie and area blank on phones).
+  const chartsReady = useIsHydrated();
 
   const textColor = theme === 'dark' ? '#A0A0A0' : '#5D6170';
   const strongTextColor = theme === 'dark' ? '#FFFFFF' : '#1D1E26';
@@ -126,26 +134,26 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
   const timelineAvg = lineData.length > 0 ? lineData.reduce((sum, d) => sum + d.mark, 0) / lineData.length : 0;
 
   return (
-    <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+    <div className="mb-8 sm:mb-10 lg:mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
       <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0} className="lg:col-span-1">
       <GlassCard
-        className="flex flex-col items-center justify-center p-6 sm:p-8 h-full cursor-pointer hover:border-primary transition-colors group"
+        className="flex flex-col items-center justify-center p-5 sm:p-8 h-full cursor-pointer hover:border-primary transition-colors group"
         onClick={() => setIs4Scale(!is4Scale)}
       >
         <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary mb-2 text-center group-hover:scale-105 transition-transform">Cumulative GPA</h2>
-        <div className="text-5xl sm:text-6xl font-orbitron font-bold text-secondary">
+        <div className="text-5xl sm:text-6xl font-orbitron font-bold text-secondary tabular-nums">
           {is4Scale ? averageGpa4_0 : averageGpa}
         </div>
         <div className="text-[10px] sm:text-xs mt-2 uppercase tracking-wider text-muted flex items-center gap-1">
           <span>{is4Scale ? "Out of 4.0 Scale" : "Out of 9.0 Scale"}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 group-hover:opacity-100 transition-opacity"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         </div>
-        <div className="mt-5 pt-4 border-t border-black/10 dark:border-white/10 w-full grid grid-cols-3 gap-2 text-center">
+        <div className="mt-5 pt-4 border-t border-black/10 w-full grid grid-cols-3 gap-2 text-center">
           <div className="flex flex-col">
             <span className="text-lg sm:text-xl font-orbitron font-bold text-secondary tabular-nums">{totalCourses}</span>
             <span className="text-[9px] uppercase tracking-widest text-muted">Courses</span>
           </div>
-          <div className="flex flex-col border-x border-black/10 dark:border-white/10">
+          <div className="flex flex-col border-x border-black/10">
             <span className="text-lg sm:text-xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{activeCourses}</span>
             <span className="text-[9px] uppercase tracking-widest text-muted">Active</span>
           </div>
@@ -157,11 +165,12 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
       </GlassCard>
       </motion.div>
       <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1} className="lg:col-span-1">
-      <GlassCard className="p-5 sm:p-6 h-full flex flex-col items-center justify-center min-h-[250px]">
+      <GlassCard className="p-4 sm:p-6 h-full flex flex-col items-center justify-center min-h-[260px]">
           <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary mb-4 w-full text-center">Grade Distribution</h2>
           <AnimatePresence mode="wait" initial={false}>
           {pieData.length > 0 ? (
-            <motion.div key={`pie-${theme}`} variants={chartSwapVariants} initial="initial" animate="animate" exit="exit" className="w-full h-48 sm:h-56">
+            <motion.div key={`pie-${theme}`} variants={chartSwapVariants} initial="initial" animate="animate" exit="exit" className="w-full h-52 sm:h-56">
+              {chartsReady && (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -208,9 +217,10 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
                     animationDuration={300}
                     wrapperStyle={{ visibility: 'visible' }}
                   />
-                  <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={9} wrapperStyle={{ fontSize: '11px', color: textColor, paddingTop: '10px' }}/>
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={isMobile ? 8 : 9} wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', color: textColor, paddingTop: '10px', lineHeight: 1.8 }}/>
                 </PieChart>
               </ResponsiveContainer>
+              )}
             </motion.div>
           ) : (
             <motion.div key="pie-empty" variants={chartSwapVariants} initial="initial" animate="animate" exit="exit" className="text-muted italic text-sm">
@@ -220,9 +230,10 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
           </AnimatePresence>
       </GlassCard>
       </motion.div>
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2} className="lg:col-span-2">
-      <GlassCard className="p-0 h-full flex flex-col min-h-[280px] overflow-hidden relative group">
-          <div className="p-6 pb-0 pointer-events-none z-10 flex items-baseline justify-between">
+      {/* Full width at md too — as a single column it left the row half empty */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2} className="md:col-span-2">
+      <GlassCard className="p-0 h-full flex flex-col min-h-[280px] sm:min-h-[300px] overflow-hidden relative group">
+          <div className="p-4 sm:p-6 pb-0 pointer-events-none z-10 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary opacity-70">Performance Timeline</h2>
             {lineData.length > 1 && (
               <span className="text-[9px] uppercase tracking-widest text-muted tabular-nums">
@@ -233,8 +244,9 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
           <AnimatePresence mode="wait" initial={false}>
           {lineData.length > 0 ? (
             <motion.div key={`line-${theme}`} variants={chartSwapVariants} initial="initial" animate="animate" exit="exit" className="w-full flex-1">
+              {chartsReady && (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={lineData} margin={{ top: 30, right: 30, left: 10, bottom: 20 }}>
+                <AreaChart data={lineData} margin={isMobile ? { top: 20, right: 14, left: 0, bottom: 12 } : { top: 30, right: 30, left: 10, bottom: 20 }}>
                   <defs>
                     <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#E31D2B" stopOpacity={0.22} />
@@ -242,8 +254,10 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.5} />
-                  <XAxis dataKey="name" stroke={textColor} fontSize={9} tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" />
-                  <YAxis stroke={textColor} fontSize={9} tickLine={false} axisLine={false} width={34} tickMargin={4} domain={['auto', 'auto']} tickFormatter={(v: number) => `${v}%`} />
+                  {/* minTickGap drops crowded term labels instead of letting
+                      them overlap once the plot is only a few hundred px wide. */}
+                  <XAxis dataKey="name" stroke={textColor} fontSize={isMobile ? 8 : 9} tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" minTickGap={isMobile ? 28 : 12} />
+                  <YAxis stroke={textColor} fontSize={isMobile ? 8 : 9} tickLine={false} axisLine={false} width={isMobile ? 28 : 34} tickCount={isMobile ? 4 : 5} tickMargin={4} domain={['auto', 'auto']} tickFormatter={(v: number) => `${v}%`} />
                   {lineData.length > 1 && (
                     <ReferenceLine
                       y={timelineAvg}
@@ -270,6 +284,7 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </motion.div>
           ) : (
             <motion.div key="line-empty" variants={chartSwapVariants} initial="initial" animate="animate" exit="exit" className="flex-1 flex items-center justify-center text-muted italic text-sm">

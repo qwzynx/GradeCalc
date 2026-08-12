@@ -103,9 +103,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary relative overflow-hidden p-4">
+    <div className="min-h-dvh flex items-center justify-center bg-primary relative overflow-hidden overlay-safe">
       {/* Animated Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-paper/10 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-alt-color/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       <motion.div 
@@ -114,28 +114,28 @@ export default function LoginPage() {
         transition={{ duration: 0.8 }}
         className="w-full max-w-md z-10"
       >
-        <div className="backdrop-blur-xl bg-white/3 border border-white/10 p-8 rounded-3xl shadow-2xl relative overflow-hidden text-center">
+        <div className="backdrop-blur-xl bg-paper/5 border border-paper/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden text-center">
           {/* Top accent line */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-secondary via-alt-color to-secondary"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-paper via-alt-color to-paper"></div>
           
-          <div className="mb-10">
+          <div className="mb-8 sm:mb-10">
             <motion.div 
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-secondary/20 to-alt-color/20 border border-secondary/30 mb-6"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-paper/20 to-alt-color/20 border border-paper/30 mb-6"
             >
               {view === 'success' ? (
-                <CheckCircle2 className="w-8 h-8 text-secondary" />
+                <CheckCircle2 className="w-8 h-8 text-paper" />
               ) : view === 'signup' ? (
-                <UserPlus className="w-8 h-8 text-secondary" />
+                <UserPlus className="w-8 h-8 text-paper" />
               ) : (
-                <LogIn className="w-8 h-8 text-secondary" />
+                <LogIn className="w-8 h-8 text-paper" />
               )}
             </motion.div>
-            <h1 className="text-4xl font-bold font-orbitron tracking-tight text-white mb-2">
+            <h1 className="text-3xl sm:text-4xl font-bold font-orbitron tracking-tight text-paper mb-2">
               GradeMatrix
             </h1>
-            <p className="text-alt-color/70 text-sm uppercase tracking-[0.2em]">
+            <p className="text-alt-color/85 text-sm uppercase tracking-[0.2em]">
               {view === 'success' ? 'Verification Sent' : view === 'signup' ? 'New Personnel Entry' : 'Authorized Access'}
             </p>
           </div>
@@ -151,40 +151,45 @@ export default function LoginPage() {
                 className="space-y-4"
               >
                 <div className="space-y-2 text-left">
-                  <label htmlFor="email" className="block text-xs font-medium text-alt-color/50 uppercase tracking-widest ml-1">
+                  <label htmlFor="email" className="block text-xs font-medium text-alt-color/80 uppercase tracking-widest ml-1">
                     Email Address
                   </label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-alt-color/40 group-focus-within:text-secondary transition-colors" />
+                      <Mail className="h-5 w-5 text-alt-color/60 group-focus-within:text-paper transition-colors" />
                     </div>
                     <input
                       id="email"
                       type="email"
                       required
+                      autoComplete="email"
+                      inputMode="email"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all outline-none text-white placeholder-white/20"
+                      className="block w-full pl-12 pr-4 py-4 bg-paper/5 border border-paper/10 rounded-2xl focus:ring-2 focus:ring-paper/50 focus:border-paper transition-all outline-none text-paper placeholder:text-paper/40"
                       placeholder="Input email"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label htmlFor="password" className="block text-xs font-medium text-alt-color/50 uppercase tracking-widest ml-1">
+                  <label htmlFor="password" className="block text-xs font-medium text-alt-color/80 uppercase tracking-widest ml-1">
                     Security Key
                   </label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-alt-color/40 group-focus-within:text-secondary transition-colors" />
+                      <Lock className="h-5 w-5 text-alt-color/60 group-focus-within:text-paper transition-colors" />
                     </div>
                     <input
                       id="password"
                       type="password"
                       required
+                      autoComplete={view === 'login' ? "current-password" : "new-password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all outline-none text-white placeholder-white/20"
+                      className="block w-full pl-12 pr-4 py-4 bg-paper/5 border border-paper/10 rounded-2xl focus:ring-2 focus:ring-paper/50 focus:border-paper transition-all outline-none text-paper placeholder:text-paper/40"
                       placeholder="••••••••"
                     />
                   </div>
@@ -192,12 +197,12 @@ export default function LoginPage() {
 
                 {view === 'signup' && (
                   <div className="space-y-2 text-left">
-                    <label htmlFor="confirmPassword" className="block text-xs font-medium text-alt-color/50 uppercase tracking-widest ml-1">
+                    <label htmlFor="confirmPassword" className="block text-xs font-medium text-alt-color/80 uppercase tracking-widest ml-1">
                       Confirm Security Key
                     </label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <ShieldCheck className="h-5 w-5 text-alt-color/40 group-focus-within:text-secondary transition-colors" />
+                        <ShieldCheck className="h-5 w-5 text-alt-color/60 group-focus-within:text-paper transition-colors" />
                       </div>
                       <input
                         id="confirmPassword"
@@ -205,7 +210,7 @@ export default function LoginPage() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all outline-none text-white placeholder-white/20"
+                        className="block w-full pl-12 pr-4 py-4 bg-paper/5 border border-paper/10 rounded-2xl focus:ring-2 focus:ring-paper/50 focus:border-paper transition-all outline-none text-paper placeholder:text-paper/40"
                         placeholder="••••••••"
                       />
                     </div>
@@ -215,9 +220,9 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-4 flex items-center justify-center gap-2 py-4 bg-secondary hover:bg-secondary/90 disabled:bg-secondary/50 text-primary font-bold rounded-2xl transition-all shadow-lg hover:shadow-secondary/20 group relative overflow-hidden"
+                  className="w-full mt-4 flex items-center justify-center gap-2 py-4 bg-paper hover:bg-paper/90 disabled:bg-paper/50 text-primary font-bold rounded-2xl transition-all shadow-lg hover:shadow-paper/20 group relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-paper/0 via-paper/20 to-paper/0 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
@@ -235,7 +240,7 @@ export default function LoginPage() {
                       setView(view === 'login' ? 'signup' : 'login');
                       setMessage(null);
                     }}
-                    className="text-xs text-alt-color/50 hover:text-secondary transition-colors uppercase tracking-widest"
+                    className="inline-flex items-center justify-center min-h-[44px] px-3 text-xs text-alt-color/60 hover:text-paper transition-colors uppercase tracking-widest"
                   >
                     {view === 'login' ? "Don't have an uplink? Register" : "Already registered? Login"}
                   </button>
@@ -248,16 +253,16 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-6 py-4"
               >
-                <p className="text-secondary text-base leading-relaxed">
-                  A magic uplink has been dispatched to <span className="text-white font-bold">{email}</span>. 
+                <p className="text-paper text-base leading-relaxed">
+                  A magic uplink has been dispatched to <span className="text-paper font-bold">{email}</span>. 
                   Click the link in your email to authenticate your access.
                 </p>
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-[10px] text-alt-color/40 uppercase tracking-widest">
+                <div className="p-4 bg-paper/5 rounded-2xl border border-paper/10 text-[10px] text-alt-color/70 uppercase tracking-widest">
                   Authentication pending confirmation...
                 </div>
                 <button
                   onClick={() => setView('login')}
-                  className="text-xs text-secondary hover:underline uppercase tracking-widest"
+                  className="inline-flex items-center justify-center min-h-[44px] px-3 text-xs text-paper hover:underline uppercase tracking-widest"
                 >
                   Return to Login
                 </button>
@@ -269,14 +274,14 @@ export default function LoginPage() {
             <motion.div 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className={`mt-6 p-4 rounded-xl text-sm ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}
+              className={`mt-6 p-4 rounded-xl text-sm ${message.type === 'success' ? 'bg-emerald-400/15 text-emerald-50 border border-emerald-200/40' : 'bg-[rgba(0,0,0,0.3)] text-paper border border-paper/30'}`}
             >
               {message.text}
             </motion.div>
           )}
 
-          <div className="mt-10 pt-6 border-t border-white/5">
-            <p className="text-alt-color/40 text-[10px] uppercase tracking-[0.3em] font-medium">
+          <div className="mt-8 sm:mt-10 pt-6 border-t border-paper/5">
+            <p className="text-alt-color/60 text-[10px] uppercase tracking-[0.3em] font-medium">
               GradeMatrix Intelligence Systems © 2026
             </p>
           </div>

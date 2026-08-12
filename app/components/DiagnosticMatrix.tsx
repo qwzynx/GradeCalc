@@ -8,6 +8,7 @@ import GlassCard from "./GlassCard";
 import NumberInput from "./NumberInput";
 import { Course, BackendMetrics } from "../types";
 import { useTheme } from "@/components/ThemeProvider";
+import { useIsMobile, useIsHydrated } from "@/lib/useMediaQuery";
 import { GRADE_MAPPING_4_0, LETTER_GRADES } from "@/lib/calculations";
 
 interface DiagnosticMatrixProps {
@@ -78,6 +79,9 @@ export default function DiagnosticMatrix({
   graphData
 }: DiagnosticMatrixProps) {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
+  // See DashboardMetrics: mount the chart only once isMobile has settled.
+  const chartsReady = useIsHydrated();
   const [is4Scale, setIs4Scale] = useState(false);
   const forceInputRef = useRef<HTMLInputElement>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -109,19 +113,19 @@ export default function DiagnosticMatrix({
   const activeLetter = getActiveLetter();
 
   return (
-    <GlassCard className="p-4 sm:p-8 pb-10 sm:pb-12 overflow-hidden relative border-black/10 shadow-lg bg-white">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-3 border-b border-black/10 pb-2 sm:pb-0 gap-3">
+    <GlassCard className="p-4 sm:p-6 lg:p-8 pb-8 sm:pb-12 overflow-hidden relative border-black/10 shadow-lg bg-white">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-3 border-b border-black/10 pb-3 sm:pb-0 gap-3">
         <div>
-           <h2 className="text-xl sm:text-2xl font-orbitron font-bold text-primary">Diagnostic Matrix</h2>
+           <h2 className="text-lg sm:text-xl lg:text-2xl font-orbitron font-bold text-primary">Diagnostic Matrix</h2>
         </div>
         <button 
           onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} 
-          className={`w-full sm:w-auto px-4 py-2 border transition-all rounded-lg text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 font-bold font-orbitron shadow-sm relative -top-1 sm:-top-2 ${
+          className={`w-full sm:w-auto px-4 py-2 min-h-[44px] border transition-all rounded-lg text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 font-bold font-orbitron shadow-sm relative sm:-top-2 ${
             course.mark !== undefined && course.mark !== null 
               ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30' 
               : forceGradeOpen
                 ? 'border-primary bg-primary text-white shadow-md'
-                : 'border-black/10 dark:border-white/10 bg-surface text-muted hover:text-primary hover:border-primary/50 hover:shadow-md'
+                : 'border-black/10 bg-surface text-muted hover:text-primary hover:border-primary/50 hover:shadow-md'
           }`}
         >
           {course.mark !== undefined && course.mark !== null ? (
@@ -142,7 +146,7 @@ export default function DiagnosticMatrix({
               <select
                 value={selectedLetter || ""}
                 onChange={handleLetterSelect}
-                className="w-full bg-surface border border-black/10 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer appearance-none min-h-[44px] transition-all group-hover:border-primary/50"
+                className="w-full bg-surface border border-black/10 rounded-lg px-3 py-2.5 text-sm text-secondary font-montserrat focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 cursor-pointer appearance-none min-h-[44px] transition-all group-hover:border-primary/50"
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23E31D2B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '12px' }}
               >
                 <option value="" className="bg-surface text-muted font-montserrat">— Select Letter —</option>
@@ -165,7 +169,7 @@ export default function DiagnosticMatrix({
               step="0.01"
               defaultValue={course.mark !== null && course.mark !== undefined ? course.mark : ""}
               placeholder="Grade %"
-              className="w-full bg-surface border border-black/10 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 min-h-[44px] placeholder:text-muted/50 transition-all hover:border-primary/50 font-montserrat font-semibold"
+              className="w-full bg-surface border border-black/10 rounded-lg px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 min-h-[44px] placeholder:text-muted/50 transition-all hover:border-primary/50 font-montserrat font-semibold"
               onChange={() => setSelectedLetter(null)}
             />
           </div>
@@ -176,7 +180,7 @@ export default function DiagnosticMatrix({
               Execute
             </button>
             {course.mark !== null && course.mark !== undefined && (
-              <button type="button" onClick={handleRemoveForceGrade} className="flex-1 sm:flex-none bg-surface border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-muted hover:text-secondary px-4 py-2.5 rounded-lg text-xs sm:text-sm uppercase tracking-widest transition-all min-h-[44px] font-orbitron">
+              <button type="button" onClick={handleRemoveForceGrade} className="flex-1 sm:flex-none bg-surface border border-black/10 hover:bg-black/5 text-muted hover:text-secondary px-4 py-2.5 rounded-lg text-xs sm:text-sm uppercase tracking-widest transition-all min-h-[44px] font-orbitron">
                 Reset
               </button>
             )}
@@ -184,16 +188,18 @@ export default function DiagnosticMatrix({
         </form>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-center">
+
           {/* Visual Graph Section */}
           <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="h-72 sm:h-80 w-full relative drop-shadow-sm flex justify-center items-center flex-col"
+            className="h-64 sm:h-80 w-full relative drop-shadow-sm flex justify-center items-center flex-col"
           >
-            <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none w-full">
+            {/* Held to roughly the donut's inner diameter so the bonus line
+                wraps inside the hole instead of running over the ring. */}
+            <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none w-[58%] max-w-[220px]">
               {course.mark !== null && course.mark !== undefined ? (
                  <>
                     <div className="text-2xl sm:text-3xl font-orbitron font-bold text-red-600">{course.mark.toFixed(2)}%</div>
@@ -206,13 +212,14 @@ export default function DiagnosticMatrix({
                     </div>
                     <div className="text-[9px] uppercase tracking-widest text-muted mt-1">Average</div>
                     {bonusPoints > 0 && (
-                      <div className="text-[10px] font-orbitron font-bold tracking-widest text-violet-600 dark:text-violet-400 mt-1">
+                      <div className="text-[9px] sm:text-[10px] font-orbitron font-bold tracking-wide sm:tracking-widest leading-tight text-violet-600 dark:text-violet-400 mt-1">
                         incl. +{bonusPoints.toFixed(2)}% bonus
                       </div>
                     )}
                  </>
               )}
             </div>
+            {chartsReady && (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -242,9 +249,9 @@ export default function DiagnosticMatrix({
                 />
                 <Legend
                   verticalAlign="bottom"
-                  height={36}
+                  height={isMobile ? 48 : 36}
                   iconSize={9}
-                  wrapperStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: theme === 'dark' ? '#A0A0A0' : '#5D6170' }}
+                  wrapperStyle={{ fontSize: isMobile ? '10px' : '11px', textTransform: 'uppercase', letterSpacing: isMobile ? '0.5px' : '1px', lineHeight: 1.9, color: theme === 'dark' ? '#A0A0A0' : '#5D6170' }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: string, entry: any) => (
                     <span>
@@ -255,20 +262,21 @@ export default function DiagnosticMatrix({
                 />
               </PieChart>
             </ResponsiveContainer>
+            )}
           </motion.div>
 
           {/* Advanced Metrics Panel */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-0">
+             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors min-w-0">
                <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted mb-2">Evaluated Weight</span>
-               <span className="text-xl sm:text-2xl font-orbitron text-secondary font-bold">
+               <span className="text-xl sm:text-2xl font-orbitron text-secondary font-bold tabular-nums">
                  {completedWeight}%
                </span>
              </div>
-             
-             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+
+             <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors min-w-0">
                <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted mb-2">Remaining Box</span>
-               <span className="text-xl sm:text-2xl font-orbitron text-primary font-bold">
+               <span className="text-xl sm:text-2xl font-orbitron text-primary font-bold tabular-nums">
                  {backendMetrics?.remaining_weight ? `${backendMetrics.remaining_weight}%` : '0%'}
                </span>
              </div>
@@ -308,12 +316,17 @@ export default function DiagnosticMatrix({
                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted font-orbitron font-bold group-hover/target:text-primary/70 transition-colors">Target Grade</span>
                  </div>
                  <div className="flex items-baseline gap-1">
-                   <input 
+                   <input
                      type="text"
-                     value={targetGrade || ""} 
-                     onChange={handleTargetChange} 
+                     // Opts out of the global 16px touch-input floor so the
+                     // display-sized target number keeps its scale on phones.
+                     data-keep-size
+                     inputMode="text"
+                     aria-label="Target grade"
+                     value={targetGrade || ""}
+                     onChange={handleTargetChange}
                      placeholder="80"
-                     className="w-24 sm:w-48 bg-transparent border-none text-4xl sm:text-5xl font-orbitron font-bold text-secondary focus:text-primary outline-none transition-all p-0 uppercase" 
+                     className="w-20 sm:w-48 min-w-0 bg-transparent border-none text-4xl sm:text-5xl font-orbitron font-bold text-secondary focus:text-primary outline-none transition-all p-0 uppercase tabular-nums"
                    />
                    <span className="text-xl sm:text-2xl font-orbitron font-bold text-muted/30 group-hover/target:text-primary/30 transition-colors">
                      {typeof targetGrade === 'string' && /^[a-zA-Z]/.test(targetGrade) ? '' : '%'}

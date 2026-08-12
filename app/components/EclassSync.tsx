@@ -310,7 +310,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   };
 
   const closeButton = (
-    <button type="button" onClick={handleCancel} className="absolute top-4 right-4 text-muted hover:text-secondary hover:bg-black/10 transition-colors bg-black/5 p-2 rounded z-20">
+    <button type="button" onClick={handleCancel} aria-label="Close" className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-10 h-10 text-muted hover:text-secondary hover:bg-black/10 transition-colors bg-black/5 rounded-lg z-20">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
   );
@@ -318,7 +318,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   // --- Connect Phase ---
   if (phase === "connect") {
     return (
-      <GlassCard className="max-w-lg w-full relative bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto relative bg-white shadow-xl border-black/10 p-5 sm:p-6">
         {closeButton}
         <h2 className="text-xl mb-4 font-orbitron text-primary font-bold border-b border-black/10 pb-2 pr-12">eClass Sync</h2>
 
@@ -334,7 +334,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
-            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
+            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
           />
           <input
             value={password}
@@ -343,7 +343,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
             type="password"
             placeholder="Passport York password"
             autoComplete="current-password"
-            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
+            className="w-full bg-white border border-black/20 rounded px-3 py-2.5 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
           />
         </div>
 
@@ -372,19 +372,19 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               <li>Press <span className="font-mono bg-black/10 px-1 rounded">F12</span> → <span className="font-semibold">Application</span> (Chrome) / <span className="font-semibold">Storage</span> (Firefox) → Cookies.</li>
               <li>Copy the value of <span className="font-mono bg-black/10 px-1 rounded">MoodleSession</span> and paste it below.</li>
             </ol>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 value={sessionCookie}
                 onChange={(e) => setSessionCookie(e.target.value)}
                 placeholder="MoodleSession value"
                 autoComplete="off"
                 spellCheck={false}
-                className="flex-1 bg-white border border-black/20 rounded px-3 py-2 text-sm font-mono text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
+                className="flex-1 min-w-0 bg-white border border-black/20 rounded px-3 py-2 min-h-[44px] text-sm font-mono text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
               />
               <button
                 onClick={handleManualFetch}
                 disabled={!sessionCookie.trim()}
-                className="px-4 py-2 border border-black/20 hover:border-primary text-muted hover:text-primary rounded text-xs uppercase tracking-wider transition-all shadow-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 min-h-[44px] border border-black/20 hover:border-primary text-muted hover:text-primary rounded text-xs uppercase tracking-wider transition-all shadow-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Fetch
               </button>
@@ -398,7 +398,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   // --- Duo Approval Phase ---
   if (phase === "duo") {
     return (
-      <GlassCard className="max-w-lg w-full text-center py-12 bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto text-center py-12 bg-white shadow-xl border-black/10">
         <div className="flex flex-col items-center gap-4">
           {duoCode ? (
             <>
@@ -412,7 +412,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                 <p className="text-muted text-xs mt-2 font-montserrat max-w-sm mx-auto">
                   Open the Duo prompt on your phone and enter this verification code:
                 </p>
-                <p className="text-4xl font-orbitron font-bold text-secondary tracking-[0.3em] mt-4">{duoCode}</p>
+                <p className="text-3xl sm:text-4xl font-orbitron font-bold text-secondary tracking-[0.2em] sm:tracking-[0.3em] mt-4 break-all">{duoCode}</p>
               </div>
             </>
           ) : (
@@ -448,7 +448,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   // --- Loading / Applying Phase ---
   if (phase === "loading" || phase === "applying") {
     return (
-      <GlassCard className="max-w-lg w-full text-center py-12 bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto text-center py-12 bg-white shadow-xl border-black/10">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="h-14 w-14 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
@@ -475,7 +475,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   // --- Error Phase ---
   if (phase === "error") {
     return (
-      <GlassCard className="max-w-lg w-full bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto relative bg-white shadow-xl border-black/10">
         {closeButton}
         <div className="text-center py-8 flex flex-col items-center gap-4">
           <div className="w-14 h-14 rounded-full border-2 border-red-200 flex items-center justify-center bg-primary/5 dark:bg-primary/10">
@@ -503,7 +503,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   // --- Done Phase ---
   if (phase === "done") {
     return (
-      <GlassCard className="max-w-lg w-full bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto relative bg-white shadow-xl border-black/10">
         {closeButton}
         <div className="text-center py-8 flex flex-col items-center gap-4">
           <div className="w-14 h-14 rounded-full border-2 border-emerald-200 flex items-center justify-center bg-emerald-500/5">
@@ -543,7 +543,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   const hasChanges = matchedCourses.some((c) => c.items.length > 0) || newCoursesToCreate > 0;
 
   return (
-    <GlassCard className="max-w-4xl w-full max-h-[92vh] relative bg-white shadow-xl border-black/10 flex flex-col">
+    <GlassCard className="max-w-4xl w-full mx-auto max-h-[88dvh] relative bg-white shadow-xl border-black/10 flex flex-col p-4 sm:p-6">
       {closeButton}
       <h2 className="text-xl mb-2 font-orbitron text-primary font-bold border-b border-black/10 pb-3 pr-12 shrink-0">Review Sync Plan</h2>
       <p className="text-[11px] text-muted uppercase tracking-widest mb-5 leading-relaxed shrink-0">AI-matched against your courses — uncheck anything you don&apos;t want applied</p>
@@ -582,7 +582,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                         type="checkbox"
                         checked={!!selected[key]}
                         onChange={(e) => setSelected((prev) => ({ ...prev, [key]: e.target.checked }))}
-                        className="mt-1 accent-primary cursor-pointer shrink-0"
+                        className="mt-0.5 w-5 h-5 accent-primary cursor-pointer shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <span className="text-sm text-secondary font-medium">{item.assignment_name || item.eclass_item_name}</span>
@@ -618,14 +618,14 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                   type="checkbox"
                   checked={enabled}
                   onChange={(e) => setCreateCourse((prev) => ({ ...prev, [ci]: e.target.checked }))}
-                  className="mt-2 accent-primary cursor-pointer shrink-0"
+                  className="mt-1.5 w-5 h-5 accent-primary cursor-pointer shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <input
                     value={edit.name}
                     disabled={!enabled}
                     onChange={(e) => setCourseEdits((prev) => ({ ...prev, [ci]: { ...edit, name: e.target.value } }))}
-                    className="w-full bg-white border border-black/20 rounded px-2.5 py-1.5 text-sm font-bold text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm disabled:opacity-50"
+                    className="w-full bg-white border border-black/20 rounded px-2.5 py-1.5 min-h-[40px] text-sm font-bold text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm disabled:opacity-50"
                   />
                   <p className="text-[9px] uppercase tracking-widest text-muted break-words mt-1.5">eClass: {course.eclass_course_name}</p>
                 </div>
@@ -634,12 +634,12 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                 </span>
               </div>
 
-              <div className="px-4 py-3 grid grid-cols-3 gap-2 border-b border-black/5">
+              <div className="px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 border-b border-black/5">
                 <select
                   value={edit.semester}
                   disabled={!enabled}
                   onChange={(e) => setCourseEdits((prev) => ({ ...prev, [ci]: { ...edit, semester: e.target.value } }))}
-                  className="bg-white border border-black/20 rounded px-2 py-1 text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
+                  className="w-full bg-white border border-black/20 rounded px-2 py-1 min-h-[40px] text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
                 >
                   {SEMESTER_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -647,13 +647,13 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                   value={edit.year}
                   disabled={!enabled}
                   onChange={(e) => setCourseEdits((prev) => ({ ...prev, [ci]: { ...edit, year: parseInt(e.target.value) || edit.year } }))}
-                  className="bg-white border border-black/20 rounded px-2 py-1 text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
+                  className="w-full bg-white border border-black/20 rounded px-2 py-1 min-h-[40px] text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
                 />
                 <select
                   value={edit.category || ""}
                   disabled={!enabled}
                   onChange={(e) => setCourseEdits((prev) => ({ ...prev, [ci]: { ...edit, category: e.target.value || null } }))}
-                  className="bg-white border border-black/20 rounded px-2 py-1 text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
+                  className="w-full bg-white border border-black/20 rounded px-2 py-1 min-h-[40px] text-xs text-secondary focus:outline-none focus:border-primary shadow-sm disabled:opacity-50"
                 >
                   <option value="">Unspecified</option>
                   {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -673,7 +673,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                           checked={!!selected[key]}
                           disabled={!enabled}
                           onChange={(e) => setSelected((prev) => ({ ...prev, [key]: e.target.checked }))}
-                          className="mt-1 accent-primary cursor-pointer shrink-0"
+                          className="mt-0.5 w-5 h-5 accent-primary cursor-pointer shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
@@ -699,7 +699,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               )}
 
               <div className="px-4 py-3 flex items-center gap-2">
-                <label className={`text-[10px] uppercase tracking-widest font-orbitron transition-colors ${enabled ? "text-muted hover:text-primary cursor-pointer" : "text-muted/40 cursor-not-allowed"}`}>
+                <label className={`flex items-center min-h-[40px] text-[10px] uppercase tracking-widest font-orbitron transition-colors ${enabled ? "text-muted hover:text-primary cursor-pointer" : "text-muted/40 cursor-not-allowed"}`}>
                   {attachingIdx === ci ? "Parsing syllabus…" : "📎 Attach syllabus PDF for exact weights"}
                   <input
                     type="file"
@@ -743,13 +743,13 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
         )}
       </div>
 
-      <div className="flex gap-3 shrink-0">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 shrink-0">
         <NeonButton onClick={handleApply} disabled={!hasChanges || (selectedCount === 0 && newCoursesToCreate === 0)} className="flex-1 py-3 text-sm">
           {newCoursesToCreate > 0
             ? `Create ${newCoursesToCreate} Course${newCoursesToCreate === 1 ? "" : "s"}${selectedCount > 0 ? ` & Apply ${selectedCount} Update${selectedCount === 1 ? "" : "s"}` : ""}`
             : `Apply ${selectedCount} Update${selectedCount === 1 ? "" : "s"}`}
         </NeonButton>
-        <button onClick={handleCancel} className="px-6 py-2.5 min-h-[44px] border border-black/20 hover:border-secondary bg-white text-muted hover:text-secondary rounded text-xs uppercase tracking-wider transition-all shadow-sm">
+        <button onClick={handleCancel} className="px-6 py-2.5 min-h-[44px] shrink-0 border border-black/20 hover:border-secondary bg-white text-muted hover:text-secondary rounded text-xs uppercase tracking-wider transition-all shadow-sm">
           Cancel
         </button>
       </div>

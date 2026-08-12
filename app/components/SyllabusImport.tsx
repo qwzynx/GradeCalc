@@ -119,15 +119,15 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
   // --- Upload Phase ---
   if (phase === "upload") {
     return (
-      <GlassCard className="max-w-lg w-full relative bg-white shadow-xl border-black/10">
-        <button type="button" onClick={onCancel} className="absolute top-4 right-4 text-muted hover:text-secondary hover:bg-black/10 transition-colors bg-black/5 p-2 rounded z-20">
+      <GlassCard className="max-w-lg w-full mx-auto relative bg-white shadow-xl border-black/10 p-5 sm:p-6">
+        <button type="button" onClick={onCancel} aria-label="Close" className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-10 h-10 text-muted hover:text-secondary hover:bg-black/10 transition-colors bg-black/5 rounded-lg z-20">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
         <h2 className="text-xl mb-4 font-orbitron text-primary font-bold border-b border-black/10 pb-2 pr-12">Import Syllabus</h2>
         <p className="text-sm text-muted mb-4">Upload your course syllabus (PDF) and AI will automatically extract the course info and graded components.</p>
 
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
+          className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all cursor-pointer ${
             isDragging
               ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02]"
               : "border-black/20 hover:border-primary hover:bg-black/5 bg-white"
@@ -157,7 +157,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
   // --- Loading Phase ---
   if (phase === "loading") {
     return (
-      <GlassCard className="max-w-lg w-full text-center py-12 bg-white shadow-xl border-black/10">
+      <GlassCard className="max-w-lg w-full mx-auto text-center py-12 bg-white shadow-xl border-black/10">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="h-14 w-14 rounded-full border-4 border-black/10 border-t-primary animate-spin"></div>
@@ -180,8 +180,8 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
   // --- Error Phase ---
   if (phase === "error") {
     return (
-      <GlassCard className="max-w-lg w-full bg-white shadow-xl border-black/10">
-        <button type="button" onClick={onCancel} className="absolute top-4 right-4 text-muted hover:text-secondary transition-colors bg-black/5 p-2 rounded z-20">
+      <GlassCard className="max-w-lg w-full mx-auto relative bg-white shadow-xl border-black/10">
+        <button type="button" onClick={onCancel} aria-label="Close" className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-10 h-10 text-muted hover:text-secondary transition-colors bg-black/5 rounded-lg z-20">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
         <div className="text-center py-8 flex flex-col items-center gap-4">
@@ -209,8 +209,8 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
 
   // --- Preview Phase ---
   return (
-    <GlassCard className="max-w-2xl w-full relative bg-white shadow-xl border-black/10">
-      <button type="button" onClick={onCancel} className="absolute top-4 right-4 text-muted hover:text-secondary hover:bg-black/5 transition-colors bg-black/5 p-2 rounded z-20">
+    <GlassCard className="max-w-2xl w-full mx-auto relative bg-white shadow-xl border-black/10 p-5 sm:p-6">
+      <button type="button" onClick={onCancel} aria-label="Close" className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-10 h-10 text-muted hover:text-secondary hover:bg-black/5 transition-colors bg-black/5 rounded-lg z-20">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       </button>
 
@@ -220,8 +220,8 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
       {/* Course Info */}
       <div className="mb-5">
         <h3 className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold mb-2 font-orbitron">Course Information</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="sm:col-span-2">
             <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Course Name</label>
             <input
               value={parsedCourse?.name || ""}
@@ -297,7 +297,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
           </h3>
         </div>
 
-        <div className="flex flex-col gap-1.5 max-h-[250px] overflow-y-auto pr-1">
+        <div className="flex flex-col gap-1.5 max-h-[40dvh] sm:max-h-[250px] overflow-y-auto overscroll-contain pr-1">
           {parsedAssignments.map((a, i) => (
             <div key={i} className="flex items-center gap-2 p-2 bg-black/5 border border-black/10 rounded group">
               <input
@@ -310,14 +310,14 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
                   value={a.weight}
                   step="0.01"
                   onChange={(e) => handleUpdateAssignment(i, "weight", e.target.value)}
-                  className="w-16 bg-white border border-black/20 rounded px-1.5 py-0.5 text-xs text-secondary text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
+                  className="w-20 bg-white border border-black/20 rounded px-1.5 py-1 text-xs text-secondary text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
                 />
                 <span className="text-muted/60 text-xs">%</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleRemoveAssignment(i)}
-                className="p-1 text-muted/50 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                aria-label="Remove component" className="flex items-center justify-center w-9 h-9 shrink-0 text-muted/50 hover:text-red-600 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
@@ -338,7 +338,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
         <NeonButton onClick={handleConfirm} className="flex-1 py-3 text-sm">
           Confirm & Import
         </NeonButton>

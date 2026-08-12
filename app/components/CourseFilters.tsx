@@ -53,23 +53,26 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   };
 
   return (
-    <div className="mb-12 p-6 rounded-2xl border border-black/10 bg-white shadow-md flex flex-col gap-8">
+    <div className="mb-8 lg:mb-12 p-4 sm:p-6 rounded-2xl border border-black/10 bg-white shadow-md flex flex-col gap-6 sm:gap-8">
       {/* Search Input */}
       <div className="relative group max-w-2xl">
         <div className="absolute inset-0 bg-black/5 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
         <div className="relative flex items-center">
-          <Search className="absolute left-4 w-5 h-5 text-muted" />
+          <Search className="absolute left-4 w-5 h-5 text-muted pointer-events-none" />
           <input
             type="text"
-            placeholder="Search courses by name, code, or professor..."
-            className="w-full bg-white border border-black/20 rounded-xl py-5 pl-12 pr-4 text-secondary placeholder:text-muted focus:outline-none focus:border-primary transition-all font-orbitron tracking-wider text-sm shadow-sm"
+            inputMode="search"
+            placeholder="Search by name, code, or professor..."
+            aria-label="Search courses"
+            className="w-full bg-white border border-black/20 rounded-xl py-3.5 sm:py-4 pl-12 pr-11 text-secondary placeholder:text-muted focus:outline-none focus:border-primary transition-all font-orbitron tracking-wider text-sm shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-4 text-muted hover:text-primary transition-colors"
+              aria-label="Clear search"
+              className="absolute right-1 flex items-center justify-center w-10 h-10 text-muted hover:text-primary transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -77,7 +80,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6 sm:gap-8">
         {/* Status Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
@@ -97,7 +100,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex items-center justify-between px-1">
             <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Year</label>
             {filterAcademicYear.length > 0 && (
-               <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -118,7 +121,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex items-center justify-between px-1">
             <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Semester</label>
             {filterSemester.length > 0 && (
-               <button onClick={() => setFilterSemester([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterSemester([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -139,7 +142,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex items-center justify-between px-1">
             <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Year</label>
             {filterYear.length > 0 && (
-               <button onClick={() => setFilterYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -160,7 +163,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex items-center justify-between px-1">
             <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Category</label>
             {filterCategory.length > 0 && (
-               <button onClick={() => setFilterCategory([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100">Reset</button>
+               <button onClick={() => setFilterCategory([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -216,7 +219,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 const FilterCheckbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
   <button
     onClick={onChange}
-    className={`group flex items-center gap-2 px-3 py-1.5 rounded-md border transition-all duration-300 ${
+    className={`group flex items-center gap-2 px-3 py-2.5 sm:py-2 min-h-[40px] rounded-md border transition-all duration-300 ${
       checked 
         ? 'bg-primary/10 border-primary text-primary font-semibold shadow-sm' 
         : 'bg-white border-black/20 text-muted hover:border-primary hover:text-primary'
@@ -232,9 +235,13 @@ const FilterCheckbox = ({ label, checked, onChange }: { label: string; checked: 
 );
 
 const FilterBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
-  <div className="flex items-center gap-2 bg-primary/5 dark:bg-primary/10 border border-primary/30 rounded-lg px-2 py-1 animate-in zoom-in-95 duration-200">
-    <span className="text-[9px] font-orbitron text-primary font-semibold uppercase tracking-wider">{label}</span>
-    <button onClick={onClear} className="text-primary hover:text-red-700 transition-colors">
+  <div className="flex items-center gap-1 max-w-full bg-primary/5 dark:bg-primary/10 border border-primary/30 rounded-lg pl-2 animate-in zoom-in-95 duration-200">
+    <span className="text-[9px] font-orbitron text-primary font-semibold uppercase tracking-wider truncate">{label}</span>
+    <button
+      onClick={onClear}
+      aria-label={`Remove filter ${label}`}
+      className="flex items-center justify-center w-7 h-7 shrink-0 text-primary hover:text-red-700 transition-colors"
+    >
       <X className="w-3 h-3" />
     </button>
   </div>
