@@ -57,11 +57,11 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
         <div className="flex justify-between items-start gap-3 mb-5 sm:mb-6">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-[10px] uppercase tracking-wider bg-black/5 px-2 py-0.5 rounded text-muted font-medium">
+              <span className="text-[0.625rem] uppercase tracking-wider bg-black/5 px-2 py-0.5 rounded text-muted font-medium">
                 {course.semester} {course.year}
               </span>
               {course.category && (
-                <span className="text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">
+                <span className="text-[0.625rem] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">
                   {course.category}
                 </span>
               )}
@@ -74,7 +74,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
           {/* Prominent Grade Badge */}
           <div className={`flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-2xl border shadow-sm ${gradeBadgeTheme}`}>
             <span className="text-lg sm:text-xl font-bold font-orbitron leading-none">{letterGrade}</span>
-            <span className="text-[10px] font-semibold mt-1 opacity-80 tabular-nums">
+            <span className="text-[0.625rem] font-semibold mt-1 opacity-80 tabular-nums">
               {finalPercentage !== null ? `${finalPercentage.toFixed(1)}%` : "—"}
             </span>
           </div>
@@ -86,7 +86,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
               <User className="w-4 h-4 text-secondary" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-widest opacity-60">Instructor</span>
+              <span className="text-[0.625rem] uppercase tracking-widest opacity-60">Instructor</span>
               <span className="text-secondary font-medium truncate" title={course.prof_name || "Unassigned"}>{course.prof_name || "Unassigned"}</span>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
               {course.in_progress ? <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <CheckCircle2 className="w-4 h-4 text-secondary" />}
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-widest opacity-60">Status</span>
+              <span className="text-[0.625rem] uppercase tracking-widest opacity-60">Status</span>
               <span className={course.in_progress ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-secondary font-medium"}>
                 {course.in_progress ? "Active" : "Archived"}
               </span>
@@ -108,8 +108,8 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
               <ListChecks className="w-4 h-4 text-secondary" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-widest opacity-60">Progress</span>
-              <span className="text-secondary font-medium text-[13px] sm:text-sm">
+              <span className="text-[0.625rem] uppercase tracking-widest opacity-60">Progress</span>
+              <span className="text-secondary font-medium text-[0.8125rem] sm:text-sm">
                 {scored.length === 0
                   ? "No assignments yet"
                   : `${gradedCount} of ${scored.length} graded · ${Math.round(gradedWeight)}% weight`}
@@ -124,11 +124,11 @@ export default function CourseCard({ course, assignments = [], finalPercentage, 
         <div className="mt-5 sm:mt-6 pt-4 border-t border-black/5 flex flex-wrap gap-2 justify-between items-center">
           <div className="flex items-center gap-1.5">
              <Bookmark className="w-3.5 h-3.5 opacity-50" />
-             <span className="text-[11px] font-medium text-muted">
+             <span className="text-[0.6875rem] font-medium text-muted">
                {course.credits || 3} Credits
              </span>
           </div>
-          <div className="uppercase text-[10px] tracking-widest font-medium">
+          <div className="uppercase text-[0.625rem] tracking-widest font-medium">
             {(course.mark !== undefined && course.mark !== null) ? (
               <span className="text-primary flex items-center gap-1 bg-primary/5 px-2 py-1 rounded">
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>

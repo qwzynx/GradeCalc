@@ -127,12 +127,21 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
         <p className="text-sm text-muted mb-4">Upload your course syllabus (PDF) and AI will automatically extract the course info and graded components.</p>
 
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Choose a syllabus PDF to upload"
           className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all cursor-pointer ${
             isDragging
               ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02]"
               : "border-black/20 hover:border-primary hover:bg-black/5 bg-white"
           }`}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -150,6 +159,11 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             </div>
           </div>
         </div>
+        <p className="text-xs text-muted mt-4">
+          Your file is sent to Google&apos;s Gemini AI to be read and is not stored by GradeMatrix. Don&apos;t upload
+          documents that contain other people&apos;s personal information.{" "}
+          <a href="/privacy#ai" target="_blank" className="text-primary font-semibold underline">How AI processing works</a>
+        </p>
       </GlassCard>
     );
   }
@@ -215,14 +229,14 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
       </button>
 
       <h2 className="text-xl mb-1 font-orbitron text-primary font-bold border-b border-black/10 pb-2 pr-12">Review Extracted Data</h2>
-      <p className="text-[10px] text-muted uppercase tracking-widest mb-4">Verify and edit before importing — parsed from <span className="text-secondary font-semibold">{fileName}</span></p>
+      <p className="text-[0.625rem] text-muted uppercase tracking-widest mb-4">Verify and edit before importing — parsed from <span className="text-secondary font-semibold">{fileName}</span></p>
 
       {/* Course Info */}
       <div className="mb-5">
-        <h3 className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold mb-2 font-orbitron">Course Information</h3>
+        <h3 className="text-[0.625rem] uppercase tracking-widest text-emerald-600 font-bold mb-2 font-orbitron">Course Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2">
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Course Name</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Course Name</label>
             <input
               value={parsedCourse?.name || ""}
               onChange={(e) => setParsedCourse(prev => prev ? { ...prev, name: e.target.value } : prev)}
@@ -230,7 +244,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             />
           </div>
           <div>
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Professor</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Professor</label>
             <input
               value={parsedCourse?.prof_name || ""}
               onChange={(e) => setParsedCourse(prev => prev ? { ...prev, prof_name: e.target.value } : prev)}
@@ -238,7 +252,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             />
           </div>
           <div>
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Category</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Category</label>
             <select
               value={parsedCourse?.category || ""}
               onChange={(e) => setParsedCourse(prev => prev ? { ...prev, category: e.target.value || null } : prev)}
@@ -253,7 +267,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             </select>
           </div>
           <div>
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Semester</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Semester</label>
             <select
               value={parsedCourse?.semester || "Fall"}
               onChange={(e) => setParsedCourse(prev => prev ? { ...prev, semester: e.target.value } : prev)}
@@ -267,7 +281,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             </select>
           </div>
           <div>
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Year</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Year</label>
             <NumberInput
               value={parsedCourse?.year || new Date().getFullYear()}
               onChange={(e) => setParsedCourse(prev => prev ? { ...prev, year: parseInt(e.target.value) || new Date().getFullYear() } : prev)}
@@ -275,7 +289,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             />
           </div>
           <div>
-            <label className="text-[9px] uppercase tracking-widest text-muted block mb-1">Credits</label>
+            <label className="text-[0.5625rem] uppercase tracking-widest text-muted block mb-1">Credits</label>
             <NumberInput
               value={parsedCourse?.credits || 3}
               step="0.5"
@@ -289,7 +303,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
       {/* Assignments */}
       <div className="mb-5">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold font-orbitron">
+          <h3 className="text-[0.625rem] uppercase tracking-widest text-emerald-600 font-bold font-orbitron">
             Graded Components
             <span className={`ml-2 ${Math.abs(totalWeight - 100) < 0.1 ? "text-emerald-600" : "text-amber-600"}`}>
               ({totalWeight.toFixed(1)}% total)
@@ -330,7 +344,7 @@ export default function SyllabusImport({ onImport, onCancel }: SyllabusImportPro
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 shrink-0">
               <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
             </svg>
-            <span className="text-[11px] text-amber-900">
+            <span className="text-[0.6875rem] text-amber-900">
               Weights total <span className="font-bold text-amber-800">{totalWeight.toFixed(1)}%</span> — expected 100%. Review and adjust before importing.
             </span>
           </div>

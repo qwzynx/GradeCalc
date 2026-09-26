@@ -84,7 +84,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Status Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Status</label>
+            <label className="text-[0.6875rem] font-orbitron text-muted uppercase tracking-[0.2em]">Status</label>
           </div>
           <div className="flex flex-wrap gap-2">
             <FilterCheckbox
@@ -98,9 +98,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
         {/* Academic Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Year</label>
+            <label className="text-[0.6875rem] font-orbitron text-muted uppercase tracking-[0.2em]">Academic Year</label>
             {filterAcademicYear.length > 0 && (
-               <button onClick={() => setFilterAcademicYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
+               <button onClick={() => setFilterAcademicYear([])} className="text-[0.5625rem] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -112,16 +112,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                  onChange={() => toggleFilter(filterAcademicYear, setFilterAcademicYear, ay)}
                />
             ))}
-            {availableAcademicYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Found</span>}
+            {availableAcademicYears.length === 0 && <span className="text-[0.625rem] text-muted/60 uppercase italic">No Years Found</span>}
           </div>
         </div>
 
         {/* Semester Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Semester</label>
+            <label className="text-[0.6875rem] font-orbitron text-muted uppercase tracking-[0.2em]">Semester</label>
             {filterSemester.length > 0 && (
-               <button onClick={() => setFilterSemester([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
+               <button onClick={() => setFilterSemester([])} className="text-[0.5625rem] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -133,16 +133,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterSemester, setFilterSemester, s)}
               />
             ))}
-            {availableSemesters.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Semesters Found</span>}
+            {availableSemesters.length === 0 && <span className="text-[0.625rem] text-muted/60 uppercase italic">No Semesters Found</span>}
           </div>
         </div>
 
         {/* Year Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Year</label>
+            <label className="text-[0.6875rem] font-orbitron text-muted uppercase tracking-[0.2em]">Year</label>
             {filterYear.length > 0 && (
-               <button onClick={() => setFilterYear([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
+               <button onClick={() => setFilterYear([])} className="text-[0.5625rem] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -154,16 +154,16 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterYear, setFilterYear, y.toString())}
               />
             ))}
-            {availableYears.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Years Found</span>}
+            {availableYears.length === 0 && <span className="text-[0.625rem] text-muted/60 uppercase italic">No Years Found</span>}
           </div>
         </div>
 
         {/* Category Filter */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <label className="text-[11px] font-orbitron text-muted uppercase tracking-[0.2em]">Category</label>
+            <label className="text-[0.6875rem] font-orbitron text-muted uppercase tracking-[0.2em]">Category</label>
             {filterCategory.length > 0 && (
-               <button onClick={() => setFilterCategory([])} className="text-[9px] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
+               <button onClick={() => setFilterCategory([])} className="text-[0.5625rem] text-primary font-semibold hover:underline uppercase tracking-widest opacity-60 hover:opacity-100 px-2 py-1 -mr-2">Reset</button>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -175,7 +175,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 onChange={() => toggleFilter(filterCategory, setFilterCategory, c)}
               />
             ))}
-            {availableCategories.length === 0 && <span className="text-[10px] text-muted/60 uppercase italic">No Categories Found</span>}
+            {availableCategories.length === 0 && <span className="text-[0.625rem] text-muted/60 uppercase italic">No Categories Found</span>}
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
-              <span className="text-[10px] font-orbitron text-muted uppercase tracking-[0.2em]">Active Filters</span>
+              <span className="text-[0.625rem] font-orbitron text-muted uppercase tracking-[0.2em]">Active Filters</span>
             </div>
             <button 
               onClick={() => {
@@ -197,7 +197,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 setFilterCategory([]);
                 setFilterInProgress(false);
               }}
-              className="text-[9px] font-orbitron text-primary font-bold hover:bg-primary/10 transition-all uppercase tracking-[0.2em] border border-primary/20 rounded px-2 py-1"
+              className="text-[0.5625rem] font-orbitron text-primary font-bold hover:bg-primary/10 transition-all uppercase tracking-[0.2em] border border-primary/20 rounded px-2 py-1"
             >
               Clear All
             </button>
@@ -230,13 +230,13 @@ const FilterCheckbox = ({ label, checked, onChange }: { label: string; checked: 
     }`}>
       {checked && <Check className="w-2.5 h-2.5 text-[#FFFFFF] stroke-[4px]" />}
     </div>
-    <span className="text-[10px] font-orbitron uppercase tracking-widest leading-none">{label}</span>
+    <span className="text-[0.625rem] font-orbitron uppercase tracking-widest leading-none">{label}</span>
   </button>
 );
 
 const FilterBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
   <div className="flex items-center gap-1 max-w-full bg-primary/5 dark:bg-primary/10 border border-primary/30 rounded-lg pl-2 animate-in zoom-in-95 duration-200">
-    <span className="text-[9px] font-orbitron text-primary font-semibold uppercase tracking-wider truncate">{label}</span>
+    <span className="text-[0.5625rem] font-orbitron text-primary font-semibold uppercase tracking-wider truncate">{label}</span>
     <button
       onClick={onClear}
       aria-label={`Remove filter ${label}`}

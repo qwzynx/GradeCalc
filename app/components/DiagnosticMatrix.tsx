@@ -120,7 +120,7 @@ export default function DiagnosticMatrix({
         </div>
         <button 
           onClick={() => { setForceGradeOpen(!forceGradeOpen); setSelectedLetter(null); }} 
-          className={`w-full sm:w-auto px-4 py-2 min-h-[44px] border transition-all rounded-lg text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 font-bold font-orbitron shadow-sm relative sm:-top-2 ${
+          className={`w-full sm:w-auto px-4 py-2 min-h-[44px] border transition-all rounded-lg text-[0.625rem] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 font-bold font-orbitron shadow-sm relative sm:-top-2 ${
             course.mark !== undefined && course.mark !== null 
               ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30' 
               : forceGradeOpen
@@ -141,7 +141,7 @@ export default function DiagnosticMatrix({
         <form onSubmit={handleForceGradeSubmit} className="mb-6 p-4 border border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 rounded-xl animate-in fade-in slide-in-from-top-2 w-full flex flex-col sm:flex-row items-stretch sm:items-end gap-4 shadow-inner">
           {/* Letter Grade Dropdown */}
           <div className="flex-1 min-w-0">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Letter Grade</label>
+            <label className="text-[0.625rem] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Letter Grade</label>
             <div className="relative group">
               <select
                 value={selectedLetter || ""}
@@ -161,7 +161,7 @@ export default function DiagnosticMatrix({
 
           {/* Manual % Input */}
           <div className="flex-1 min-w-0">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Override %</label>
+            <label className="text-[0.625rem] uppercase tracking-[0.2em] text-primary/80 dark:text-primary/70 block mb-1.5 font-bold font-orbitron">Override %</label>
             <NumberInput
               ref={forceInputRef}
               required
@@ -203,16 +203,16 @@ export default function DiagnosticMatrix({
               {course.mark !== null && course.mark !== undefined ? (
                  <>
                     <div className="text-2xl sm:text-3xl font-orbitron font-bold text-red-600">{course.mark.toFixed(2)}%</div>
-                    <div className="text-[10px] uppercase tracking-widest text-red-600 mt-1">Forced</div>
+                    <div className="text-[0.625rem] uppercase tracking-widest text-red-600 mt-1">Forced</div>
                  </>
               ) : (
                  <>
                     <div className="text-3xl sm:text-4xl font-orbitron font-bold text-secondary">
                       {backendMetrics?.final_average !== undefined ? `${backendMetrics.final_average.toFixed(2)}%` : 'N/A'}
                     </div>
-                    <div className="text-[9px] uppercase tracking-widest text-muted mt-1">Average</div>
+                    <div className="text-[0.5625rem] uppercase tracking-widest text-muted mt-1">Average</div>
                     {bonusPoints > 0 && (
-                      <div className="text-[9px] sm:text-[10px] font-orbitron font-bold tracking-wide sm:tracking-widest leading-tight text-violet-600 dark:text-violet-400 mt-1">
+                      <div className="text-[0.5625rem] sm:text-[0.625rem] font-orbitron font-bold tracking-wide sm:tracking-widest leading-tight text-violet-600 dark:text-violet-400 mt-1">
                         incl. +{bonusPoints.toFixed(2)}% bonus
                       </div>
                     )}
@@ -268,14 +268,14 @@ export default function DiagnosticMatrix({
           {/* Advanced Metrics Panel */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-0">
              <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors min-w-0">
-               <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted mb-2">Evaluated Weight</span>
+               <span className="text-[0.5625rem] sm:text-[0.625rem] uppercase tracking-widest text-muted mb-2">Evaluated Weight</span>
                <span className="text-xl sm:text-2xl font-orbitron text-secondary font-bold tabular-nums">
                  {completedWeight}%
                </span>
              </div>
 
              <div className="bg-black/5 border border-black/10 rounded-lg p-3 sm:p-4 flex flex-col justify-between hover:border-primary/50 transition-colors min-w-0">
-               <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted mb-2">Remaining Box</span>
+               <span className="text-[0.5625rem] sm:text-[0.625rem] uppercase tracking-widest text-muted mb-2">Remaining Box</span>
                <span className="text-xl sm:text-2xl font-orbitron text-primary font-bold tabular-nums">
                  {backendMetrics?.remaining_weight ? `${backendMetrics.remaining_weight}%` : '0%'}
                </span>
@@ -287,7 +287,7 @@ export default function DiagnosticMatrix({
              >
                <div className="flex flex-col">
                  <div className="flex items-center gap-2">
-                   <span className="text-[10px] uppercase tracking-[0.15em] text-emerald-800/70 dark:text-emerald-400/70 font-orbitron font-bold">
+                   <span className="text-[0.625rem] uppercase tracking-[0.15em] text-emerald-800/70 dark:text-emerald-400/70 font-orbitron font-bold">
                      {is4Scale ? "Est. 4.0 Scale GPA" : "Est. YorkU GPA"}
                    </span>
                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 text-emerald-600 dark:text-emerald-400"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
@@ -313,7 +313,7 @@ export default function DiagnosticMatrix({
              <div className="col-span-2 bg-black/5 border border-black/10 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-primary/50 hover:bg-primary/[0.02] transition-all duration-300 group/target shadow-xs cursor-text">
                <div className="flex flex-col flex-1 w-full sm:w-auto">
                  <div className="flex items-center gap-2 mb-1">
-                   <span className="text-[10px] uppercase tracking-[0.15em] text-muted font-orbitron font-bold group-hover/target:text-primary/70 transition-colors">Target Grade</span>
+                   <span className="text-[0.625rem] uppercase tracking-[0.15em] text-muted font-orbitron font-bold group-hover/target:text-primary/70 transition-colors">Target Grade</span>
                  </div>
                  <div className="flex items-baseline gap-1">
                    <input
@@ -335,7 +335,7 @@ export default function DiagnosticMatrix({
                </div>
                
                <div className="flex flex-col items-start sm:items-end text-left sm:text-right pointer-events-none">
-                 <span className="text-[10px] uppercase tracking-[0.15em] text-muted mb-1.5 font-orbitron font-bold">Score Needed on Remaining</span>
+                 <span className="text-[0.625rem] uppercase tracking-[0.15em] text-muted mb-1.5 font-orbitron font-bold">Score Needed on Remaining</span>
                  <div className="flex items-baseline gap-2">
                    {backendMetrics?.is_target_invalid && targetGrade !== "" ? (
                       <span className="text-xl sm:text-2xl font-orbitron text-red-600 font-bold leading-none animate-pulse">Wrong Input</span>
@@ -359,8 +359,8 @@ export default function DiagnosticMatrix({
 
              <div className="col-span-2 bg-blue-500/[0.04] dark:bg-blue-500/[0.08] border border-blue-500/10 dark:border-blue-500/20 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-blue-500/40 transition-all duration-300 group shadow-xs">
                <div className="flex flex-col">
-                 <span className="text-[10px] uppercase tracking-[0.15em] text-blue-800/70 dark:text-blue-400/70 font-orbitron font-bold">Maximum Potential Mark</span>
-                 <span className="text-[9px] text-blue-800/50 dark:text-blue-400/50 uppercase tracking-wider mt-0.5">
+                 <span className="text-[0.625rem] uppercase tracking-[0.15em] text-blue-800/70 dark:text-blue-400/70 font-orbitron font-bold">Maximum Potential Mark</span>
+                 <span className="text-[0.5625rem] text-blue-800/50 dark:text-blue-400/50 uppercase tracking-wider mt-0.5">
                    + 100% on remaining assignments{bonusPotential > 0 ? ` + ${parseFloat(bonusPotential.toFixed(2))}% bonus` : ''}
                  </span>
                </div>

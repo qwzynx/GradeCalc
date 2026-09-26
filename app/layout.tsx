@@ -1,11 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Atkinson_Hyperlegible, Inter } from "next/font/google";
 import "./globals.css";
+import { A11Y_PREPAINT_SCRIPT } from "@/lib/a11y";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+});
+
+// Only downloaded when the "Readable font" accessibility setting is on.
+const readable = Atkinson_Hyperlegible({
+  variable: "--font-readable",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
 });
 
 
@@ -40,6 +50,8 @@ export const viewport: Viewport = {
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import TermsGate from "@/components/TermsGate";
 
 export default function RootLayout({
   children,
@@ -47,16 +59,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-CA" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: A11Y_PREPAINT_SCRIPT }} />
+      </head>
       <body
-        className={`${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-[#FFFFFF] overflow-x-hidden min-h-dvh`}
+        className={`${inter.variable} ${readable.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-[#FFFFFF] overflow-x-hidden min-h-dvh`}
         suppressHydrationWarning
       >
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeProvider>
           <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
+            <AccessibilityProvider>
+              <ToastProvider>
+                {children}
+                <TermsGate />
+              </ToastProvider>
+            </AccessibilityProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -46,6 +46,9 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
   const [sessionCookie, setSessionCookie] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Express consent is required before any York credential or session leaves
+  // the browser (Privacy Policy §4, Terms §7). Deliberately not remembered.
+  const [consented, setConsented] = useState(false);
   const [duoCode, setDuoCode] = useState<string | null>(null);
   const [loginStage, setLoginStage] = useState<"opening" | "logging_in" | "duo_wait">("opening");
   const abortRef = useRef<AbortController | null>(null);
@@ -322,14 +325,37 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
         {closeButton}
         <h2 className="text-xl mb-4 font-orbitron text-primary font-bold border-b border-black/10 pb-2 pr-12">eClass Sync</h2>
 
-        <p className="text-sm text-muted mb-5">
-          Sign in with your Passport York credentials. We complete Passport York + Duo for you in the background and sync your grades automatically — nothing is stored beyond the sync results.
+        <p className="text-sm text-muted mb-4">
+          Sign in with your Passport York credentials. We complete Passport York + Duo for you in the background, then show you the grade changes to review before anything is saved.
         </p>
+
+        <div className="text-xs text-secondary bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
+          <p className="font-semibold mb-1.5">Before you continue</p>
+          <ul className="list-disc pl-4 flex flex-col gap-1 text-muted">
+            <li>Your username and password are sent over HTTPS to the GradeMatrix server, where a temporary automated browser signs in to Passport York for you. They are held in memory for this one sign-in only — never saved or logged.</li>
+            <li>Your eClass courses, grades and course syllabi are read and sent to Google&apos;s Gemini AI to match them to your courses.</li>
+            <li>GradeMatrix is not affiliated with York University. York&apos;s policies on sharing your password or using third-party tools still apply to you.</li>
+          </ul>
+          <label className="flex items-start gap-2.5 mt-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consented}
+              onChange={(e) => setConsented(e.target.checked)}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-primary cursor-pointer"
+            />
+            <span className="text-secondary">
+              This is my own York account, and I authorize GradeMatrix to access eClass on my behalf as described in the{" "}
+              <a href="/terms#eclass" target="_blank" className="text-primary font-semibold underline">Terms</a> and{" "}
+              <a href="/privacy#eclass" target="_blank" className="text-primary font-semibold underline">Privacy Policy</a>.
+            </span>
+          </label>
+        </div>
 
         <div className="flex flex-col gap-2.5 mb-3">
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            aria-label="Passport York username"
             placeholder="Passport York username"
             autoComplete="username"
             autoCapitalize="none"
@@ -339,26 +365,27 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && username.trim() && password) handleCredentialLogin(); }}
+            onKeyDown={(e) => { if (e.key === "Enter" && consented && username.trim() && password) handleCredentialLogin(); }}
             type="password"
+            aria-label="Passport York password"
             placeholder="Passport York password"
             autoComplete="current-password"
             className="w-full bg-white border border-black/20 rounded px-3 py-2.5 min-h-[44px] text-sm text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
           />
         </div>
 
-        <NeonButton onClick={handleCredentialLogin} disabled={!username.trim() || !password} className="w-full py-3 text-sm mb-3">
+        <NeonButton onClick={handleCredentialLogin} disabled={!consented || !username.trim() || !password} className="w-full py-3 text-sm mb-3">
           <span className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Sign in to eClass
           </span>
         </NeonButton>
-        <p className="text-[10px] text-muted mb-4">Your credentials are sent over HTTPS straight to York&apos;s Passport York login and are never stored. You&apos;ll approve the sign-in with Duo on your phone.</p>
+        <p className="text-[0.625rem] text-muted mb-4">You&apos;ll approve the sign-in with Duo on your phone. The temporary browser declines &ldquo;remember this device&rdquo; and is closed as soon as the sync finishes.</p>
 
         <button
           type="button"
           onClick={() => setShowManual((v) => !v)}
-          className="text-[10px] uppercase tracking-widest text-muted hover:text-primary transition-colors font-orbitron"
+          className="text-[0.625rem] uppercase tracking-widest text-muted hover:text-primary transition-colors font-orbitron"
         >
           {showManual ? "▾" : "▸"} Prefer not to enter your password? Paste a session cookie instead
         </button>
@@ -376,6 +403,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               <input
                 value={sessionCookie}
                 onChange={(e) => setSessionCookie(e.target.value)}
+                aria-label="MoodleSession value"
                 placeholder="MoodleSession value"
                 autoComplete="off"
                 spellCheck={false}
@@ -383,7 +411,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               />
               <button
                 onClick={handleManualFetch}
-                disabled={!sessionCookie.trim()}
+                disabled={!consented || !sessionCookie.trim()}
                 className="px-4 py-2 min-h-[44px] border border-black/20 hover:border-primary text-muted hover:text-primary rounded text-xs uppercase tracking-wider transition-all shadow-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Fetch
@@ -546,7 +574,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
     <GlassCard className="max-w-4xl w-full mx-auto max-h-[88dvh] relative bg-white shadow-xl border-black/10 flex flex-col p-4 sm:p-6">
       {closeButton}
       <h2 className="text-xl mb-2 font-orbitron text-primary font-bold border-b border-black/10 pb-3 pr-12 shrink-0">Review Sync Plan</h2>
-      <p className="text-[11px] text-muted uppercase tracking-widest mb-5 leading-relaxed shrink-0">AI-matched against your courses — uncheck anything you don&apos;t want applied</p>
+      <p className="text-[0.6875rem] text-muted uppercase tracking-widest mb-5 leading-relaxed shrink-0">AI-matched against your courses — uncheck anything you don&apos;t want applied</p>
 
       <div className="flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto pr-2 mb-5">
         {!hasChanges && (
@@ -563,14 +591,14 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               <div className="bg-black/5 px-4 py-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <p className="text-sm font-bold text-secondary min-w-0 break-words">{course.app_course_name || course.eclass_course_name}</p>
-                  <span className={`text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap ${
+                  <span className={`text-[0.5625rem] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap ${
                     course.confidence === "high" ? "bg-emerald-500/10 text-emerald-600" :
                     course.confidence === "medium" ? "bg-amber-500/10 text-amber-600" : "bg-red-500/10 text-red-600"
                   }`}>
                     {course.confidence} match
                   </span>
                 </div>
-                <p className="text-[9px] uppercase tracking-widest text-muted/80 break-words mt-1.5">eClass: {course.eclass_course_name}</p>
+                <p className="text-[0.5625rem] uppercase tracking-widest text-muted/80 break-words mt-1.5">eClass: {course.eclass_course_name}</p>
               </div>
 
               <div className="flex flex-col divide-y divide-black/5">
@@ -586,11 +614,11 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                       />
                       <div className="flex-1 min-w-0">
                         <span className="text-sm text-secondary font-medium">{item.assignment_name || item.eclass_item_name}</span>
-                        <p className="text-[11px] text-muted mt-1 leading-relaxed">
+                        <p className="text-[0.6875rem] text-muted mt-1 leading-relaxed">
                           Mark: <span className="text-secondary">{item.old_mark !== null && item.old_mark !== undefined ? `${item.old_mark}%` : "N/A"}</span> → <span className={`font-bold ${isDecrease(item) ? "text-red-600" : "text-emerald-600"}`}>{item.new_mark}%</span>
                         </p>
                         {item.warning && (
-                          <p className="text-[10px] text-amber-700 bg-amber-500/10 border border-amber-200 rounded-md px-2 py-1 mt-1.5 leading-snug">⚠ {item.warning}</p>
+                          <p className="text-[0.625rem] text-amber-700 bg-amber-500/10 border border-amber-200 rounded-md px-2 py-1 mt-1.5 leading-snug">⚠ {item.warning}</p>
                         )}
                       </div>
                     </label>
@@ -602,7 +630,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
         })}
 
         {upToDateCount > 0 && (
-          <p className="text-[11px] text-muted/80 text-center py-1">
+          <p className="text-[0.6875rem] text-muted/80 text-center py-1">
             {upToDateCount} course{upToDateCount === 1 ? "" : "s"} already up to date
           </p>
         )}
@@ -627,9 +655,9 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                     onChange={(e) => setCourseEdits((prev) => ({ ...prev, [ci]: { ...edit, name: e.target.value } }))}
                     className="w-full bg-white border border-black/20 rounded px-2.5 py-1.5 min-h-[40px] text-sm font-bold text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm disabled:opacity-50"
                   />
-                  <p className="text-[9px] uppercase tracking-widest text-muted break-words mt-1.5">eClass: {course.eclass_course_name}</p>
+                  <p className="text-[0.5625rem] uppercase tracking-widest text-muted break-words mt-1.5">eClass: {course.eclass_course_name}</p>
                 </div>
-                <span className="text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shrink-0 bg-primary/10 text-primary">
+                <span className="text-[0.5625rem] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shrink-0 bg-primary/10 text-primary">
                   New Course
                 </span>
               </div>
@@ -678,9 +706,9 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm text-secondary font-medium">{item.assignment_name || item.eclass_item_name}</span>
-                            <span className="text-[8px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary shrink-0">New</span>
+                            <span className="text-[0.5rem] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary shrink-0">New</span>
                           </div>
-                          <p className="text-[11px] text-muted mt-1 leading-relaxed">
+                          <p className="text-[0.6875rem] text-muted mt-1 leading-relaxed">
                             {item.new_mark !== null ? (
                               <>Mark: <span className="text-emerald-600 font-bold">{item.new_mark}%</span></>
                             ) : (
@@ -689,7 +717,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                             {item.weight !== null && item.weight !== undefined && <> • Weight: <span className="text-secondary">{item.weight}%</span></>}
                           </p>
                           {item.warning && (
-                            <p className="text-[10px] text-amber-700 bg-amber-500/10 border border-amber-200 rounded-md px-2 py-1 mt-1.5 leading-snug">⚠ {item.warning}</p>
+                            <p className="text-[0.625rem] text-amber-700 bg-amber-500/10 border border-amber-200 rounded-md px-2 py-1 mt-1.5 leading-snug">⚠ {item.warning}</p>
                           )}
                         </div>
                       </label>
@@ -699,7 +727,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
               )}
 
               <div className="px-4 py-3 flex items-center gap-2">
-                <label className={`flex items-center min-h-[40px] text-[10px] uppercase tracking-widest font-orbitron transition-colors ${enabled ? "text-muted hover:text-primary cursor-pointer" : "text-muted/40 cursor-not-allowed"}`}>
+                <label className={`flex items-center min-h-[40px] text-[0.625rem] uppercase tracking-widest font-orbitron transition-colors ${enabled ? "text-muted hover:text-primary cursor-pointer" : "text-muted/40 cursor-not-allowed"}`}>
                   {attachingIdx === ci ? "Parsing syllabus…" : "📎 Attach syllabus PDF for exact weights"}
                   <input
                     type="file"
@@ -711,7 +739,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
                 </label>
               </div>
               {attachErrors[ci] && (
-                <p className="px-4 pb-3 text-[10px] text-red-600">{attachErrors[ci]}</p>
+                <p className="px-4 pb-3 text-[0.625rem] text-red-600">{attachErrors[ci]}</p>
               )}
             </div>
           );
@@ -719,7 +747,7 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
 
         {unresolvedCourses.length > 0 && (
           <div className="bg-black/5 border border-black/10 rounded-xl p-4">
-            <p className="text-[9px] uppercase tracking-widest text-muted font-bold mb-2">Not matched to any course — skipped</p>
+            <p className="text-[0.5625rem] uppercase tracking-widest text-muted font-bold mb-2">Not matched to any course — skipped</p>
             <div className="flex flex-col gap-1">
               {unresolvedCourses.map((c, i) => (
                 <p key={i} className="text-xs text-muted break-words">• {c.eclass_course_name}</p>
@@ -730,10 +758,10 @@ export default function EclassSync({ courses, assignments, onApply, onCancel }: 
 
         {plan && plan.warnings.length > 0 && (
           <div className="bg-amber-500/10 border border-amber-200 rounded-xl p-4">
-            <p className="text-[9px] uppercase tracking-widest text-amber-700 font-bold mb-2">Syllabus Verification Warnings</p>
+            <p className="text-[0.5625rem] uppercase tracking-widest text-amber-700 font-bold mb-2">Syllabus Verification Warnings</p>
             <div className="flex flex-col gap-2">
               {plan.warnings.map((w, i) => (
-                <p key={i} className="text-[11px] text-amber-900 leading-relaxed flex items-start gap-1.5">
+                <p key={i} className="text-[0.6875rem] text-amber-900 leading-relaxed flex items-start gap-1.5">
                   <span className="shrink-0">⚠</span>
                   <span>{w}</span>
                 </p>

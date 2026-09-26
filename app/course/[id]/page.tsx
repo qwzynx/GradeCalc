@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/components/ToastProvider";
 import HeaderControls from "../../components/HeaderControls";
+import SiteFooter from "@/components/SiteFooter";
 import DiagnosticMatrix from "../../components/DiagnosticMatrix";
 import EditCourseForm from "../../components/EditCourseForm";
 import AssignmentForm from "../../components/AssignmentForm";
@@ -423,7 +424,7 @@ export default function CourseDetail() {
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => router.push('/')}
-              className="group flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[10px] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[44px] shrink-0"
+              className="group flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-black/5 hover:bg-black/10 text-muted hover:text-secondary transition-all text-[0.625rem] uppercase tracking-widest font-orbitron border border-transparent hover:border-black/10 min-h-[44px] shrink-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
               Back to Dashboard
@@ -438,7 +439,7 @@ export default function CourseDetail() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-orbitron tracking-wide sm:tracking-widest text-transparent bg-clip-text bg-linear-to-r from-secondary to-primary drop-shadow-[0_0_10px_rgba(224,211,211,0.5)] leading-tight break-words">
               {course.name}
             </h1>
-            <p className="mt-1 text-muted text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-orbitron break-words">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
+            <p className="mt-1 text-muted text-[0.5625rem] sm:text-[0.625rem] uppercase tracking-[0.2em] font-orbitron break-words">{course.semester} {course.year} • {course.prof_name || "Unassigned"}</p>
           </div>
         </div>
 
@@ -471,7 +472,7 @@ export default function CourseDetail() {
         />
       </AnimatedOverlay>
 
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start flex-1 w-full">
+      <main id="main" tabIndex={-1} className="outline-none grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start flex-1 w-full">
 
         {/* LEFT COLUMN */}
         <div className="lg:col-span-4 w-full flex flex-col gap-4 order-2 lg:order-1">
@@ -488,19 +489,19 @@ export default function CourseDetail() {
             <h3 className="text-xs font-montserrat text-secondary uppercase tracking-[0.2em] border-b border-black/10 pb-2 mb-3">Course Parameters</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Instructor</span>
+                <span className="text-[0.5625rem] uppercase tracking-widest text-muted/60 block font-montserrat">Instructor</span>
                 <span className="text-secondary text-xs font-montserrat">{course.prof_name || "Unassigned"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Category</span>
+                <span className="text-[0.5625rem] uppercase tracking-widest text-muted/60 block font-montserrat">Category</span>
                 <span className="text-secondary text-xs font-montserrat">{course.category || "—"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Credits</span>
+                <span className="text-[0.5625rem] uppercase tracking-widest text-muted/60 block font-montserrat">Credits</span>
                 <span className="text-secondary text-xs font-montserrat">{course.credits || "N/A"}</span>
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-muted/60 block font-montserrat">Status</span>
+                <span className="text-[0.5625rem] uppercase tracking-widest text-muted/60 block font-montserrat">Status</span>
                 <span className={`text-xs font-montserrat ${course.in_progress ? "text-emerald-400" : "text-muted"}`}>
                   {course.in_progress ? "● Active" : "○ Archived"}
                 </span>
@@ -515,7 +516,7 @@ export default function CourseDetail() {
                 <h3 className="text-lg font-orbitron text-secondary tracking-widest">Assignments</h3>
                 {assignments.length > 0 && (
                   <span
-                    className={`text-[9px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 ${
+                    className={`text-[0.5625rem] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 ${
                       totalAssignmentWeight > 100
                         ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
                         : totalAssignmentWeight === 100
@@ -529,7 +530,7 @@ export default function CourseDetail() {
                 )}
                 {totalBonusWeight > 0 && (
                   <span
-                    className="text-[9px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-400"
+                    className="text-[0.5625rem] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider tabular-nums shrink-0 bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-400"
                     title="Bonus available on top of the 100%"
                   >
                     +{parseFloat(totalBonusWeight.toFixed(2))}% bonus
@@ -565,12 +566,12 @@ export default function CourseDetail() {
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-secondary text-base font-bold truncate" title={a.name}>{a.name}</span>
                           {a.is_bonus && (
-                            <span className="text-[8px] px-1.5 py-0.5 rounded border border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold uppercase tracking-wider shrink-0">
+                            <span className="text-[0.5rem] px-1.5 py-0.5 rounded border border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold uppercase tracking-wider shrink-0">
                               Bonus
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] text-muted uppercase tracking-wider">
+                        <span className="text-[0.625rem] text-muted uppercase tracking-wider">
                           {a.is_bonus ? 'Worth up to' : 'Weight'}: <span className={a.is_bonus ? 'text-violet-700 dark:text-violet-400' : 'text-secondary'}>{a.weight !== null && a.weight !== undefined ? `${a.is_bonus ? '+' : ''}${parseFloat(a.weight.toFixed(2))}%` : '—'}</span>
                           {a.is_bonus && a.mark !== null && a.mark !== undefined && (
                             <span className="text-muted"> · adds {parseFloat((((a.weight ?? 0) * a.mark) / 100).toFixed(2))}%</span>
@@ -597,7 +598,7 @@ export default function CourseDetail() {
                   <p className="text-sm font-orbitron tracking-widest text-secondary opacity-70">No assignments yet</p>
                   <button
                     onClick={() => { setAddingAssignment(true); setEditingAssignment(null); setSplitQuantity(1); }}
-                    className="text-[10px] uppercase tracking-widest font-bold text-primary border border-primary/30 rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors"
+                    className="text-[0.625rem] uppercase tracking-widest font-bold text-primary border border-primary/30 rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors"
                   >
                     + Add your first assignment
                   </button>
@@ -633,6 +634,8 @@ export default function CourseDetail() {
         </div>
 
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

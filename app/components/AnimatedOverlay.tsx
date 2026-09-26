@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 type OverlayWidth = "lg" | "2xl" | "4xl";
 
@@ -10,7 +10,14 @@ interface AnimatedOverlayProps {
   children: React.ReactNode;
   /** Max width of the panel. Defaults to `lg`. */
   width?: OverlayWidth;
+  /** id of the element that names the dialog (usually its heading). */
+  labelledBy?: string;
+  /** Accessible name when there's no visible heading to point at. */
+  label?: string;
 }
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const WIDTHS: Record<OverlayWidth, string> = {
   lg: "max-w-lg",
@@ -40,10 +47,14 @@ function unlockBodyScroll() {
  * be reached), the page behind is locked so touch scrolling stays inside the
  * modal, Escape closes it, and heights use dvh so mobile browser chrome doesn't
  * clip the panel.
+ *
+ * Focus (WCAG 2.4.3): opening moves focus into the panel, Tab cycles within
+ * it, and closing returns focus to whatever opened the dialog.
  */
-export default function AnimatedOverlay({ open, onClose, children, width = "lg" }: AnimatedOverlayProps) {
+export default function AnimatedOverlay({ open, onClose, children, width = "lg", labelledBy, label }: AnimatedOverlayProps) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -66,10 +77,42 @@ export default function AnimatedOverlay({ open, onClose, children, width = "lg" 
     return unlockBodyScroll;
   }, [mounted]);
 
+  // Move focus into the panel once it's on screen, and hand it back to the
+  // trigger when the overlay unmounts.
+  useEffect(() => {
+    if (!mounted) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const frame = requestAnimationFrame(() => {
+      const panel = panelRef.current;
+      if (!panel || panel.contains(document.activeElement)) return;
+      const first = panel.querySelector<HTMLElement>(FOCUSABLE);
+      (first ?? panel).focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (previouslyFocused && document.contains(previouslyFocused)) previouslyFocused.focus();
+    };
+  }, [mounted]);
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const inside = panelRef.current.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -87,6 +130,8 @@ export default function AnimatedOverlay({ open, onClose, children, width = "lg" 
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : label}
       className={`fixed inset-0 z-50 overflow-y-auto overscroll-contain overlay-safe transition-all duration-300 ease-out ${
         visible ? "bg-black/70 backdrop-blur-sm opacity-100" : "bg-black/0 backdrop-blur-none opacity-0"
       }`}
@@ -97,8 +142,10 @@ export default function AnimatedOverlay({ open, onClose, children, width = "lg" 
           from the top instead of overflowing past the edges of the screen. */}
       <div className="flex min-h-full items-start justify-center sm:items-center">
         <div
+          ref={panelRef}
+          tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
-          className={`w-full ${WIDTHS[width]} my-auto transition-all duration-300 ease-out ${
+          className={`w-full outline-none ${WIDTHS[width]} my-auto transition-all duration-300 ease-out ${
             visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"
           }`}
         >

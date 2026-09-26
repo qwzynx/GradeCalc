@@ -12,6 +12,7 @@ import CourseFilters from "./components/CourseFilters";
 import { Course, Assignment, EclassSyncPlan } from "./types";
 import AnimatedOverlay from "./components/AnimatedOverlay";
 import HeaderControls from "./components/HeaderControls";
+import SiteFooter from "@/components/SiteFooter";
 import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/components/ToastProvider";
 import { RefreshCw, SlidersHorizontal, ChevronDown } from "lucide-react";
@@ -513,7 +514,7 @@ export default function Home() {
           <div className="flex flex-1 lg:flex-none items-center gap-1 bg-black/5 p-1 rounded-2xl border border-black/5 shadow-inner">
             <NeonButton
               onClick={() => setShowAddForm(true)}
-              className="flex-1 lg:flex-none !py-2 !px-3 sm:!px-6 !rounded-xl !text-[10px] sm:!text-xs shadow-none hover:shadow-md whitespace-nowrap"
+              className="flex-1 lg:flex-none !py-2 !px-3 sm:!px-6 !rounded-xl !text-[0.625rem] sm:!text-xs shadow-none hover:shadow-md whitespace-nowrap"
             >
               Add Course
             </NeonButton>
@@ -524,14 +525,14 @@ export default function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted group-hover:text-primary transition-colors">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
               </svg>
-              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
+              <span className="text-[0.625rem] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">AI Import</span>
             </button>
             <button
               onClick={() => setShowEclassSync(true)}
               className="group flex flex-1 lg:flex-none items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-xl hover:bg-white transition-all duration-300 min-h-[44px]"
             >
               <RefreshCw className="w-3.5 h-3.5 shrink-0 text-muted group-hover:text-primary group-hover:rotate-90 transition-all" />
-              <span className="text-[10px] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync</span>
+              <span className="text-[0.625rem] sm:text-xs font-orbitron font-semibold text-secondary group-hover:text-primary transition-colors uppercase tracking-wider">Sync</span>
             </button>
           </div>
 
@@ -543,7 +544,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         {!loading && courses.length > 0 && (
           <DashboardMetrics
             averageGpa={averageGpa}
@@ -569,7 +570,7 @@ export default function Home() {
                   <SlidersHorizontal className="w-4 h-4 text-muted" />
                   <span className="text-xs font-orbitron font-bold uppercase tracking-widest">Search &amp; Filters</span>
                   {activeFilterCount > 0 && (
-                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-[10px] font-bold text-[#FFFFFF] tabular-nums">
+                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-[0.625rem] font-bold text-[#FFFFFF] tabular-nums">
                       {activeFilterCount}
                     </span>
                   )}
@@ -727,6 +728,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

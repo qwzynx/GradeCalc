@@ -23,16 +23,16 @@ export default function EditCourseForm({ course, onSubmit, onCancel, onDelete }:
        </div>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
          <div>
-           <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Designation</label>
+           <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Designation</label>
            <input required name="name" type="text" defaultValue={course.name} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary focus:border-primary transition-all shadow-sm" />
          </div>
          <div className="flex gap-4">
            <div className="flex-1">
-             <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Professor</label>
+             <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Professor</label>
              <input name="prof_name" type="text" defaultValue={course.prof_name || ""} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary focus:border-primary transition-all shadow-sm" />
            </div>
            <div className="flex-1">
-             <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Category *</label>
+             <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Category *</label>
              <select required name="category" defaultValue={course.category || ""} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary focus:border-primary transition-all appearance-none cursor-pointer shadow-sm">
                <option value="" disabled className="bg-white text-muted">Select Stream</option>
                <option value="LE/EECS" className="bg-white text-secondary">LE/EECS</option>
@@ -45,11 +45,11 @@ export default function EditCourseForm({ course, onSubmit, onCancel, onDelete }:
          </div>
          <div className="flex gap-4">
            <div className="flex-1">
-             <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Year</label>
+             <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Year</label>
               <NumberInput required name="year" defaultValue={course.year} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary focus:border-primary transition-all shadow-sm" />
            </div>
            <div className="flex-1">
-             <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Semester</label>
+             <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Semester</label>
              <select required name="semester" defaultValue={course.semester} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary transition-all shadow-sm">
                <option value="Fall" className="bg-white">Fall</option>
                <option value="Winter" className="bg-white">Winter</option>
@@ -60,11 +60,11 @@ export default function EditCourseForm({ course, onSubmit, onCancel, onDelete }:
            </div>
          </div>
          <div>
-           <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Credits</label>
+           <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Credits</label>
             <NumberInput name="credits" step="0.5" defaultValue={course.credits || ""} className="w-full bg-white border border-black/20 rounded p-2 text-sm text-secondary focus:border-primary transition-all shadow-sm" />
          </div>
          <div className="flex flex-col">
-           <label className="block text-[10px] uppercase tracking-wider text-muted mb-1">Status</label>
+           <label className="block text-[0.625rem] uppercase tracking-wider text-muted mb-1">Status</label>
            <label className="flex items-center gap-2 group cursor-pointer">
              <input name="in_progress" type="checkbox" defaultChecked={course.in_progress} className="w-4 h-4 accent-primary rounded cursor-pointer" />
              <span className="text-xs uppercase tracking-wider text-secondary font-semibold">In Progress</span>

@@ -62,6 +62,13 @@ Filter and search the course list by:
 ### 7. 🔐 Authentication
 Email/password auth via Supabase, with API routes independently verifying the caller's session token server-side. See [`app/login/page.tsx`](app/login/page.tsx), [`components/AuthProvider.tsx`](components/AuthProvider.tsx), and [`lib/api-auth.ts`](lib/api-auth.ts).
 
+### 8. ⚖️ Legal, privacy & accessibility
+* **[Terms of Use](app/terms/page.tsx)**, **[Privacy Policy](app/privacy/page.tsx)** and **[Accessibility Statement](app/accessibility/page.tsx)** — public pages whose facts (operator, contact email, jurisdiction, minimum age, Gemini tier) all come from [`lib/legal.ts`](lib/legal.ts). **Fill that file in before deploying.**
+* **Recorded consent** — signup requires accepting the Terms/Privacy Policy and stores `terms_version` + `terms_accepted_at` in the user's metadata. Bumping `TERMS_VERSION` makes [`components/TermsGate.tsx`](components/TermsGate.tsx) ask every signed-in user to re-accept.
+* **Feature-level disclosures** — eClass Sync requires explicit consent before credentials leave the browser; AI Import states that files go to Gemini.
+* **Your data** ([`app/account/page.tsx`](app/account/page.tsx)) — JSON export, sync-history deletion and self-service account deletion.
+* **Accessibility settings** ([`components/AccessibilityProvider.tsx`](components/AccessibilityProvider.tsx)) — text size, high contrast, reduced motion, readable font, underlined links and text spacing, applied pre-paint via data attributes on `<html>`; plus a skip link, visible focus and focus-managed dialogs.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -123,6 +130,7 @@ Email/password auth via Supabase, with API routes independently verifying the ca
    | [`20260706_eclass_sync.sql`](supabase/migrations/20260706_eclass_sync.sql) | `eclass_course_id` / `eclass_item_name` sync keys, `eclass_syncs` history table + RLS |
    | [`20260706_eclass_dedup_constraints.sql`](supabase/migrations/20260706_eclass_dedup_constraints.sql) | Unique indexes preventing duplicate synced courses/assignments |
    | [`20260808_assignment_bonus.sql`](supabase/migrations/20260808_assignment_bonus.sql) | `is_bonus` boolean column on `assignments` |
+   | [`20260926_delete_own_account.sql`](supabase/migrations/20260926_delete_own_account.sql) | `delete_own_account()` RPC behind the "Delete my account" button |
 
    Your `courses` and `assignments` tables should end up with roughly this shape:
 

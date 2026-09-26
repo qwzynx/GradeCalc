@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const handleRedirect = (currentUser: User | null) => {
-    const publicPages = ['/login', '/verify'];
+    const publicPages = ['/login', '/verify', '/terms', '/privacy', '/accessibility'];
     if (!currentUser && !publicPages.includes(pathname)) {
       router.push('/login');
     }

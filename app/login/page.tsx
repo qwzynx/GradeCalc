@@ -3,13 +3,17 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ArrowRight, Loader2, Sparkles, ShieldCheck, Lock, UserPlus, LogIn, CheckCircle2 } from 'lucide-react';
+import SiteFooter from '@/components/SiteFooter';
+import { LEGAL, TERMS_VERSION } from '@/lib/legal';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [view, setView] = useState<'login' | 'signup' | 'success'>('login');
@@ -58,6 +62,12 @@ export default function LoginPage() {
       return;
     }
 
+    if (!agreed) {
+      setMessage({ type: 'error', text: "Please confirm your age and accept the Terms of Use and Privacy Policy." });
+      setLoading(false);
+      return;
+    }
+
     try {
       // Supabase's signUp won't always reveal if a user exists for security reasons (if email confirmation is on).
       // However, we can handle the error if it does return one, or proactively try to check if it's a common requirement.
@@ -68,6 +78,12 @@ export default function LoginPage() {
         password,
         options: {
           emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL || `${window.location.origin}/`,
+          // Record of consent: which version of the Terms/Privacy Policy was
+          // accepted and when. TermsGate re-asks when TERMS_VERSION changes.
+          data: {
+            terms_version: TERMS_VERSION,
+            terms_accepted_at: new Date().toISOString(),
+          },
         }
       });
 
@@ -103,12 +119,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-primary relative overflow-hidden overlay-safe">
+    <main id="main" tabIndex={-1} className="on-brand min-h-dvh flex items-center justify-center bg-primary relative overflow-hidden overlay-safe outline-none">
       {/* Animated Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-paper/10 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-alt-color/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
-      <motion.div 
+      <div aria-hidden="true" className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-paper/10 rounded-full blur-[120px] animate-pulse"></div>
+      <div aria-hidden="true" className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-alt-color/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -208,12 +224,32 @@ export default function LoginPage() {
                         id="confirmPassword"
                         type="password"
                         required
+                        autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="block w-full pl-12 pr-4 py-4 bg-paper/5 border border-paper/10 rounded-2xl focus:ring-2 focus:ring-paper/50 focus:border-paper transition-all outline-none text-paper placeholder:text-paper/40"
                         placeholder="••••••••"
                       />
                     </div>
+                  </div>
+                )}
+
+                {view === 'signup' && (
+                  <div className="flex items-start gap-3 text-left pt-1">
+                    <input
+                      id="agree"
+                      type="checkbox"
+                      required
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-0.5 h-5 w-5 shrink-0 accent-paper cursor-pointer"
+                    />
+                    <label htmlFor="agree" className="text-xs leading-relaxed text-alt-color/90 cursor-pointer">
+                      I am at least {LEGAL.minimumAge} years old and I agree to the{' '}
+                      <Link href="/terms" target="_blank" className="text-paper font-semibold underline">Terms of Use</Link>{' '}
+                      and{' '}
+                      <Link href="/privacy" target="_blank" className="text-paper font-semibold underline">Privacy Policy</Link>.
+                    </label>
                   </div>
                 )}
 
@@ -257,7 +293,7 @@ export default function LoginPage() {
                   A magic uplink has been dispatched to <span className="text-paper font-bold">{email}</span>. 
                   Click the link in your email to authenticate your access.
                 </p>
-                <div className="p-4 bg-paper/5 rounded-2xl border border-paper/10 text-[10px] text-alt-color/70 uppercase tracking-widest">
+                <div className="p-4 bg-paper/5 rounded-2xl border border-paper/10 text-[0.625rem] text-alt-color/70 uppercase tracking-widest">
                   Authentication pending confirmation...
                 </div>
                 <button
@@ -280,13 +316,9 @@ export default function LoginPage() {
             </motion.div>
           )}
 
-          <div className="mt-8 sm:mt-10 pt-6 border-t border-paper/5">
-            <p className="text-alt-color/60 text-[10px] uppercase tracking-[0.3em] font-medium">
-              GradeMatrix Intelligence Systems © 2026
-            </p>
-          </div>
+          <SiteFooter variant="brand" />
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 }

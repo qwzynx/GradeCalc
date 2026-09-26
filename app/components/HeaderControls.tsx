@@ -1,11 +1,13 @@
 "use client";
 
-import { LogOut, Moon, Sun } from "lucide-react";
+import { Accessibility, LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAccessibility } from "@/components/AccessibilityProvider";
 
 /**
- * Theme toggle + sign out, shared by the dashboard and course headers.
+ * Accessibility settings + theme toggle + sign out, shared by the dashboard
+ * and course headers.
  *
  * Both pages render two instances — an icon-only one that sits beside the page
  * title on compact layouts, and a labelled one that joins the toolbar row at
@@ -14,13 +16,22 @@ import { useTheme } from "@/components/ThemeProvider";
 export default function HeaderControls({ showLabel = false }: { showLabel?: boolean }) {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { openSettings } = useAccessibility();
 
   return (
     <>
       <button
+        onClick={openSettings}
+        className="group flex items-center justify-center w-11 h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
+        aria-label="Accessibility settings"
+        title="Accessibility settings"
+      >
+        <Accessibility className="w-4 h-4 text-muted group-hover:text-primary transition-colors" aria-hidden="true" />
+      </button>
+      <button
         onClick={toggleTheme}
         className="group flex items-center justify-center w-11 h-11 rounded-xl bg-white shadow-sm border border-black/10 hover:border-primary transition-all duration-300"
-        aria-label="Toggle Theme"
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       >
         {theme === "dark" ? (
           <Sun className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />

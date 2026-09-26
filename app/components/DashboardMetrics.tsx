@@ -74,7 +74,7 @@ const CustomPieTooltip = ({ active, payload, total }: any) => (
           <span className="text-sm font-bold text-primary font-orbitron tabular-nums">
             {p[0].payload.credits} Credit{p[0].payload.credits !== 1 ? 's' : ''}
           </span>
-          <span className="text-[10px] font-bold text-muted tabular-nums">
+          <span className="text-[0.625rem] font-bold text-muted tabular-nums">
             · {p[0].value} Course{p[0].value > 1 ? 's' : ''}
             {total > 0 && ` · ${((p[0].value / total) * 100).toFixed(0)}%`}
           </span>
@@ -104,7 +104,7 @@ const CustomLineTooltip = ({ active, payload, label, data }: any) => (
             </span>
           </div>
           {delta !== null && (
-            <span className={`text-[10px] font-bold tabular-nums tracking-wide ${delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            <span className={`text-[0.625rem] font-bold tabular-nums tracking-wide ${delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
               {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(2)}% vs previous term
             </span>
           )}
@@ -144,22 +144,22 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
         <div className="text-5xl sm:text-6xl font-orbitron font-bold text-secondary tabular-nums">
           {is4Scale ? averageGpa4_0 : averageGpa}
         </div>
-        <div className="text-[10px] sm:text-xs mt-2 uppercase tracking-wider text-muted flex items-center gap-1">
+        <div className="text-[0.625rem] sm:text-xs mt-2 uppercase tracking-wider text-muted flex items-center gap-1">
           <span>{is4Scale ? "Out of 4.0 Scale" : "Out of 9.0 Scale"}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 group-hover:opacity-100 transition-opacity"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         </div>
         <div className="mt-5 pt-4 border-t border-black/10 w-full grid grid-cols-3 gap-2 text-center">
           <div className="flex flex-col">
             <span className="text-lg sm:text-xl font-orbitron font-bold text-secondary tabular-nums">{totalCourses}</span>
-            <span className="text-[9px] uppercase tracking-widest text-muted">Courses</span>
+            <span className="text-[0.5625rem] uppercase tracking-widest text-muted">Courses</span>
           </div>
           <div className="flex flex-col border-x border-black/10">
             <span className="text-lg sm:text-xl font-orbitron font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{activeCourses}</span>
-            <span className="text-[9px] uppercase tracking-widest text-muted">Active</span>
+            <span className="text-[0.5625rem] uppercase tracking-widest text-muted">Active</span>
           </div>
           <div className="flex flex-col">
             <span className="text-lg sm:text-xl font-orbitron font-bold text-secondary tabular-nums">{totalCredits}</span>
-            <span className="text-[9px] uppercase tracking-widest text-muted">Credits</span>
+            <span className="text-[0.5625rem] uppercase tracking-widest text-muted">Credits</span>
           </div>
         </div>
       </GlassCard>
@@ -236,7 +236,7 @@ export default function DashboardMetrics({ averageGpa, averageGpa4_0, pieData, l
           <div className="p-4 sm:p-6 pb-0 pointer-events-none z-10 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h2 className="text-xs sm:text-sm uppercase tracking-widest text-primary opacity-70">Performance Timeline</h2>
             {lineData.length > 1 && (
-              <span className="text-[9px] uppercase tracking-widest text-muted tabular-nums">
+              <span className="text-[0.5625rem] uppercase tracking-widest text-muted tabular-nums">
                 Overall Avg <span className="text-secondary font-bold">{timelineAvg.toFixed(1)}%</span>
               </span>
             )}
